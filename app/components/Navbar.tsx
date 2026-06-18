@@ -12,7 +12,6 @@ const navLinks = [
   { label: "How It Works", href: "#how-it-works" },
   { label: "Impact", href: "#impact" },
   { label: "Technology", href: "#technology" },
-  { label: "Demo", href: "#demo" },
 ];
 
 export default function Navbar() {
@@ -62,12 +61,6 @@ export default function Navbar() {
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-3">
             <a
-              href="#how-it-works"
-              className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors"
-            >
-              Learn More
-            </a>
-            <a
               href="#demo"
               className="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-white gradient-green-blue rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-300"
             >
@@ -108,14 +101,7 @@ export default function Navbar() {
                   {link.label}
                 </a>
               ))}
-              <div className="pt-3 space-y-2">
-                <a
-                  href="#how-it-works"
-                  onClick={() => setMobileOpen(false)}
-                  className="block w-full px-4 py-3 text-center text-sm font-medium text-slate-700 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
-                >
-                  Learn More
-                </a>
+              <div className="pt-3">
                 <a
                   href="#demo"
                   onClick={() => setMobileOpen(false)}
