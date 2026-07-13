@@ -1,230 +1,107 @@
 @import "tailwindcss";
 
-:root {
-  --background: #F8FAFC;
-  --foreground: #0F172A;
-  --primary-green: #22C55E;
-  --primary-blue: #2563EB;
-  --light-green: #DCFCE7;
-  --light-blue: #DBEAFE;
-  --dark-text: #0F172A;
-  --light-text: #64748B;
-  --border: #E2E8F0;
-  --light-bg: #F8FAFC;
-  --card-bg: #FFFFFF;
-  --muted: #F1F5F9;
+@theme inline {
+  --color-primary: #00B5AB;
+  --color-primary-dark: #008C84;
+  --color-primary-light: #E6F7F6;
+  --color-secondary: #351951;
+  --color-secondary-light: #F0ECF4;
+  --color-background: #FFFFFF;
+  --color-background-soft: #F8FAFC;
+  --color-card: #FFFFFF;
+  --color-card-alt: #F2FBFA;
+  --color-foreground: #0F172A;
+  --color-muted-foreground: #475569;
+  --color-border: #E2E8F0;
+  --color-border-hover: #CBD5E1;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --radius: 0.75rem;
+  --radius-card: 1rem;
+  --radius-button: 0.75rem;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-card-hover: 0 10px 40px rgba(0,0,0,0.08);
+  --shadow-button: 0 4px 14px rgba(0,181,171,0.3);
+  --shadow-nav: 0 1px 3px rgba(0,0,0,0.04);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary-blue);
-  --color-secondary: var(--primary-green);
-  --color-accent: #22C55E;
-  --color-muted-foreground: var(--light-text);
-  --color-border: var(--border);
-  --color-card: var(--card-bg);
-  --color-muted: var(--muted);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --radius: 0.75rem;
+:root {
+  --background: #FFFFFF;
+  --foreground: #0F172A;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-button,
-input {
-  font: inherit;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background: #bbf7d0;
-  color: #064e3b;
+  background: #00B5AB;
+  color: #FFFFFF;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #F1F5F9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #CBD5E1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #94A3B8;
 }
 
-/* Animations */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-24px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes fadeInRight {
-  from {
-    opacity: 0;
-    transform: translateX(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-12px);
-  }
-}
-
-@keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 0 16px rgba(34, 197, 94, 0);
-  }
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-float-2 {
-  animation: float 6s ease-in-out 2s infinite;
-}
-
-.animate-float-3 {
-  animation: float 6s ease-in-out 4s infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulseGlow 2s ease-in-out infinite;
-}
-
-.animate-slide-down {
-  animation: slideDown 0.3s ease-out forwards;
-}
-
-/* Gradient backgrounds */
-.gradient-green-blue {
-  background: linear-gradient(135deg, #22C55E 0%, #2563EB 100%);
-}
-
-.gradient-green-blue-soft {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
-}
-
-.gradient-green {
-  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
-}
-
-.gradient-blue {
-  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-}
-
-.gradient-dark {
-  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-}
-
-/* Card styles */
-.card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  transition: all 0.3s ease;
-}
-
-.card:hover {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
-  border-color: #22C55E;
-}
-
-.card-shadow {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-}
-
-.card-shadow-hover:hover {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-}
-
-/* Line clamp */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Section padding */
-.section-padding {
-  padding: 5rem 0;
-}
-
-@media (max-width: 768px) {
-  .section-padding {
-    padding: 3rem 0;
+  html {
+    scroll-behavior: auto;
   }
 }
