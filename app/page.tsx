@@ -1,30 +1,23 @@
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import Problem from "./components/Problem";
-import ProblemBreakdown from "./components/ProblemBreakdown";
-import Solution from "./components/Solution";
-import HowItWorks from "./components/HowItWorks";
-import UserStory from "./components/UserStory";
-import Impact from "./components/Impact";
-import HelpMumAlignment from "./components/HelpMumAlignment";
-import Technology from "./components/Technology";
-import CTA from "./components/CTA";
-import Footer from "./components/Footer";
+import { Footer } from "@/app/components/shared/Footer";
+import { FAQSection } from "@/app/components/shared/FAQSection";
+import HomeHero from "@/app/components/home/Hero";
+import ProblemSection from "@/app/components/home/ProblemSection";
+import StatsSection from "@/app/components/home/StatsSection";
+import HowItWorksSection from "@/app/components/home/HowItWorksSection";
+import TechnologySection from "@/app/components/home/TechnologySection";
+import PartnersTeaser from "@/app/components/home/PartnersTeaser";
+import { homeFaqs } from "@/lib/data/home-faq";
 
 export default function Home() {
   return (
     <main className="flex flex-col min-h-screen">
-      <Navbar />
-      <Hero />
-      <Problem />
-      <ProblemBreakdown />
-      <Solution />
-      <HowItWorks />
-      <UserStory />
-      <Impact />
-      <HelpMumAlignment />
-      <Technology />
-      <CTA />
+      <HomeHero />
+      <ProblemSection />
+      <StatsSection />
+      <HowItWorksSection />
+      <TechnologySection />
+      <PartnersTeaser />
+      <FAQSection items={homeFaqs} description="Find answers about MamaConnect, how it works, and how to get started." />
       <Footer />
     </main>
   );
