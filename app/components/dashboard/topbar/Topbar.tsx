@@ -24,11 +24,9 @@ function getPageTitle(pathname: string): string {
 export default function Topbar() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const isOnboarding = pathname === "/dashboard/onboarding";
-
-  if (isOnboarding) return null;
 
   const pageTitle = getPageTitle(pathname);
+  const initials = user ? `${user.firstName?.charAt(0) || ""}${user.lastName?.charAt(0) || ""}`.toUpperCase() || "CH" : "CH";
 
   return (
     <header className="sticky top-0 z-20 bg-card/80 backdrop-blur-md border-b border-border">
@@ -50,7 +48,7 @@ export default function Topbar() {
         <div className="flex items-center gap-2 ml-auto">
           <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-background-soft">
             <div className="w-8 h-8 rounded-lg bg-primary-light flex items-center justify-center">
-              <span className="text-xs font-bold text-primary">CH</span>
+              <span className="text-xs font-bold text-primary">{initials}</span>
             </div>
             <div className="hidden sm:block">
               <p className="text-sm font-medium text-foreground leading-tight">

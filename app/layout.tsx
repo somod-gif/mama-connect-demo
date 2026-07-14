@@ -5,6 +5,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
 import { Toaster } from "sonner";
 import { Navbar } from "@/app/components/shared/Navbar";
+import { ErrorBoundary } from "@/app/components/shared/ErrorBoundary";
 
 const InterFont = Inter({
   variable: "--font-inter",
@@ -17,14 +18,8 @@ export const metadata: Metadata = {
   description:
     "MamaConnect connects pregnant and postpartum women with Community Health Extension Workers and healthcare facilities for timely maternal care.",
   keywords: [
-    "maternal health",
-    "pregnancy",
-    "postpartum",
-    "Nigeria",
-    "CHEW",
-    "community health",
-    "MamaConnect",
-    "HelpMum",
+    "maternal health", "pregnancy", "postpartum", "Nigeria",
+    "CHEW", "community health", "MamaConnect", "HelpMum",
   ],
   openGraph: {
     title: "MamaConnect | Human-Centered Maternal Health Platform",
@@ -36,16 +31,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${InterFont.variable} h-full scroll-smooth antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
         <QueryProvider>
           <AuthProvider>
-            <Navbar />
-            {children}
+            <ErrorBoundary>
+              <Navbar />
+              {children}
+            </ErrorBoundary>
             <Toaster richColors closeButton position="top-right" />
           </AuthProvider>
         </QueryProvider>

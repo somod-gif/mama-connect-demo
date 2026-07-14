@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Search, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, Search, CheckCircle, XCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { adminService } from "@/services/admin.service";
 import type { AdminPatient } from "@/types/admin";
@@ -37,7 +37,7 @@ export default function AdminPatientsPage() {
   const statusBadge = (status: string) => {
     if (status === "VERIFIED") return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-50 text-green-700"><CheckCircle className="w-3 h-3" /> Verified</span>;
     if (status === "REJECTED") return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-red-50 text-red-700"><XCircle className="w-3 h-3" /> Rejected</span>;
-    return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-amber-50 text-amber-700"><CheckCircle className="w-3 h-3" /> Pending</span>;
+    return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-amber-50 text-amber-700"><Clock className="w-3 h-3" /> Pending</span>;
   };
 
   if (isLoading) {

@@ -132,7 +132,7 @@ export default function TechnologySection() {
               <div className="mt-6 pt-6 border-t border-border">
                 <p className="text-xs text-muted-foreground text-center leading-relaxed">
                   Maternal health expertise powered by <strong className="text-foreground">HelpMum</strong>&apos;s
-                  MamaBot AI, MamaBot Llama, VaxAI, and Vax Llama models.
+                   <strong>MamaBot AI,  VaxAI,</strong> models.
                 </p>
               </div>
             </Card>

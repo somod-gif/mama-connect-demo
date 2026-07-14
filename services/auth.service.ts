@@ -1,9 +1,9 @@
-import { chewApi } from "./api";
-import type { RegisterRequest, LoginRequest, TokenResponse } from "@/types/auth";
+import { api } from "./api";
+import type { RegisterRequest, LoginRequest, LoginResponse, TokenResponse } from "@/types/auth";
 
 class AuthService {
-  async register(data: RegisterRequest): Promise<TokenResponse> {
-    const response = await chewApi.post<TokenResponse>("/auth/register", {
+  async register(data: RegisterRequest): Promise<LoginResponse> {
+    const response = await api.post<LoginResponse>("/auth/register", {
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
@@ -17,18 +17,23 @@ class AuthService {
     return response.data;
   }
 
-  async login(data: LoginRequest): Promise<{ accessToken: string; refreshToken: string; user?: { verificationStatus: string } }> {
-    const response = await chewApi.post("/auth/login", data);
+  async login(data: LoginRequest): Promise<LoginResponse> {
+    const response = await api.post<LoginResponse>("/auth/login", data);
     return response.data;
   }
 
   async refresh(refreshToken: string): Promise<TokenResponse> {
-    const response = await chewApi.post<TokenResponse>("/auth/refresh", { refreshToken });
+    const response = await api.post<TokenResponse>("/auth/refresh", { refreshToken });
     return response.data;
   }
 
   async logout(refreshToken: string): Promise<void> {
-    await chewApi.post("/auth/logout", { refreshToken });
+    await api.post("/auth/logout", { refreshToken });
+  }
+
+  async getMe(): Promise<{ role: string; verificationStatus: string }> {
+    const response = await api.get("/auth/me");
+    return response.data;
   }
 }
 

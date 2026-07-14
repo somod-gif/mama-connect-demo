@@ -8,9 +8,8 @@ const publicPaths = [
   "/partners",
   "/mothers",
   "/chew",
-  "/chew/login",
-  "/chew/register",
-  "/admin/login",
+  "/login",
+  "/register",
   "/pending-approval",
   "/_next",
   "/favicon.ico",
@@ -26,21 +25,35 @@ function isPublicPath(pathname: string): boolean {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (isPublicPath(pathname)) {
-    return NextResponse.next();
+  if (isPublicPath(pathname)) return NextResponse.next();
+
+  const authToken = request.cookies.get("mama_auth_token")?.value;
+
+  if (!authToken) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    const adminToken = request.cookies.get("mama_admin_access_token")?.value;
-    if (!adminToken) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
+  if (pathname.startsWith("/admin")) {
+    try {
+      const payload = JSON.parse(atob(authToken.split(".")[1]));
+      if (payload.role !== "ADMIN") {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      }
+    } catch {
+      return NextResponse.redirect(new URL("/login", request.url));
     }
   }
 
   if (pathname.startsWith("/dashboard")) {
-    const chewToken = request.cookies.get("mama_chew_access_token")?.value;
-    if (!chewToken) {
-      return NextResponse.redirect(new URL("/chew/login", request.url));
+    try {
+      const payload = JSON.parse(atob(authToken.split(".")[1]));
+      if (payload.role === "ADMIN") {
+        return NextResponse.redirect(new URL("/admin", request.url));
+      }
+    } catch {
+      return NextResponse.redirect(new URL("/login", request.url));
     }
   }
 

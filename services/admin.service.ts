@@ -1,57 +1,57 @@
-import { adminApi } from "./api";
+import { api } from "./api";
 import type { AdminDashboardData, AdminChewUser, AdminChewDetail, AdminPatient, AdminDocument, VerifyRequest } from "@/types/admin";
 import type { TokenResponse } from "@/types/auth";
 
 class AdminService {
   async login(data: { email: string; password: string }): Promise<TokenResponse> {
-    const response = await adminApi.post<TokenResponse>("/admin/login", data);
+    const response = await api.post<TokenResponse>("/admin/login", data);
     return response.data;
   }
 
   async refresh(refreshToken: string): Promise<TokenResponse> {
-    const response = await adminApi.post<TokenResponse>("/auth/refresh", { refreshToken });
+    const response = await api.post<TokenResponse>("/auth/refresh", { refreshToken });
     return response.data;
   }
 
   async logout(refreshToken: string): Promise<void> {
-    await adminApi.post("/auth/logout", { refreshToken });
+    await api.post("/auth/logout", { refreshToken });
   }
 
   async getDashboard(): Promise<AdminDashboardData> {
-    const response = await adminApi.get<AdminDashboardData>("/admin/dashboard");
+    const response = await api.get<AdminDashboardData>("/admin/dashboard");
     return response.data;
   }
 
   async getCHEWs(): Promise<AdminChewUser[]> {
-    const response = await adminApi.get<AdminChewUser[]>("/admin/users");
+    const response = await api.get<AdminChewUser[]>("/admin/users");
     return response.data;
   }
 
   async getCHEWDetail(id: string): Promise<AdminChewDetail> {
-    const response = await adminApi.get<AdminChewDetail>(`/admin/users/${id}`);
+    const response = await api.get<AdminChewDetail>(`/admin/users/${id}`);
     return response.data;
   }
 
   async verifyCHEW(id: string, data: VerifyRequest): Promise<void> {
-    await adminApi.post(`/admin/users/${id}/verify`, data);
+    await api.post(`/admin/users/${id}/verify`, data);
   }
 
   async getPatients(): Promise<AdminPatient[]> {
-    const response = await adminApi.get<AdminPatient[]>("/admin/patients");
+    const response = await api.get<AdminPatient[]>("/admin/patients");
     return response.data;
   }
 
   async verifyPatient(id: string): Promise<void> {
-    await adminApi.post(`/admin/patients/${id}/verify`);
+    await api.post(`/admin/patients/${id}/verify`);
   }
 
   async getDocuments(): Promise<AdminDocument[]> {
-    const response = await adminApi.get<AdminDocument[]>("/admin/documents");
+    const response = await api.get<AdminDocument[]>("/admin/documents");
     return response.data;
   }
 
   async verifyDocument(id: string, data: VerifyRequest): Promise<void> {
-    await adminApi.post(`/admin/documents/${id}/verify`, data);
+    await api.post(`/admin/documents/${id}/verify`, data);
   }
 }
 

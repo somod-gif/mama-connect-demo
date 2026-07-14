@@ -2,163 +2,140 @@ import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from "axio
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-let chewAccessToken: string | null = null;
-let adminAccessToken: string | null = null;
+let accessToken: string | null = null;
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (token: string) => void;
+  reject: (error: unknown) => void;
+}> = [];
 
-function getToken(prefix: "chew" | "admin"): string | null {
-  if (prefix === "admin") return adminAccessToken;
-  return chewAccessToken;
+function processQueue(error: unknown, token: string | null): void {
+  failedQueue.forEach((promise) => {
+    if (error) promise.reject(error);
+    else if (token) promise.resolve(token);
+  });
+  failedQueue = [];
 }
 
-function setToken(prefix: "chew" | "admin", token: string | null): void {
-  if (prefix === "admin") {
-    adminAccessToken = token;
-  } else {
-    chewAccessToken = token;
-  }
-}
-
-function getStorageKey(prefix: "chew" | "admin", key: string): string {
-  return `mama_${prefix}_${key}`;
-}
-
-function getFromStorage(prefix: "chew" | "admin", key: string): string | null {
+function getFromStorage(key: string): string | null {
   if (typeof window === "undefined") return null;
   try {
-    return localStorage.getItem(getStorageKey(prefix, key));
-  } catch {
-    return null;
-  }
+    return localStorage.getItem(`mama_${key}`);
+  } catch { return null; }
 }
 
-function setInStorage(prefix: "chew" | "admin", key: string, value: string): void {
+function setInStorage(key: string, value: string): void {
   if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(getStorageKey(prefix, key), value);
-  } catch { }
+  try { localStorage.setItem(`mama_${key}`, value); } catch { }
 }
 
-function removeFromStorage(prefix: "chew" | "admin", key: string): void {
+function removeFromStorage(key: string): void {
   if (typeof window === "undefined") return;
-  try {
-    localStorage.removeItem(getStorageKey(prefix, key));
-  } catch { }
+  try { localStorage.removeItem(`mama_${key}`); } catch { }
 }
 
-export function setChewAccessToken(token: string | null): void {
-  setToken("chew", token);
+export function setAccessToken(token: string | null): void {
+  accessToken = token;
+  if (token) setInStorage("access_token", token);
+  else removeFromStorage("access_token");
 }
 
-export function getChewAccessToken(): string | null {
-  return getToken("chew");
+export function getAccessToken(): string | null {
+  if (accessToken) return accessToken;
+  accessToken = getFromStorage("access_token");
+  return accessToken;
 }
 
-export function setAdminAccessToken(token: string | null): void {
-  setToken("admin", token);
+export function setRefreshToken(token: string | null): void {
+  if (token) setInStorage("refresh_token", token);
+  else removeFromStorage("refresh_token");
 }
 
-export function getAdminAccessToken(): string | null {
-  return getToken("admin");
+export function getRefreshToken(): string | null {
+  return getFromStorage("refresh_token");
 }
 
-export function setChewRefreshToken(token: string | null): void {
-  if (token) {
-    setInStorage("chew", "refresh_token", token);
-  } else {
-    removeFromStorage("chew", "refresh_token");
-  }
+export function clearTokens(): void {
+  accessToken = null;
+  removeFromStorage("access_token");
+  removeFromStorage("refresh_token");
+  removeFromStorage("user");
 }
 
-export function getChewRefreshToken(): string | null {
-  return getFromStorage("chew", "refresh_token");
+function setCookie(name: string, value: string): void {
+  if (typeof window === "undefined") return;
+  document.cookie = `${name}=${value}; path=/; max-age=86400; SameSite=Lax`;
 }
 
-export function setAdminRefreshToken(token: string | null): void {
-  if (token) {
-    setInStorage("admin", "refresh_token", token);
-  } else {
-    removeFromStorage("admin", "refresh_token");
-  }
+function removeCookie(name: string): void {
+  if (typeof window === "undefined") return;
+  document.cookie = `${name}=; path=/; max-age=0`;
 }
 
-export function getAdminRefreshToken(): string | null {
-  return getFromStorage("admin", "refresh_token");
+export function syncAuthToCookie(): void {
+  const token = getAccessToken();
+  if (token) setCookie("mama_auth_token", token);
+  else removeCookie("mama_auth_token");
 }
 
-export function clearChewTokens(): void {
-  chewAccessToken = null;
-  removeFromStorage("chew", "refresh_token");
-  removeFromStorage("chew", "user");
-}
+const api: AxiosInstance = axios.create({
+  baseURL: BASE_URL,
+  timeout: 15000,
+  headers: { "Content-Type": "application/json", Accept: "application/json" },
+});
 
-export function clearAdminTokens(): void {
-  adminAccessToken = null;
-  removeFromStorage("admin", "refresh_token");
-  removeFromStorage("admin", "user");
-}
+api.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token = getAccessToken();
+    if (token && config.headers) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-function createApiInstance(prefix: "chew" | "admin"): AxiosInstance {
-  const instance: AxiosInstance = axios.create({
-    baseURL: BASE_URL,
-    timeout: 15000,
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-  });
-
-  instance.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
-      const token = getToken(prefix);
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise<string>((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then((token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        }).catch((err) => Promise.reject(err));
       }
-      return config;
-    },
-    (error) => Promise.reject(error)
-  );
 
-  instance.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-      const originalRequest = error.config;
-      if (error.response?.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true;
-        try {
-          const refreshToken = prefix === "admin" ? getAdminRefreshToken() : getChewRefreshToken();
-          if (!refreshToken) throw new Error("No refresh token");
+      originalRequest._retry = true;
+      isRefreshing = true;
 
-          const response = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken });
-          const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
+      try {
+        const storedRefreshToken = getRefreshToken();
+        if (!storedRefreshToken) throw new Error("No refresh token");
 
-          if (prefix === "admin") {
-            setAdminAccessToken(newAccessToken);
-            setAdminRefreshToken(newRefreshToken);
-          } else {
-            setChewAccessToken(newAccessToken);
-            setChewRefreshToken(newRefreshToken);
-          }
+        const response = await axios.post(`${BASE_URL}/auth/refresh`, {
+          refreshToken: storedRefreshToken,
+        });
 
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          return instance(originalRequest);
-        } catch {
-          if (prefix === "admin") {
-            clearAdminTokens();
-          } else {
-            clearChewTokens();
-          }
-          if (typeof window !== "undefined") {
-            window.location.href = prefix === "admin" ? "/admin/login" : "/chew/login";
-          }
-          return Promise.reject(error);
-        }
+        const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
+        setAccessToken(newAccessToken);
+        setRefreshToken(newRefreshToken);
+        processQueue(null, newAccessToken);
+
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return api(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        clearTokens();
+        if (typeof window !== "undefined") window.location.href = "/login";
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
-      return Promise.reject(error);
     }
-  );
+    return Promise.reject(error);
+  }
+);
 
-  return instance;
-}
-
-export const chewApi = createApiInstance("chew");
-export const adminApi = createApiInstance("admin");
+export { api };

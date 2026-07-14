@@ -2,17 +2,18 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAdminAuth } from "@/contexts/AdminAuthContext";
+import { useAuth } from "./useAuth";
 
 export function useAdminRoute() {
-  const { isAuthenticated, isLoading } = useAdminAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace("/admin/login");
+    if (!isLoading) {
+      if (!isAuthenticated) router.replace("/login");
+      else if (user?.role !== "ADMIN") router.replace("/dashboard");
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, user, router]);
 
-  return { isAuthenticated, isLoading };
+  return { isAuthenticated, isLoading, isAdmin: user?.role === "ADMIN" };
 }

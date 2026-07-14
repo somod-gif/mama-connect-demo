@@ -92,7 +92,7 @@ const api: AxiosInstance = axios.create({
 
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = getAccessToken();
+    const token = getAccessToken() || (typeof window !== "undefined" ? localStorage.getItem("mama_access_token") : null);
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -122,7 +122,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const storedRefreshToken = getRefreshToken();
+        const storedRefreshToken = getRefreshToken() || (typeof window !== "undefined" ? localStorage.getItem("mama_refresh_token") : null);
         if (!storedRefreshToken) {
           throw new Error("No refresh token available");
         }
@@ -143,7 +143,7 @@ api.interceptors.response.use(
         processQueue(refreshError, null);
         clearTokens();
         if (typeof window !== "undefined") {
-          window.location.href = "/chew/login";
+          window.location.href = "/login";
         }
         return Promise.reject(refreshError);
       } finally {

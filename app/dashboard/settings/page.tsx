@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
 import {
   User,
@@ -10,8 +10,9 @@ import {
   Shield,
   LogOut,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import { chewService } from "@/lib/services/chew.service";
+import { chewService } from "@/services/chew.service";
 import { FadeInUp } from "@/app/components/animations";
 
 const sections = [
@@ -24,13 +25,30 @@ const sections = [
 export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState("profile");
   const { user, logout } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: profile } = useQuery({
     queryKey: ["chew", "profile"],
     queryFn: () => chewService.getProfile(),
   });
 
+  const updateMutation = useMutation({
+    mutationFn: (data: { preferredLanguage?: string }) => chewService.updateProfile(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chew", "profile"] });
+      toast.success("Language preference updated");
+    },
+    onError: () => toast.error("Failed to update language preference"),
+  });
+
   const display = profile || user;
+
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const lang = e.target.value;
+    if (profile) {
+      updateMutation.mutate({ preferredLanguage: lang });
+    }
+  };
 
   return (
     <div className="space-y-8 max-w-3xl">
@@ -106,22 +124,7 @@ export default function SettingsPage() {
               <FadeInUp key="notifications">
                 <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
                   <h3 className="text-lg font-bold text-foreground mb-6">Notification Preferences</h3>
-                  {[
-                    { label: "New mother registrations", description: "When a new mother registers in your area" },
-                    { label: "High risk alerts", description: "When a mother is flagged as high risk" },
-                    { label: "Missed check-ins", description: "When a mother misses a weekly check-in" },
-                    { label: "Referral updates", description: "When a referral status changes" },
-                  ].map((item) => (
-                    <label key={item.label} className="flex items-center justify-between py-4 border-b border-border last:border-0">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{item.label}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
-                      </div>
-                      <div className="w-11 h-6 bg-primary rounded-full relative cursor-pointer">
-                        <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 shadow-sm" />
-                      </div>
-                    </label>
-                  ))}
+                  <p className="text-sm text-muted-foreground">Notification settings will be available soon.</p>
                 </div>
               </FadeInUp>
             )}
@@ -135,7 +138,8 @@ export default function SettingsPage() {
                   </p>
                   <select
                     className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                    defaultValue={profile?.preferredLanguage || "English"}
+                    value={profile?.preferredLanguage || "English"}
+                    onChange={handleLanguageChange}
                   >
                     {["English", "Pidgin", "Yoruba", "Hausa", "Igbo"].map((l) => (
                       <option key={l} value={l}>{l}</option>
@@ -149,22 +153,7 @@ export default function SettingsPage() {
               <FadeInUp key="security">
                 <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
                   <h3 className="text-lg font-bold text-foreground mb-6">Security</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 rounded-xl bg-background-soft">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">Password</p>
-                        <p className="text-xs text-muted-foreground">Last changed 30 days ago</p>
-                      </div>
-                      <button className="text-sm font-medium text-primary hover:text-primary-dark">Change</button>
-                    </div>
-                    <div className="flex items-center justify-between p-4 rounded-xl bg-background-soft">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">Two-Factor Authentication</p>
-                        <p className="text-xs text-muted-foreground">Add an extra layer of security</p>
-                      </div>
-                      <button className="text-sm font-medium text-primary hover:text-primary-dark">Enable</button>
-                    </div>
-                  </div>
+                  <p className="text-sm text-muted-foreground">Security settings will be available soon.</p>
                 </div>
               </FadeInUp>
             )}

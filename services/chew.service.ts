@@ -1,4 +1,4 @@
-import { chewApi } from "./api";
+import { api } from "./api";
 
 export interface ChewProfile {
   id: string;
@@ -23,16 +23,16 @@ export interface UpdateProfileRequest {
 
 class ChewService {
   async getProfile(): Promise<ChewProfile> {
-    const response = await chewApi.get<ChewProfile>("/users/me");
+    const response = await api.get<ChewProfile>("/users/me");
     return response.data;
   }
 
   async updateProfile(data: UpdateProfileRequest): Promise<void> {
-    await chewApi.patch("/users/profile", data);
+    await api.patch("/users/profile", data);
   }
 
   async getDashboard(): Promise<unknown> {
-    const response = await chewApi.get("/chew/dashboard");
+    const response = await api.get("/chew/dashboard");
     return response.data;
   }
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Mail, Phone, MapPin, Building2, Globe, Shield, Calendar, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, Mail, Phone, MapPin, Building2, Globe, Shield, Calendar, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { adminService } from "@/services/admin.service";
 import type { AdminChewDetail } from "@/types/admin";
@@ -46,9 +47,14 @@ export default function AdminChewDetailPage() {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <div>
-        <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">CHEW Profile</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Full profile and verification</p>
+      <div className="flex items-center gap-4">
+        <Link href="/admin/chews" className="p-2 rounded-xl hover:bg-background-soft transition-colors">
+          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+        </Link>
+        <div>
+          <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">CHEW Profile</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Full profile and verification</p>
+        </div>
       </div>
 
       <div className="bg-card border border-border rounded-2xl p-6 md:p-8">

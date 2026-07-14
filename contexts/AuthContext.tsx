@@ -16,19 +16,21 @@ import type {
   LoginRequest,
   RegisterRequest,
   User,
+  UserRole,
   VerificationStatus,
 } from "@/types/auth";
 import { authService } from "@/services/auth.service";
 import {
-  setChewAccessToken,
-  setChewRefreshToken,
-  clearChewTokens,
-  getChewRefreshToken,
-  getChewAccessToken,
+  setAccessToken,
+  setRefreshToken,
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  syncAuthToCookie,
 } from "@/services/api";
 
 function parseUserFromToken(): User | null {
-  const token = getChewAccessToken();
+  const token = getAccessToken();
   if (!token) return null;
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
@@ -38,8 +40,8 @@ function parseUserFromToken(): User | null {
       lastName: payload.lastName || payload.name?.split(" ").slice(1).join(" ") || "",
       email: payload.email || "",
       phone: payload.phone || "",
-      role: payload.role || "chew",
-      verificationStatus: (payload.verificationStatus as VerificationStatus) || "PENDING",
+      role: (payload.role || "CHEW") as UserRole,
+      verificationStatus: (payload.verificationStatus || "PENDING") as VerificationStatus,
       state: payload.state,
       lga: payload.lga,
       primaryHealthcareCentre: payload.primaryHealthcareCentre,
@@ -53,25 +55,19 @@ function parseUserFromToken(): User | null {
 function getStoredUser(): User | null {
   if (typeof window === "undefined") return null;
   try {
-    const stored = localStorage.getItem("mama_chew_user");
-    return stored ? (JSON.parse(stored) as User) : null;
-  } catch {
-    return null;
-  }
+    const stored = localStorage.getItem("mama_user");
+    return stored ? JSON.parse(stored) : null;
+  } catch { return null; }
 }
 
 function setStoredUser(user: User): void {
   if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem("mama_chew_user", JSON.stringify(user));
-  } catch { }
+  try { localStorage.setItem("mama_user", JSON.stringify(user)); } catch { }
 }
 
 function clearStoredUser(): void {
   if (typeof window === "undefined") return;
-  try {
-    localStorage.removeItem("mama_chew_user");
-  } catch { }
+  try { localStorage.removeItem("mama_user"); } catch { }
 }
 
 function extractErrorMessage(error: unknown): string {
@@ -84,7 +80,6 @@ function extractErrorMessage(error: unknown): string {
     if (typeof resp.status === "number" && resp.status >= 500) return "Server unavailable. Please try again later.";
   }
   if (err?.code === "ECONNABORTED") return "Request timed out. Please check your connection.";
-  if (!err?.response && err?.code !== "ERR_CANCELED") return "Network error. Please check your internet connection.";
   if (error instanceof Error) return error.message;
   return "An unexpected error occurred.";
 }
@@ -101,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const initializeAuth = useCallback(async () => {
     try {
-      const token = getChewAccessToken();
+      const token = getAccessToken();
       if (token) {
         const user = parseUserFromToken() || getStoredUser();
         if (user) {
@@ -114,12 +109,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const storedUser = getStoredUser();
       if (storedUser) {
         setState({ user: storedUser, isAuthenticated: true, isLoading: false });
-        const storedRefreshToken = getChewRefreshToken();
+        const storedRefreshToken = getRefreshToken();
         if (storedRefreshToken) {
           try {
             const response = await authService.refresh(storedRefreshToken);
-            setChewAccessToken(response.accessToken);
-            setChewRefreshToken(response.refreshToken);
+            setAccessToken(response.accessToken);
+            setRefreshToken(response.refreshToken);
+            syncAuthToCookie();
             const freshUser = parseUserFromToken();
             if (freshUser) {
               setStoredUser(freshUser);
@@ -130,11 +126,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const storedRefreshToken = getChewRefreshToken();
+      const storedRefreshToken = getRefreshToken();
       if (storedRefreshToken) {
         const response = await authService.refresh(storedRefreshToken);
-        setChewAccessToken(response.accessToken);
-        setChewRefreshToken(response.refreshToken);
+        setAccessToken(response.accessToken);
+        setRefreshToken(response.refreshToken);
+        syncAuthToCookie();
         const user = parseUserFromToken();
         if (user) {
           setStoredUser(user);
@@ -145,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       setState({ user: null, isAuthenticated: false, isLoading: false });
     } catch {
-      clearChewTokens();
+      clearTokens();
       clearStoredUser();
       setState({ user: null, isAuthenticated: false, isLoading: false });
     }
@@ -161,21 +158,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState((prev) => ({ ...prev, isLoading: true }));
       try {
         const response = await authService.login(data);
-        setChewAccessToken(response.accessToken);
-        setChewRefreshToken(response.refreshToken);
-        const user = parseUserFromToken();
-        if (user) {
-          user.verificationStatus = (response.user?.verificationStatus as VerificationStatus) || "PENDING";
-          setStoredUser(user);
-        }
-        setState({
-          user: user || null,
-          isAuthenticated: true,
-          isLoading: false,
-        });
+        setAccessToken(response.accessToken);
+        setRefreshToken(response.refreshToken);
+        syncAuthToCookie();
 
-        if (user?.verificationStatus === "PENDING") {
+        const user = parseUserFromToken();
+        const verificationStatus = (response.user?.verificationStatus as VerificationStatus) || "PENDING";
+        const role = (response.user?.role as UserRole) || "CHEW";
+        if (user) {
+          user.verificationStatus = verificationStatus;
+          user.role = role;
+          setStoredUser(user);
+          setState({ user, isAuthenticated: true, isLoading: false });
+        } else {
+          setState({ user: null, isAuthenticated: false, isLoading: false });
+          toast.error("Authentication failed: invalid token");
+          return;
+        }
+
+        if (role === "ADMIN") {
+          toast.success("Welcome, Admin");
+          router.push("/admin");
+        } else if (verificationStatus === "PENDING") {
           toast.info("Your account is pending verification");
+          router.push("/pending-approval");
+        } else if (verificationStatus === "REJECTED") {
+          toast.error("Your account has been rejected");
           router.push("/pending-approval");
         } else {
           toast.success("Welcome back");
@@ -196,18 +204,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState((prev) => ({ ...prev, isLoading: true }));
       try {
         const response = await authService.register(data);
-        setChewAccessToken(response.accessToken);
-        setChewRefreshToken(response.refreshToken);
+        setAccessToken(response.accessToken);
+        setRefreshToken(response.refreshToken);
+        syncAuthToCookie();
+
         const user = parseUserFromToken();
         if (user) {
           user.verificationStatus = "PENDING";
           setStoredUser(user);
+          setState({ user, isAuthenticated: true, isLoading: false });
+        } else {
+          setState({ user: null, isAuthenticated: false, isLoading: false });
+          toast.error("Registration failed: invalid response");
+          return;
         }
-        setState({
-          user: user || null,
-          isAuthenticated: true,
-          isLoading: false,
-        });
         router.push("/pending-approval");
       } catch (error) {
         setState((prev) => ({ ...prev, isLoading: false }));
@@ -221,15 +231,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      const storedRefreshToken = getChewRefreshToken();
-      if (storedRefreshToken) {
-        await authService.logout(storedRefreshToken);
-      }
+      const storedRefreshToken = getRefreshToken();
+      if (storedRefreshToken) await authService.logout(storedRefreshToken);
     } catch { }
-    clearChewTokens();
+    clearTokens();
     clearStoredUser();
     setState({ user: null, isAuthenticated: false, isLoading: false });
-    router.push("/chew/login");
+    router.push("/login");
   }, [router]);
 
   const updateUser = useCallback((data: Partial<User>) => {
@@ -243,27 +251,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     try {
-      const storedRefreshToken = getChewRefreshToken();
+      const storedRefreshToken = getRefreshToken();
       if (!storedRefreshToken) throw new Error("No refresh token");
       const response = await authService.refresh(storedRefreshToken);
-      setChewAccessToken(response.accessToken);
-      setChewRefreshToken(response.refreshToken);
+      setAccessToken(response.accessToken);
+      setRefreshToken(response.refreshToken);
+      syncAuthToCookie();
       const user = parseUserFromToken();
       if (user) {
         setStoredUser(user);
         setState((prev) => ({ ...prev, user }));
       }
     } catch {
-      clearChewTokens();
+      clearTokens();
       clearStoredUser();
       setState({ user: null, isAuthenticated: false, isLoading: false });
     }
   }, []);
 
   return (
-    <AuthContext.Provider
-      value={{ ...state, login, register, logout, refresh, updateUser }}
-    >
+    <AuthContext.Provider value={{ ...state, login, register, logout, refresh, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

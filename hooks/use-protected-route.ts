@@ -10,13 +10,11 @@ export function useProtectedRoute() {
 
   useEffect(() => {
     if (!isLoading) {
-      if (!isAuthenticated) {
-        router.replace("/chew/login");
-      } else if (user?.verificationStatus === "PENDING") {
-        router.replace("/pending-approval");
-      }
+      if (!isAuthenticated) router.replace("/login");
+      else if (user?.verificationStatus === "PENDING") router.replace("/pending-approval");
+      else if (user?.role === "ADMIN") router.replace("/admin");
     }
   }, [isAuthenticated, isLoading, user, router]);
 
-  return { isAuthenticated, isLoading, isVerified: user?.verificationStatus === "VERIFIED" };
+  return { isAuthenticated, isLoading, role: user?.role };
 }

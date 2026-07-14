@@ -1,10 +1,10 @@
 "use client";
 
 import { LogOut, Shield } from "lucide-react";
-import { useAdminAuth } from "@/contexts/AdminAuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AdminSettingsPage() {
-  const { user, logout } = useAdminAuth();
+  const { user, logout } = useAuth();
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -19,7 +19,7 @@ export default function AdminSettingsPage() {
             <span className="text-lg font-bold text-white">A</span>
           </div>
           <div>
-            <p className="text-base font-semibold text-foreground">{user?.name || "Admin"}</p>
+            <p className="text-base font-semibold text-foreground">{user ? `${user.firstName} ${user.lastName}` : "Admin"}</p>
             <p className="text-sm text-muted-foreground">{user?.email}</p>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 mt-1 text-[10px] font-medium rounded-full bg-primary-light text-primary-dark">
               <Shield className="w-3 h-3" /> Administrator

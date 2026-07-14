@@ -39,4 +39,5 @@ export interface AuthContextValue extends AuthState {
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
+  updateUser: (data: Partial<User>) => void;
 }

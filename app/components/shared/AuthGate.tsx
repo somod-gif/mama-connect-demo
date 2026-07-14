@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { getAccessToken, getRefreshToken } from "@/lib/api";
+import { getAccessToken, getRefreshToken } from "@/services/api";
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();

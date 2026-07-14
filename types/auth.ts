@@ -20,7 +20,18 @@ export interface TokenResponse {
   refreshToken: string;
 }
 
-export type UserRole = "chew" | "supervisor" | "staff" | "admin";
+export interface LoginResponse extends TokenResponse {
+  user: {
+    id: string;
+    email: string;
+    role: UserRole;
+    verificationStatus?: VerificationStatus;
+    firstName?: string;
+    lastName?: string;
+  };
+}
+
+export type UserRole = "CHEW" | "ADMIN" | "SUPERVISOR";
 
 export type VerificationStatus = "PENDING" | "VERIFIED" | "REJECTED";
 
@@ -31,7 +42,7 @@ export interface User {
   email: string;
   phone: string;
   role: UserRole;
-  verificationStatus?: VerificationStatus;
+  verificationStatus: VerificationStatus;
   state?: string;
   lga?: string;
   primaryHealthcareCentre?: string;
