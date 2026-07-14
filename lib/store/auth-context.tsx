@@ -1,3 +1,4 @@
 "use client";
 
-export { AuthProvider, useAuthContext as useAuth } from "@/lib/contexts/AuthContext";
+export { AuthProvider } from "@/contexts/AuthContext";
+export { useAuth } from "@/hooks/useAuth";
