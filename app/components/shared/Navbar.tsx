@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/lib/store/auth-context";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NavItem {
   label: string;
@@ -29,7 +29,7 @@ function isActive(pathname: string, href?: string): boolean {
 }
 
 function isDashboardRoute(pathname: string): boolean {
-  return pathname.startsWith("/dashboard");
+  return pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
 }
 
 export function Navbar() {
@@ -45,6 +45,7 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileOpen(false);
   }, [pathname]);
 
@@ -68,6 +69,7 @@ export function Navbar() {
                 alt="MamaConnect"
                 width={48}
                 height={48}
+                priority
                 className="rounded-xl transition-all duration-500 group-hover:scale-105"
               />
             </div>

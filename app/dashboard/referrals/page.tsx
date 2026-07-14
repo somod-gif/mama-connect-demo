@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { referralsService } from "@/lib/services/referrals.service";
 import { patientsService } from "@/lib/services/patients.service";
-import { FadeInUp, StaggerContainer, StaggerItem } from "@/app/components/animations";
+import { StaggerContainer, StaggerItem } from "@/app/components/animations";
 import { toast } from "sonner";
 import type { Referral, CreateReferralRequest } from "@/lib/types/dashboard";
 
@@ -96,7 +96,7 @@ export default function ReferralsPage() {
         </div>
       ) : (
         <StaggerContainer className="grid sm:grid-cols-2 gap-4">
-          {referrals.map((r, i) => (
+          {referrals.map((r) => (
             <StaggerItem key={r.id}>
               <motion.div
                 whileHover={{ y: -2 }}

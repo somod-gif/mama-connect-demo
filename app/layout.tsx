@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/lib/contexts/AuthContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
 import { Toaster } from "sonner";
 import { Navbar } from "@/app/components/shared/Navbar";
 
-const inter = Inter({
+const InterFont = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
@@ -40,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full scroll-smooth antialiased`}>
+    <html lang="en" className={`${InterFont.variable} h-full scroll-smooth antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
         <QueryProvider>
           <AuthProvider>

@@ -2,17 +2,15 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import {
   User,
   Bell,
   Globe,
   Shield,
   LogOut,
-  ChevronRight,
-  Loader2,
 } from "lucide-react";
-import { useAuth } from "@/lib/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { chewService } from "@/lib/services/chew.service";
 import { FadeInUp } from "@/app/components/animations";
 

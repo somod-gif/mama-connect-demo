@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/lib/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -31,29 +31,31 @@ export default function Topbar() {
   const pageTitle = getPageTitle(pathname);
 
   return (
-    <header className="sticky top-0 z-20 bg-card border-b border-border">
-      <div className="flex items-center justify-between px-4 md:px-6 lg:px-8 h-16">
-        <div>
-          <h1 className="text-lg font-bold text-foreground lg:hidden">
+    <header className="sticky top-0 z-20 bg-card/80 backdrop-blur-md border-b border-border">
+      <div className="flex items-center justify-between px-4 md:px-6 lg:px-8 h-14 lg:h-16">
+        <div className="lg:hidden">
+          <h1 className="text-base font-bold text-foreground">
             {pageTitle}
           </h1>
-          <p className="hidden lg:block text-sm text-muted-foreground">
-            {getGreeting()}, <span className="font-semibold text-foreground">{user?.firstName || "CHEW"}</span>
+        </div>
+        <div className="hidden lg:block">
+          <p className="text-sm text-muted-foreground">
+            {getGreeting()},{" "}
+            <span className="font-semibold text-foreground">
+              {user?.firstName || "CHEW"}
+            </span>
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary-light flex items-center justify-center">
-              <span className="text-xs font-bold text-primary">
-                {user?.firstName?.charAt(0) || "C"}{user?.lastName?.charAt(0) || "W"}
-              </span>
+        <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-background-soft">
+            <div className="w-8 h-8 rounded-lg bg-primary-light flex items-center justify-center">
+              <span className="text-xs font-bold text-primary">CH</span>
             </div>
             <div className="hidden sm:block">
               <p className="text-sm font-medium text-foreground leading-tight">
-                {user?.firstName} {user?.lastName}
+                CHEW
               </p>
-              <p className="text-[10px] text-muted-foreground">CHEW</p>
             </div>
           </div>
         </div>
