@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MamaConnect
+
+**CareCode Hackathon by HelpMum — 2026**
+
+A human-centered, AI-assisted maternal health platform connecting pregnant and postpartum women with Community Health Extension Workers (CHEWs) and healthcare facilities for timely maternal care.
+
+> Deployed: [mama-connect-demo.vercel.app](https://mama-connect-demo.vercel.app)
+
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v4
+- **State/Data:** React Query (TanStack Query v5)
+- **Forms:** React Hook Form + Zod
+- **HTTP:** Axios
+- **Animations:** Framer Motion
+- **UI Components:** Lucide React, Radix UI, Sonner
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server (Webpack) |
+| `npm run dev:turbo` | Start dev server (Turbopack) |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
 
-## Learn More
+## Environment
 
-To learn more about Next.js, take a look at the following resources:
+Copy `.env.example` to `.env.local` and set:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+NEXT_PUBLIC_API_URL=https://mamaconnect.onrender.com/v1
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/
+├── (auth)/          # Auth layout (centered card)
+├── admin/           # Admin portal (CHEW mgmt, patient mgmt, documents)
+├── components/      # Shared UI components
+├── dashboard/       # CHEW dashboard (mothers, referrals, profile, settings)
+├── login/           # Unified login
+├── register/        # CHEW registration
+├── pending-approval/# Post-registration pending screen
+├── about/           # About page
+├── faq/             # FAQ page
+├── mothers/         # Mothers landing page
+├── chew/            # CHEW landing page
+├── partners/        # Partners page
+└── layout.tsx       # Root layout
+```
