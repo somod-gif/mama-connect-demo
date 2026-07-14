@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from "axios";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://mamaconnect.onrender.com/v1";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 let chewAccessToken: string | null = null;
 let adminAccessToken: string | null = null;
