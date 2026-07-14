@@ -49,6 +49,7 @@ function parseUserFromToken(): User | null {
       email: payload.email || "",
       phone: payload.phone || "",
       role: payload.role || "chew",
+      onboardingCompleted: payload.onboardingCompleted ?? false,
     };
   } catch {
     return null;
@@ -105,6 +106,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      const storedUser = getStoredUser();
+      if (storedUser) {
+        setState({ user: storedUser, isAuthenticated: true, isLoading: false });
+
+        const storedRefreshToken = getRefreshToken();
+        if (storedRefreshToken) {
+          try {
+            const response = await authService.refresh(storedRefreshToken);
+            setAccessToken(response.accessToken);
+            setRefreshToken(response.refreshToken);
+            const freshUser = parseUserFromToken();
+            if (freshUser) {
+              setStoredUser(freshUser);
+              setState({ user: freshUser, isAuthenticated: true, isLoading: false });
+            }
+          } catch {
+            // Background refresh failed; stored user remains valid for this session
+          }
+        }
+        return;
+      }
+
       const storedRefreshToken = getRefreshToken();
       if (storedRefreshToken) {
         const response = await authService.refresh(storedRefreshToken);
@@ -118,12 +141,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      const storedUser = getStoredUser();
-      if (storedUser) {
-        setState({ user: storedUser, isAuthenticated: true, isLoading: false });
-        return;
-      }
-
       setState({ user: null, isAuthenticated: false, isLoading: false });
     } catch {
       clearTokens();
@@ -133,6 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     initializeAuth();
   }, [initializeAuth]);
 
@@ -181,7 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isLoading: false,
         });
         toast.success("Registration successful. Redirecting...");
-        router.push("/dashboard/onboarding");
+        router.push("/dashboard");
       } catch (error) {
         setState((prev) => ({ ...prev, isLoading: false }));
         const message = extractErrorMessage(error);
@@ -211,6 +229,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/chew/login");
   }, [router]);
 
+  const updateUser = useCallback((data: Partial<User>) => {
+    setState((prev) => {
+      if (!prev.user) return prev;
+      const updated = { ...prev.user, ...data };
+      setStoredUser(updated);
+      return { ...prev, user: updated };
+    });
+  }, []);
+
   const refresh = useCallback(async () => {
     try {
       const storedRefreshToken = getRefreshToken();
@@ -232,7 +259,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ ...state, login, register, logout, refresh }}
+      value={{ ...state, login, register, logout, refresh, updateUser }}
     >
       {children}
     </AuthContext.Provider>
