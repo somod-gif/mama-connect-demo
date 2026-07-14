@@ -4,11 +4,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Loader2, HeartPulse } from "lucide-react";
-import { useAuth } from "@/lib/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 
 const loginSchema = z.object({
   identifier: z.string().min(1, "Email or phone number is required"),
@@ -20,7 +19,6 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function ChewLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading } = useAuth();
-  const router = useRouter();
 
   const {
     register,
