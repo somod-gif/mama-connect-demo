@@ -13,6 +13,7 @@ import {
 import { referralsService } from "@/lib/services/referrals.service";
 import { patientsService } from "@/lib/services/patients.service";
 import { StaggerContainer, StaggerItem } from "@/app/components/animations";
+import { RequireVerified } from "@/app/components/shared/VerificationGate";
 import { toast } from "sonner";
 import type { Referral, CreateReferralRequest } from "@/lib/types/dashboard";
 
@@ -24,6 +25,14 @@ const statusStyles: Record<string, string> = {
 };
 
 export default function ReferralsPage() {
+  return (
+    <RequireVerified>
+      <ReferralsContent />
+    </RequireVerified>
+  );
+}
+
+function ReferralsContent() {
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState<CreateReferralRequest>({
     patientId: "",

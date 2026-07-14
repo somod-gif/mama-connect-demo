@@ -6,10 +6,19 @@ import { motion } from "framer-motion";
 import { Users, Loader2, UserPlus, Search } from "lucide-react";
 import { patientsService } from "@/lib/services/patients.service";
 import { FadeInUp } from "@/app/components/animations";
+import { RequireVerified } from "@/app/components/shared/VerificationGate";
 import { toast } from "sonner";
 import type { Patient } from "@/lib/types/patient";
 
 export default function FindMothersPage() {
+  return (
+    <RequireVerified>
+      <FindMothersContent />
+    </RequireVerified>
+  );
+}
+
+function FindMothersContent() {
   const [search, setSearch] = useState("");
   const queryClient = useQueryClient();
 

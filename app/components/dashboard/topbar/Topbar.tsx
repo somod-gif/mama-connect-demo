@@ -1,14 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
-}
 
 function getPageTitle(pathname: string): string {
   if (pathname === "/dashboard") return "Dashboard";
@@ -21,7 +15,13 @@ function getPageTitle(pathname: string): string {
   return "Dashboard";
 }
 
-export default function Topbar() {
+export default function Topbar({
+  mobileOpen,
+  onMobileToggle,
+}: {
+  mobileOpen: boolean;
+  onMobileToggle: () => void;
+}) {
   const pathname = usePathname();
   const { user } = useAuth();
 
@@ -30,15 +30,22 @@ export default function Topbar() {
 
   return (
     <header className="sticky top-0 z-20 bg-card/80 backdrop-blur-md border-b border-border">
-      <div className="flex items-center justify-between px-4 md:px-6 lg:px-8 h-14 lg:h-16">
-        <div className="lg:hidden">
-          <h1 className="text-base font-bold text-foreground">
+      <div className="flex items-center justify-between px-4 md:px-6 lg:px-8 h-12 lg:h-14">
+        <div className="flex items-center gap-3 lg:hidden">
+          <button
+            onClick={onMobileToggle}
+            className="flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:bg-background-soft transition-colors -ml-1"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
+          <h1 className="text-sm font-bold text-foreground">
             {pageTitle}
           </h1>
         </div>
         <div className="hidden lg:block">
           <p className="text-sm text-muted-foreground">
-            {getGreeting()},{" "}
+            Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"},{" "}
             <span className="font-semibold text-foreground">
               {user?.firstName || "CHEW"}
             </span>
@@ -46,9 +53,9 @@ export default function Topbar() {
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
-          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-background-soft">
-            <div className="w-8 h-8 rounded-lg bg-primary-light flex items-center justify-center">
-              <span className="text-xs font-bold text-primary">{initials}</span>
+          <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-background-soft">
+            <div className="w-7 h-7 rounded-lg bg-primary-light flex items-center justify-center">
+              <span className="text-[11px] font-bold text-primary">{initials}</span>
             </div>
             <div className="hidden sm:block">
               <p className="text-sm font-medium text-foreground leading-tight">

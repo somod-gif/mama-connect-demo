@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { patientsService } from "@/lib/services/patients.service";
 import { FadeInUp } from "@/app/components/animations";
+import { RequireVerified } from "@/app/components/shared/VerificationGate";
 import type { Patient } from "@/lib/types/patient";
 
 function SkeletonRow() {
@@ -34,6 +35,14 @@ const riskStyles: Record<string, string> = {
 };
 
 export default function MothersPage() {
+  return (
+    <RequireVerified>
+      <MothersContent />
+    </RequireVerified>
+  );
+}
+
+function MothersContent() {
   const [search, setSearch] = useState("");
 
   const { data: patients = [], isLoading } = useQuery<Patient[]>({

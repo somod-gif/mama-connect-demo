@@ -144,6 +144,19 @@ export default function ProfilePage() {
     );
   }
 
+  const normalizeLga = (val: unknown): string => {
+    if (typeof val === "string") return val;
+    if (val && typeof val === "object") return (val as { name: string }).name || "—";
+    return "—";
+  };
+
+  const normalizeState = (val: unknown): string => {
+    if (typeof val === "string") return val;
+    if (val && typeof val === "object") return (val as { name: string }).name || "—";
+    if (profile?.lga && typeof profile.lga === "object") return (profile.lga as { state: { name: string } }).state?.name || "—";
+    return "—";
+  };
+
   const display = profile || user;
 
   const verificationBadge = () => {
@@ -155,14 +168,14 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-8 max-w-3xl">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold text-foreground tracking-tight">Profile</h2>
           <p className="text-sm text-muted-foreground mt-1">Your professional information</p>
         </div>
         <button
           onClick={() => setShowEdit(true)}
-          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-primary bg-primary-light rounded-xl hover:bg-primary/20 transition-all"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-primary bg-primary-light rounded-xl hover:bg-primary/20 transition-all sm:self-start"
         >
           <Edit3 className="w-4 h-4" />
           Edit Personal Information
@@ -195,8 +208,8 @@ export default function ProfilePage() {
             {[
               { icon: Mail, label: "Email", value: display?.email },
               { icon: Phone, label: "Phone", value: display?.phone || "—" },
-              { icon: MapPin, label: "State", value: profile?.state || "—" },
-              { icon: MapPin, label: "LGA", value: profile?.lga || "—" },
+              { icon: MapPin, label: "State", value: normalizeState(profile?.state || profile?.lga) },
+              { icon: MapPin, label: "LGA", value: normalizeLga(profile?.lga) },
               { icon: Building2, label: "Primary Healthcare Centre", value: profile?.primaryHealthcareCentre || "—" },
               { icon: Globe, label: "Preferred Language", value: profile?.preferredLanguage || "English" },
             ].map((field) => (

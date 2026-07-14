@@ -6,6 +6,10 @@ import {
   AlertTriangle,
   ArrowRightLeft,
   CalendarCheck,
+  Shield,
+  Clock,
+  XCircle,
+  ExternalLink,
 } from "lucide-react";
 import { dashboardService } from "@/lib/services/dashboard.service";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,6 +18,7 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "@/app/components/animations";
+import { VerificationBadge } from "@/app/components/shared/VerificationGate";
 import type { DashboardData } from "@/lib/types/dashboard";
 
 function getGreeting(): string {
@@ -60,7 +65,7 @@ const summaryCards = [
 
 function SkeletonGrid() {
   return (
-    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
       {[1, 2, 3, 4].map((i) => (
         <div key={i} className="bg-card border border-border rounded-xl p-5 animate-pulse">
           <div className="flex items-center justify-between mb-3">
@@ -97,6 +102,81 @@ export default function DashboardHome() {
 
   return (
     <div className="space-y-6">
+      {user?.verificationStatus === "PENDING" && (
+        <FadeInUp>
+          <div className="flex items-start gap-3.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5">
+            <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+              <Clock className="w-4 h-4 text-amber-700" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-sm font-bold text-amber-900">Pending Verification</p>
+                <VerificationBadge status="PENDING" />
+              </div>
+              <p className="text-xs text-amber-800/80 mt-1">
+                Your account is under review. Full access will be available once approved by an administrator.
+              </p>
+            </div>
+          </div>
+        </FadeInUp>
+      )}
+
+      {user?.verificationStatus === "REJECTED" && (
+        <FadeInUp>
+          <div className="flex items-start gap-3.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3.5">
+            <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+              <XCircle className="w-4 h-4 text-red-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-sm font-bold text-red-900">Verification Required</p>
+                <VerificationBadge status="REJECTED" />
+              </div>
+              <p className="text-xs text-red-800/80 mt-1">
+                Your account couldn&apos;t be verified. Please update your information or contact support.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-2.5">
+                <a
+                  href="/dashboard/profile"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 text-[11px] font-semibold text-red-700 bg-red-100 rounded-lg hover:bg-red-200 transition-colors"
+                >
+                  <Shield className="w-3 h-3" />
+                  Update Profile
+                </a>
+                <a
+                  href="https://wa.me/2348169725007"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 text-[11px] font-semibold text-foreground bg-card border border-border rounded-lg hover:bg-background-soft transition-colors"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  Contact Support
+                </a>
+              </div>
+            </div>
+          </div>
+        </FadeInUp>
+      )}
+
+      {user?.verificationStatus === "VERIFIED" && (
+        <FadeInUp>
+          <div className="flex items-start gap-3.5 bg-green-50 border border-green-200 rounded-xl px-4 py-3.5">
+            <div className="w-9 h-9 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+              <Shield className="w-4 h-4 text-green-700" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-sm font-bold text-green-900">Verified</p>
+                <VerificationBadge status="VERIFIED" />
+              </div>
+              <p className="text-xs text-green-800/80 mt-1">
+                Your account has been verified. You now have full access to MamaConnect.
+              </p>
+            </div>
+          </div>
+        </FadeInUp>
+      )}
+
       <div>
         <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">
           {getGreeting()}, {user?.firstName || "CHEW"}
@@ -109,10 +189,10 @@ export default function DashboardHome() {
       {isLoading ? (
         <SkeletonGrid />
       ) : (
-        <StaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StaggerContainer className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {summaryCards.map((stat) => (
             <StaggerItem key={stat.key}>
-              <div className="bg-card border border-border rounded-xl p-5 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+              <div className="bg-card border border-border rounded-xl p-4 md:p-5 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 h-full">
                 <div className="flex items-center justify-between mb-3">
                   <div className={`w-10 h-10 rounded-lg ${stat.bg} flex items-center justify-center ring-1 ${stat.ring}`}>
                     <stat.icon className={`w-5 h-5 ${stat.color}`} />

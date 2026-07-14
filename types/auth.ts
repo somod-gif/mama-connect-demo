@@ -37,6 +37,7 @@ export type VerificationStatus = "PENDING" | "VERIFIED" | "REJECTED";
 
 export interface User {
   id: string;
+  name?: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -44,9 +45,10 @@ export interface User {
   role: UserRole;
   verificationStatus: VerificationStatus;
   state?: string;
-  lga?: string;
+  lga?: string | { id: string; name: string; state: { id: string; name: string } };
   primaryHealthcareCentre?: string;
   preferredLanguage?: string;
+  createdAt?: string;
 }
 
 export interface AuthState {

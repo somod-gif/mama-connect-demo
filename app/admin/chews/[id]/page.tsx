@@ -3,47 +3,83 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Mail, Phone, MapPin, Building2, Globe, Shield, Calendar, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
+import { Loader2, Mail, Phone, MapPin, Globe, Shield, Calendar, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { adminService } from "@/services/admin.service";
-import type { AdminChewDetail } from "@/types/admin";
+import { showApiError } from "@/lib/error-handler";
+import type { AdminUser } from "@/types/admin";
+
+function DetailSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-16 h-16 rounded-2xl bg-background-soft" />
+        <div className="space-y-2">
+          <div className="w-40 h-5 rounded bg-background-soft" />
+          <div className="w-32 h-4 rounded bg-background-soft" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-6">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="p-4 rounded-xl bg-background-soft">
+            <div className="w-20 h-3 rounded bg-background-soft/60 mb-2" />
+            <div className="w-32 h-4 rounded bg-background-soft/80" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function AdminChewDetailPage() {
   const params = useParams();
   const queryClient = useQueryClient();
   const id = params.id as string;
 
-  const { data: chew, isLoading } = useQuery<AdminChewDetail>({
-    queryKey: ["admin", "chew", id],
-    queryFn: () => adminService.getCHEWDetail(id),
+  const { data: user, isLoading } = useQuery<AdminUser>({
+    queryKey: ["admin", "user", id],
+    queryFn: () => adminService.getUser(id),
   });
 
   const verifyMutation = useMutation({
-    mutationFn: (status: "VERIFIED" | "REJECTED") => adminService.verifyCHEW(id, { status }),
+    mutationFn: (status: "VERIFIED" | "REJECTED") =>
+      adminService.verifyUser(id, { status }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "chew", id] });
-      queryClient.invalidateQueries({ queryKey: ["admin", "chews"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "user", id] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
-      toast.success("CHEW status updated");
+      toast.success("User status updated");
     },
-    onError: () => toast.error("Failed to update status"),
+    onError: (err) => showApiError(err),
   });
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      <div className="space-y-6 max-w-3xl">
+        <div className="flex items-center gap-4">
+          <Link href="/admin/chews" className="p-2 rounded-xl hover:bg-background-soft transition-colors">
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </Link>
+          <div>
+            <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">User Profile</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Loading...</p>
+          </div>
+        </div>
+        <DetailSkeleton />
       </div>
     );
   }
 
-  if (!chew) {
+  if (!user) {
     return (
       <div className="text-center py-20">
-        <p className="text-sm text-muted-foreground">CHEW not found</p>
+        <p className="text-sm text-muted-foreground">User not found</p>
+        <Link href="/admin/chews" className="text-sm text-primary hover:underline mt-2 inline-block">Back to users</Link>
       </div>
     );
   }
+
+  const initials = (user.name?.split(" ")[0]?.charAt(0) || "") + (user.name?.split(" ")[1]?.charAt(0) || "") || "U";
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -52,7 +88,7 @@ export default function AdminChewDetailPage() {
           <ArrowLeft className="w-5 h-5 text-muted-foreground" />
         </Link>
         <div>
-          <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">CHEW Profile</h1>
+          <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">User Profile</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Full profile and verification</p>
         </div>
       </div>
@@ -60,17 +96,17 @@ export default function AdminChewDetailPage() {
       <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
         <div className="flex items-center gap-4 mb-8">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
-            <span className="text-xl font-bold text-white">{chew.firstName.charAt(0)}{chew.lastName.charAt(0)}</span>
+            <span className="text-xl font-bold text-white">{initials}</span>
           </div>
           <div>
-            <p className="text-lg font-semibold text-foreground">{chew.firstName} {chew.lastName}</p>
-            <p className="text-sm text-muted-foreground">{chew.email}</p>
+            <p className="text-lg font-semibold text-foreground">{user.name}</p>
+            <p className="text-sm text-muted-foreground">{user.email}</p>
             <div className="mt-1">
-              {chew.verificationStatus === "VERIFIED" ? (
+              {user.verificationStatus === "VERIFIED" ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-50 text-green-700">
                   <CheckCircle className="w-3 h-3" /> Verified
                 </span>
-              ) : chew.verificationStatus === "REJECTED" ? (
+              ) : user.verificationStatus === "REJECTED" ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-red-50 text-red-700">
                   <XCircle className="w-3 h-3" /> Rejected
                 </span>
@@ -85,14 +121,12 @@ export default function AdminChewDetailPage() {
 
         <div className="grid sm:grid-cols-2 gap-6">
           {[
-            { icon: Mail, label: "Email", value: chew.email },
-            { icon: Phone, label: "Phone", value: chew.phone || "—" },
-            { icon: MapPin, label: "State", value: chew.state || "—" },
-            { icon: MapPin, label: "LGA", value: chew.lga || "—" },
-            { icon: Building2, label: "Primary Healthcare Centre", value: chew.primaryHealthcareCentre || "—" },
-            { icon: Globe, label: "Preferred Language", value: chew.preferredLanguage || "—" },
-            { icon: Calendar, label: "Created", value: new Date(chew.createdAt).toLocaleDateString() },
-            { icon: Shield, label: "Role", value: chew.role || "CHEW" },
+            { icon: Mail, label: "Email", value: user.email || "—" },
+            { icon: Phone, label: "Phone", value: user.phone || "—" },
+            { icon: MapPin, label: "State", value: user.lga?.state?.name || "—" },
+            { icon: MapPin, label: "LGA", value: user.lga?.name || "—" },
+            { icon: Calendar, label: "Created", value: new Date(user.createdAt).toLocaleDateString() },
+            { icon: Shield, label: "Role", value: user.role || "CHEW" },
           ].map((field) => (
             <div key={field.label} className="flex items-start gap-3 p-4 rounded-xl bg-background-soft">
               <field.icon className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
@@ -104,19 +138,23 @@ export default function AdminChewDetailPage() {
           ))}
         </div>
 
-        {chew.verificationStatus !== "VERIFIED" && (
+        {user.verificationStatus !== "VERIFIED" && (
           <div className="flex items-center gap-3 mt-8 pt-6 border-t border-border">
             <button
               onClick={() => verifyMutation.mutate("VERIFIED")}
-              className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 transition-all"
+              disabled={verifyMutation.isPending}
+              className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 disabled:opacity-60 transition-all"
             >
-              <CheckCircle className="w-4 h-4" /> Approve
+              {verifyMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+              Approve
             </button>
             <button
               onClick={() => verifyMutation.mutate("REJECTED")}
-              className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition-all"
+              disabled={verifyMutation.isPending}
+              className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-red-600 bg-red-50 rounded-xl hover:bg-red-100 disabled:opacity-60 transition-all"
             >
-              <XCircle className="w-4 h-4" /> Reject
+              {verifyMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+              Reject
             </button>
           </div>
         )}
