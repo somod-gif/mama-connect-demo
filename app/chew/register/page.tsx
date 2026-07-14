@@ -4,45 +4,46 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
-import { useAuth } from "@/lib/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { geographyService } from "@/services/geography.service";
 
-const registerSchema = z
-  .object({
-    firstName: z.string().min(2, "First name must be at least 2 characters"),
-    lastName: z.string().min(2, "Last name must be at least 2 characters"),
-    email: z.string().email("Please enter a valid email address"),
-    phone: z
-      .string()
-      .min(10, "Please enter a valid Nigerian phone number")
-      .regex(
-        /^(\+234|0)[789]\d{9}$/,
-        "Please enter a valid Nigerian phone number (e.g. +2348012345678)"
-      ),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/[A-Z]/, "Must contain an uppercase letter")
-      .regex(/[a-z]/, "Must contain a lowercase letter")
-      .regex(/[0-9]/, "Must contain a number")
-      .regex(/[^A-Za-z0-9]/, "Must contain a special character"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+const registerSchema = z.object({
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  phone: z
+    .string()
+    .min(10, "Please enter a valid Nigerian phone number")
+    .regex(/^(\+234|0)[789]\d{9}$/, "Please enter a valid Nigerian phone number (e.g. +2348012345678)"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Must contain an uppercase letter")
+    .regex(/[a-z]/, "Must contain a lowercase letter")
+    .regex(/[0-9]/, "Must contain a number")
+    .regex(/[^A-Za-z0-9]/, "Must contain a special character"),
+  confirmPassword: z.string(),
+  stateId: z.string().min(1, "Please select your state"),
+  lgaId: z.string().min(1, "Please select your LGA"),
+  primaryHealthcareCentre: z.string().min(2, "Please enter your Primary Healthcare Centre"),
+  preferredLanguage: z.string().min(1, "Please select your preferred language"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
 type RegisterFormData = z.infer<typeof registerSchema>;
+
+const LANGUAGES = ["English", "Pidgin", "Yoruba", "Hausa", "Igbo"];
 
 export default function ChewRegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { register: registerUser, isLoading } = useAuth();
-  const router = useRouter();
 
   const {
     register,
@@ -58,7 +59,24 @@ export default function ChewRegisterPage() {
       phone: "",
       password: "",
       confirmPassword: "",
+      stateId: "",
+      lgaId: "",
+      primaryHealthcareCentre: "",
+      preferredLanguage: "",
     },
+  });
+
+  const selectedStateId = watch("stateId");
+
+  const { data: states = [] } = useQuery({
+    queryKey: ["geography", "states"],
+    queryFn: () => geographyService.getStates(),
+  });
+
+  const { data: lgas = [], isFetching: lgasLoading } = useQuery({
+    queryKey: ["geography", "lgas", selectedStateId],
+    queryFn: () => geographyService.getLGAs(selectedStateId),
+    enabled: !!selectedStateId,
   });
 
   const password = watch("password", "");
@@ -82,10 +100,15 @@ export default function ChewRegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       await registerUser({
-        name: `${data.firstName} ${data.lastName}`.trim(),
+        firstName: data.firstName,
+        lastName: data.lastName,
         email: data.email,
         phone: data.phone,
         password: data.password,
+        stateId: data.stateId,
+        lgaId: data.lgaId,
+        primaryHealthcareCentre: data.primaryHealthcareCentre,
+        preferredLanguage: data.preferredLanguage,
       });
     } catch {
       // Toast handles error display
@@ -103,7 +126,7 @@ export default function ChewRegisterPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-lg"
+        className="w-full max-w-2xl"
       >
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-foreground tracking-tight">
@@ -133,20 +156,21 @@ export default function ChewRegisterPage() {
               </div>
             </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">
-                Email Address
-              </label>
-              <input id="email" type="email" placeholder="you@example.com" {...register("email")} disabled={isPending} className={inputClass} />
-              {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1.5">
-                Phone Number
-              </label>
-              <input id="phone" type="tel" placeholder="+2348012345678" {...register("phone")} disabled={isPending} className={inputClass} />
-              {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>}
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">
+                  Email Address
+                </label>
+                <input id="email" type="email" placeholder="you@example.com" {...register("email")} disabled={isPending} className={inputClass} />
+                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
+              </div>
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1.5">
+                  Phone Number
+                </label>
+                <input id="phone" type="tel" placeholder="+2348012345678" {...register("phone")} disabled={isPending} className={inputClass} />
+                {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>}
+              </div>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
@@ -207,6 +231,55 @@ export default function ChewRegisterPage() {
                   </button>
                 </div>
                 {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword.message}</p>}
+              </div>
+            </div>
+
+            <div className="border-t border-border pt-5">
+              <h3 className="text-sm font-semibold text-foreground mb-4">Professional Information</h3>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="stateId" className="block text-sm font-medium text-foreground mb-1.5">
+                    State
+                  </label>
+                  <select id="stateId" {...register("stateId")} disabled={isPending} className={inputClass}>
+                    <option value="">Select state</option>
+                    {states.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                  {errors.stateId && <p className="mt-1 text-xs text-red-500">{errors.stateId.message}</p>}
+                </div>
+                <div>
+                  <label htmlFor="lgaId" className="block text-sm font-medium text-foreground mb-1.5">
+                    LGA
+                  </label>
+                  <select id="lgaId" {...register("lgaId")} disabled={isPending || !selectedStateId || lgasLoading} className={inputClass}>
+                    <option value="">{lgasLoading ? "Loading..." : "Select LGA"}</option>
+                    {lgas.map((l) => (
+                      <option key={l.id} value={l.id}>{l.name}</option>
+                    ))}
+                  </select>
+                  {errors.lgaId && <p className="mt-1 text-xs text-red-500">{errors.lgaId.message}</p>}
+                </div>
+                <div>
+                  <label htmlFor="primaryHealthcareCentre" className="block text-sm font-medium text-foreground mb-1.5">
+                    Primary Healthcare Centre
+                  </label>
+                  <input id="primaryHealthcareCentre" type="text" placeholder="e.g. General Hospital, Gwagwalada" {...register("primaryHealthcareCentre")} disabled={isPending} className={inputClass} />
+                  {errors.primaryHealthcareCentre && <p className="mt-1 text-xs text-red-500">{errors.primaryHealthcareCentre.message}</p>}
+                </div>
+                <div>
+                  <label htmlFor="preferredLanguage" className="block text-sm font-medium text-foreground mb-1.5">
+                    Preferred Language
+                  </label>
+                  <select id="preferredLanguage" {...register("preferredLanguage")} disabled={isPending} className={inputClass}>
+                    <option value="">Select language</option>
+                    {LANGUAGES.map((l) => (
+                      <option key={l} value={l}>{l}</option>
+                    ))}
+                  </select>
+                  {errors.preferredLanguage && <p className="mt-1 text-xs text-red-500">{errors.preferredLanguage.message}</p>}
+                </div>
               </div>
             </div>
 
