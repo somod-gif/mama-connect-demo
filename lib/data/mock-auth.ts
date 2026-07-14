@@ -18,7 +18,8 @@ export async function mockLogin(): Promise<TokenResponse> {
   };
 }
 
-export async function mockRegister(data: RegisterRequest): Promise<TokenResponse> {
+export async function mockRegister(_registerData: RegisterRequest): Promise<TokenResponse> {
+  void _registerData;
   await new Promise((resolve) => setTimeout(resolve, 1500));
   return {
     accessToken: "mock-jwt-token-mamaconnect-2026-abc123",

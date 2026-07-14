@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/lib/store/auth-context";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NavItem {
   label: string;
@@ -18,6 +18,9 @@ const navItems: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "For Mothers", href: "/mothers" },
   { label: "For CHEWs", href: "/chew" },
+  { label: "About", href: "/about" },
+  { label: "FAQ", href: "/faq" },
+  { label: "Partners", href: "/partners" },
 ];
 
 function isActive(pathname: string, href?: string): boolean {
@@ -29,7 +32,9 @@ function isActive(pathname: string, href?: string): boolean {
 }
 
 function isDashboardRoute(pathname: string): boolean {
-  return pathname.startsWith("/dashboard");
+  return pathname.startsWith("/dashboard") || pathname.startsWith("/admin")
+    || pathname === "/login" || pathname === "/register"
+    || pathname.startsWith("/pending-approval");
 }
 
 export function Navbar() {
@@ -43,10 +48,6 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
 
   if (isDashboardRoute(pathname)) return null;
 
@@ -68,6 +69,7 @@ export function Navbar() {
                 alt="MamaConnect"
                 width={48}
                 height={48}
+                priority
                 className="rounded-xl transition-all duration-500 group-hover:scale-105"
               />
             </div>
@@ -116,13 +118,13 @@ export function Navbar() {
             ) : (
               <>
                 <Link
-                  href="/chew/login"
+                  href="/login"
                   className="px-4 py-2.5 text-sm font-semibold text-foreground/80 hover:text-foreground transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
-                  href="/chew/register"
+                  href="/register"
                   className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary-dark transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5"
                 >
                   Register
@@ -188,14 +190,14 @@ export function Navbar() {
                   ) : (
                     <>
                       <Link
-                        href="/chew/login"
+                        href="/login"
                         onClick={() => setMobileOpen(false)}
                         className="flex items-center justify-center w-full px-4 py-3 text-sm font-semibold text-foreground border border-border rounded-xl hover:bg-background-soft transition-all"
                       >
                         Sign In
                       </Link>
                       <Link
-                        href="/chew/register"
+                        href="/register"
                         onClick={() => setMobileOpen(false)}
                         className="flex items-center justify-center w-full px-4 py-3 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary-dark transition-all"
                       >
