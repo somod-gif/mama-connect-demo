@@ -179,13 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setStoredUser(user);
         setState({ user, isAuthenticated: true, isLoading: false });
 
-        if (user.role === "ADMIN") {
-          toast.success("Welcome, Admin");
-          router.push("/admin");
-        } else {
-          toast.success("Welcome back");
-          router.push("/dashboard");
-        }
+        toast.success(user.role === "ADMIN" ? "Welcome, Admin" : "Welcome back");
       } catch (error) {
         setState((prev) => ({ ...prev, isLoading: false }));
         const message = extractErrorMessage(error);

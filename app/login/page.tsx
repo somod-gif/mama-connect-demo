@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import { Eye, EyeOff, Loader2, HeartPulse } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { Eye, EyeOff, Loader2, HeartPulse, CheckCircle2, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
@@ -19,8 +20,11 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const { login, isLoading } = useAuth();
+  const [redirecting, setRedirecting] = useState(false);
+  const [redirectTarget, setRedirectTarget] = useState("/dashboard");
+  const { login, isLoading, user, isAuthenticated } = useAuth();
 
   const {
     register,
@@ -31,8 +35,22 @@ export default function LoginPage() {
     defaultValues: { identifier: "", password: "" },
   });
 
+  useEffect(() => {
+    if (redirecting && isAuthenticated && user) {
+      const target = user.role === "ADMIN" ? "/admin" : "/dashboard";
+      setRedirectTarget(target);
+      const timer = setTimeout(() => router.replace(target), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [redirecting, isAuthenticated, user, router]);
+
   const onSubmit = async (data: LoginFormData) => {
-    await login(data);
+    try {
+      await login(data);
+      setRedirecting(true);
+    } catch {
+      // error toast is handled by AuthContext
+    }
   };
 
   const isPending = isLoading || isSubmitting;
@@ -168,6 +186,40 @@ export default function LoginPage() {
           </p>
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {redirecting && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-primary/95 via-primary-dark/95 to-background/95 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 20 }}
+              className="flex flex-col items-center gap-4"
+            >
+              <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center">
+                <CheckCircle2 className="w-10 h-10 text-white" />
+              </div>
+              <p className="text-xl font-bold text-white tracking-tight">
+                Login Successful
+              </p>
+              <p className="text-sm text-white/70">
+                Redirecting to {redirectTarget === "/admin" ? "Admin" : "CHEW"} Dashboard
+              </p>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+              >
+                <Sparkles className="w-5 h-5 text-white/50" />
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

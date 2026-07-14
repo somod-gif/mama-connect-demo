@@ -13,45 +13,25 @@ import type {
 } from "@/types/admin";
 import type { TokenResponse } from "@/types/auth";
 
-function unwrapArray<T>(response: unknown, key: string): T[] {
-  if (Array.isArray(response)) return response as T[];
-  if (response && typeof response === "object") {
-    const obj = response as Record<string, unknown>;
-    if (Array.isArray(obj[key])) return obj[key] as T[];
-    if (Array.isArray(obj.data)) return obj.data as T[];
-    if (Array.isArray(obj.results)) return obj.results as T[];
-  }
-  return [];
-}
-
 class AdminService {
   async login(data: { email: string; password: string }): Promise<TokenResponse> {
-    const response = await api.post<TokenResponse>("/admin/login", data);
+    const response = await api.post<TokenResponse>("/auth/login", data);
     return response.data;
-  }
-
-  async refresh(refreshToken: string): Promise<TokenResponse> {
-    const response = await api.post<TokenResponse>("/auth/refresh", { refreshToken });
-    return response.data;
-  }
-
-  async logout(refreshToken: string): Promise<void> {
-    await api.post("/auth/logout", { refreshToken });
   }
 
   async getDashboard(): Promise<AdminDashboardData> {
-    const response = await api.get<AdminDashboardData>("/admin/dashboard");
-    return response.data;
+    const response = await api.get("/admin/dashboard");
+    return (response.data as { data: AdminDashboardData }).data;
   }
 
   async getUsers(params?: { role?: string; status?: string }): Promise<AdminUser[]> {
     const response = await api.get("/admin/users", { params });
-    return unwrapArray<AdminUser>(response.data, "users");
+    return (response.data as { data: AdminUser[] }).data;
   }
 
   async getUser(id: string): Promise<AdminUser> {
-    const response = await api.get<AdminUser>(`/admin/users/${id}`);
-    return response.data;
+    const response = await api.get(`/admin/users/${id}`);
+    return (response.data as { data: AdminUser }).data;
   }
 
   async updateUser(id: string, data: UpdateUserRequest): Promise<void> {
@@ -68,12 +48,7 @@ class AdminService {
 
   async getPatients(params?: { verificationStatus?: string; lga?: string; assignedCHEW?: string }): Promise<AdminPatient[]> {
     const response = await api.get("/admin/patients", { params });
-    return unwrapArray<AdminPatient>(response.data, "patients");
-  }
-
-  async getPatient(id: string): Promise<AdminPatient> {
-    const response = await api.get<AdminPatient>(`/admin/patients/${id}`);
-    return response.data;
+    return (response.data as { data: AdminPatient[] }).data;
   }
 
   async updatePatient(id: string, data: UpdatePatientRequest): Promise<void> {
@@ -90,7 +65,7 @@ class AdminService {
 
   async getDocuments(): Promise<AdminDocument[]> {
     const response = await api.get("/admin/documents");
-    return unwrapArray<AdminDocument>(response.data, "documents");
+    return (response.data as { data: AdminDocument[] }).data;
   }
 
   async verifyDocument(id: string, data: VerifyDocumentRequest): Promise<void> {

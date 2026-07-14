@@ -19,49 +19,56 @@ export interface AdminActivityItem {
   timestamp: string;
 }
 
+export interface LgaRef {
+  id: string;
+  name: string;
+  state?: { id: string; name: string };
+}
+
 export interface AdminUser {
   id: string;
-  firstName?: string;
-  lastName?: string;
-  name?: string;
-  email: string;
-  phone: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
   role: string;
   verificationStatus: VerificationStatus;
-  lga?: string | { id: string; name: string; state?: { id: string; name: string } };
-  state?: string;
+  lga: LgaRef | null;
+  lgaId?: string | null;
   createdAt: string;
-  primaryHealthcareCentre?: string;
-  preferredLanguage?: string;
+  updatedAt: string;
 }
 
 export interface AdminPatient {
   id: string;
-  maternalId: string;
-  firstName: string;
-  lastName: string;
-  phone?: string;
-  assignedCHEW: string;
-  assignedChewId?: string;
+  userId: string;
+  name: string;
+  maternalId: string | null;
+  phone: string | null;
+  age: number | null;
+  address: string | null;
+  state: { id: string; name: string } | null;
+  lga: { id: string; name: string } | null;
+  stateId?: string;
+  lgaId?: string;
+  wardId?: string | null;
+  chewId: string | null;
+  preferredChannel: string | null;
+  preferredLanguage: string | null;
   verificationStatus: VerificationStatus;
-  pregnancyStatus?: string;
-  edd?: string;
-  state: string;
-  lga: string;
-  age?: number;
-  address?: string;
-  preferredLanguage?: string;
-  preferredChannel?: string;
+  chew: { id: string; name: string } | null;
+  createdAt: string;
+  updatedAt: string;
+  pregnancies: unknown[];
 }
 
 export interface AdminDocument {
   id: string;
+  userId?: string;
   chewName: string;
   documentType: string;
   uploadDate: string;
   verificationStatus: VerificationStatus;
   previewUrl?: string;
-  userId?: string;
   fileName?: string;
 }
 
@@ -87,8 +94,7 @@ export interface UpdateUserRequest {
 }
 
 export interface UpdatePatientRequest {
-  firstName?: string;
-  lastName?: string;
+  name?: string;
   age?: number;
   state?: string;
   lga?: string;

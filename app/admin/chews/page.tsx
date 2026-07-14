@@ -2,13 +2,13 @@
 
 import { useState, useCallback, memo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import {
-  Loader2, Search, CheckCircle, XCircle, Eye, Shield, Mail, Phone,
-  MapPin, Calendar, X, Trash2, UserCog, LogOut, Save,
+  Loader2, Search, CheckCircle, XCircle, Eye, Shield, Phone,
+  MapPin, Calendar, X, Trash2, Save,
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminService } from "@/services/admin.service";
-import { useAuth } from "@/hooks/useAuth";
 import { showApiError } from "@/lib/error-handler";
 import type { AdminUser } from "@/types/admin";
 
@@ -23,7 +23,7 @@ function UserDrawer({
   onClose: () => void;
 }) {
   const queryClient = useQueryClient();
-  const [name, setName] = useState(`${user.firstName || ""} ${user.lastName || ""}`.trim() || user.name || "");
+  const [name, setName] = useState(user.name || "");
   const [role, setRole] = useState(user.role);
 
   const updateMutation = useMutation({
@@ -60,12 +60,12 @@ function UserDrawer({
   });
 
   const handleUpdate = () => {
-    if (name !== `${user.firstName || ""} ${user.lastName || ""}`.trim() || role !== user.role) {
+    if (name !== (user.name || "") || role !== user.role) {
       updateMutation.mutate({ name, role });
     }
   };
 
-  const initials = (user.firstName?.charAt(0) || "") + (user.lastName?.charAt(0) || "") || user.name?.charAt(0) || "U";
+  const initials = (user.name?.split(" ")[0]?.charAt(0) || "") + (user.name?.split(" ")[1]?.charAt(0) || "") || "U";
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
@@ -88,7 +88,7 @@ function UserDrawer({
             </div>
             <div className="min-w-0">
               <p className="text-base font-semibold text-foreground truncate">
-                {user.firstName} {user.lastName}
+                {user.name}
               </p>
               <p className="text-sm text-muted-foreground">{user.email}</p>
             </div>
@@ -98,8 +98,8 @@ function UserDrawer({
             {[
               { icon: Phone, label: "Phone", value: user.phone || "—" },
               { icon: Shield, label: "Role", value: user.role },
-              { icon: MapPin, label: "State", value: typeof user.state === "string" ? user.state : "—" },
-              { icon: MapPin, label: "LGA", value: typeof user.lga === "string" ? user.lga : (user.lga as { name?: string })?.name || "—" },
+              { icon: MapPin, label: "State", value: user.lga?.state?.name || "—" },
+              { icon: MapPin, label: "LGA", value: user.lga?.name || "—" },
               { icon: Calendar, label: "Registered", value: new Date(user.createdAt).toLocaleDateString() },
             ].map((field) => (
               <div key={field.label} className="flex items-start gap-2.5 p-3 rounded-xl bg-background-soft">
@@ -195,17 +195,21 @@ const statusBadge = (status: string) => {
 };
 
 function UserCard({ user, onSelect }: { user: AdminUser; onSelect: (u: AdminUser) => void }) {
+  const router = useRouter();
   return (
-    <div className="bg-card border border-border rounded-xl p-4 space-y-3 hover:shadow-sm transition-shadow">
+    <div
+      onClick={() => router.push(`/admin/chews/${user.id}`)}
+      className="bg-card border border-border rounded-xl p-4 space-y-3 hover:shadow-sm transition-shadow cursor-pointer"
+    >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center flex-shrink-0">
             <span className="text-sm font-bold text-white">
-              {(user.firstName?.charAt(0) || "") + (user.lastName?.charAt(0) || "")}
+              {(user.name?.charAt(0) || "") + (user.name?.split(" ")[1]?.charAt(0) || "")}
             </span>
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground truncate">{user.firstName} {user.lastName}</p>
+            <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
             <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
           </div>
         </div>
@@ -215,10 +219,10 @@ function UserCard({ user, onSelect }: { user: AdminUser; onSelect: (u: AdminUser
         <Phone className="w-3 h-3" /> {user.phone || "—"}
       </div>
       <button
-        onClick={() => onSelect(user)}
+        onClick={(e) => { e.stopPropagation(); onSelect(user); }}
         className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-primary bg-primary-light rounded-lg hover:bg-primary/20 transition-all"
       >
-        <Eye className="w-3.5 h-3.5" /> View Details
+        <Eye className="w-3.5 h-3.5" /> Quick View
       </button>
     </div>
   );
@@ -242,9 +246,10 @@ function TableSkeleton() {
 }
 
 export default function AdminChewsPage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
+  const [roleFilter, setRoleFilter] = useState("CHEW");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
 
@@ -257,10 +262,8 @@ export default function AdminChewsPage() {
     if (!search.trim()) return true;
     const q = search.toLowerCase();
     return (
-      (u.firstName?.toLowerCase() || "").includes(q) ||
-      (u.lastName?.toLowerCase() || "").includes(q) ||
       (u.name?.toLowerCase() || "").includes(q) ||
-      u.email.toLowerCase().includes(q) ||
+      (u.email || "").toLowerCase().includes(q) ||
       (u.phone || "").includes(q)
     );
   });
@@ -268,8 +271,8 @@ export default function AdminChewsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">User Management</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">{users.length} registered users</p>
+        <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">CHEW Management</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">{users.length} registered CHEWs</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -277,7 +280,7 @@ export default function AdminChewsPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search users..."
+            placeholder="Search CHEWs..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -313,43 +316,37 @@ export default function AdminChewsPage() {
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Role</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Status</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Created</th>
-                <th className="text-right px-4 py-3 font-semibold text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {isLoading ? (
-                <tr><td colSpan={7}><TableSkeleton /></td></tr>
+                <tr><td colSpan={6}><TableSkeleton /></td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-12 text-sm text-muted-foreground">No users found</td></tr>
+                <tr><td colSpan={6} className="text-center py-12 text-sm text-muted-foreground">No users found</td></tr>
               ) : (
                 filtered.map((user) => (
-                  <tr key={user.id} className="hover:bg-background-soft transition-colors">
-                    <td className="px-4 py-3">
+                  <tr
+                    key={user.id}
+                    onClick={() => router.push(`/admin/chews/${user.id}`)}
+                    className="hover:bg-background-soft transition-colors cursor-pointer"
+                  >
+                    <td className="px-4 py-3 max-w-[200px]">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center flex-shrink-0">
                           <span className="text-xs font-bold text-white">
-                            {(user.firstName?.charAt(0) || "") + (user.lastName?.charAt(0) || "")}
+                            {(user.name?.charAt(0) || "") + (user.name?.split(" ")[1]?.charAt(0) || "")}
                           </span>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">{user.firstName} {user.lastName}</p>
+                          <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">{user.email}</td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">{user.phone || "—"}</td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">{user.role}</td>
-                    <td className="px-4 py-3">{statusBadge(user.verificationStatus)}</td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">{new Date(user.createdAt).toLocaleDateString()}</td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => setSelectedUser(user)}
-                        className="p-2 rounded-lg hover:bg-background-soft text-muted-foreground hover:text-foreground transition-colors"
-                        title="View details"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground truncate max-w-[200px]">{user.email}</td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">{user.phone || "—"}</td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">{user.role}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">{statusBadge(user.verificationStatus)}</td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">{new Date(user.createdAt).toLocaleDateString()}</td>
                   </tr>
                 ))
               )}

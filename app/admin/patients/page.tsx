@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Search, CheckCircle, XCircle, Clock, Edit3, UserCog } from "lucide-react";
+import { Loader2, Search, CheckCircle, XCircle, Clock, Edit3 } from "lucide-react";
 import { toast } from "sonner";
 import { adminService } from "@/services/admin.service";
 import { showApiError } from "@/lib/error-handler";
@@ -16,11 +16,10 @@ function EditPatientDialog({
   onClose: () => void;
 }) {
   const queryClient = useQueryClient();
-  const [firstName, setFirstName] = useState(patient.firstName || "");
-  const [lastName, setLastName] = useState(patient.lastName || "");
-  const [age, setAge] = useState(String(patient.age || ""));
-  const [state, setState] = useState(patient.state || "");
-  const [lga, setLga] = useState(patient.lga || "");
+  const [name, setName] = useState(patient.name || "");
+  const [age, setAge] = useState(String(patient.age ?? ""));
+  const [state, setState] = useState(patient.state?.name || "");
+  const [lga, setLga] = useState(patient.lga?.name || "");
   const [address, setAddress] = useState(patient.address || "");
   const [preferredLanguage, setPreferredLanguage] = useState(patient.preferredLanguage || "");
   const [preferredChannel, setPreferredChannel] = useState(patient.preferredChannel || "");
@@ -28,7 +27,7 @@ function EditPatientDialog({
   const updateMutation = useMutation({
     mutationFn: () =>
       adminService.updatePatient(patient.id, {
-        firstName, lastName,
+        name,
         age: age ? Number(age) : undefined,
         state, lga, address, preferredLanguage, preferredChannel,
       }),
@@ -48,15 +47,9 @@ function EditPatientDialog({
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-background-soft"><XCircle className="w-5 h-5" /></button>
         </div>
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">First Name</label>
-              <input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">Last Name</label>
-              <input value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-            </div>
+          <div>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Name</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -141,7 +134,7 @@ function VerifyPatientDialog({
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-background-soft"><XCircle className="w-5 h-5" /></button>
         </div>
         <p className="text-sm text-muted-foreground mb-4">
-          Assign <strong>{patient.firstName} {patient.lastName}</strong> to a CHEW to verify.
+          Assign <strong>{patient.name}</strong> to a CHEW to verify.
         </p>
         <div className="space-y-4">
           <div>
@@ -154,7 +147,7 @@ function VerifyPatientDialog({
               <option value="">Select CHEW</option>
               {chews.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.firstName} {c.lastName} — {c.email}
+                  {c.name} — {c.email}
                 </option>
               ))}
             </select>
@@ -192,14 +185,14 @@ function PatientCard({
     <div className="bg-card border border-border rounded-xl p-4 space-y-3">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-semibold text-foreground">{patient.firstName} {patient.lastName}</p>
-          <p className="text-[11px] text-muted-foreground">{patient.maternalId}</p>
+          <p className="text-sm font-semibold text-foreground">{patient.name}</p>
+          <p className="text-[11px] text-muted-foreground">{patient.maternalId || "—"}</p>
         </div>
         {statusBadge(patient.verificationStatus)}
       </div>
       <div className="text-[11px] text-muted-foreground space-y-0.5">
-        <p>CHEW: {patient.assignedCHEW || "Unassigned"}</p>
-        <p>{patient.state} · {patient.lga}</p>
+        <p>CHEW: {patient.chew?.name || "Unassigned"}</p>
+        <p>{patient.state?.name || "—"} · {patient.lga?.name || "—"}</p>
       </div>
       <div className="flex gap-2">
         <button onClick={() => onEdit(patient)} className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold text-primary bg-primary-light rounded-lg hover:bg-primary/20 transition-all">
@@ -246,10 +239,9 @@ export default function AdminPatientsPage() {
     if (!search.trim()) return true;
     const q = search.toLowerCase();
     return (
-      (p.firstName?.toLowerCase() || "").includes(q) ||
-      (p.lastName?.toLowerCase() || "").includes(q) ||
-      p.maternalId.toLowerCase().includes(q) ||
-      (p.assignedCHEW || "").toLowerCase().includes(q)
+      (p.name?.toLowerCase() || "").includes(q) ||
+      (p.maternalId || "").toLowerCase().includes(q) ||
+      (p.chew?.name || "").toLowerCase().includes(q)
     );
   });
 
@@ -294,12 +286,12 @@ export default function AdminPatientsPage() {
               ) : (
                 filtered.map((patient) => (
                   <tr key={patient.id} className="hover:bg-background-soft transition-colors">
-                    <td className="px-4 py-3 text-sm font-medium text-foreground">{patient.maternalId}</td>
-                    <td className="px-4 py-3 text-sm text-foreground">{patient.firstName} {patient.lastName}</td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">{patient.assignedCHEW || "—"}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-foreground">{patient.maternalId || "—"}</td>
+                    <td className="px-4 py-3 text-sm text-foreground">{patient.name}</td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground">{patient.chew?.name || "—"}</td>
                     <td className="px-4 py-3">{statusBadge(patient.verificationStatus)}</td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">{patient.state || "—"}</td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">{patient.lga || "—"}</td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground">{patient.state?.name || "—"}</td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground">{patient.lga?.name || "—"}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => setEditPatient(patient)} className="p-2 rounded-lg hover:bg-background-soft text-muted-foreground hover:text-foreground transition-colors" title="Edit">

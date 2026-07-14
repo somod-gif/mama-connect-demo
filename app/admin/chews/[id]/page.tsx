@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Mail, Phone, MapPin, Building2, Globe, Shield, Calendar, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
+import { Loader2, Mail, Phone, MapPin, Globe, Shield, Calendar, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { adminService } from "@/services/admin.service";
 import { showApiError } from "@/lib/error-handler";
@@ -20,7 +20,7 @@ function DetailSkeleton() {
         </div>
       </div>
       <div className="grid grid-cols-2 gap-6">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+        {[1, 2, 3, 4, 5, 6].map((i) => (
           <div key={i} className="p-4 rounded-xl bg-background-soft">
             <div className="w-20 h-3 rounded bg-background-soft/60 mb-2" />
             <div className="w-32 h-4 rounded bg-background-soft/80" />
@@ -53,16 +53,6 @@ export default function AdminChewDetailPage() {
     onError: (err) => showApiError(err),
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: () => adminService.deleteUser(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
-      queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
-      toast.success("User deleted");
-    },
-    onError: (err) => showApiError(err),
-  });
-
   if (isLoading) {
     return (
       <div className="space-y-6 max-w-3xl">
@@ -71,7 +61,7 @@ export default function AdminChewDetailPage() {
             <ArrowLeft className="w-5 h-5 text-muted-foreground" />
           </Link>
           <div>
-            <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">CHEW Profile</h1>
+            <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">User Profile</h1>
             <p className="text-sm text-muted-foreground mt-0.5">Loading...</p>
           </div>
         </div>
@@ -89,7 +79,7 @@ export default function AdminChewDetailPage() {
     );
   }
 
-  const initials = (user.firstName?.charAt(0) || "") + (user.lastName?.charAt(0) || "");
+  const initials = (user.name?.split(" ")[0]?.charAt(0) || "") + (user.name?.split(" ")[1]?.charAt(0) || "") || "U";
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -109,7 +99,7 @@ export default function AdminChewDetailPage() {
             <span className="text-xl font-bold text-white">{initials}</span>
           </div>
           <div>
-            <p className="text-lg font-semibold text-foreground">{user.firstName} {user.lastName}</p>
+            <p className="text-lg font-semibold text-foreground">{user.name}</p>
             <p className="text-sm text-muted-foreground">{user.email}</p>
             <div className="mt-1">
               {user.verificationStatus === "VERIFIED" ? (
@@ -131,12 +121,10 @@ export default function AdminChewDetailPage() {
 
         <div className="grid sm:grid-cols-2 gap-6">
           {[
-            { icon: Mail, label: "Email", value: user.email },
+            { icon: Mail, label: "Email", value: user.email || "—" },
             { icon: Phone, label: "Phone", value: user.phone || "—" },
-            { icon: MapPin, label: "State", value: typeof user.state === "string" ? user.state : "—" },
-            { icon: MapPin, label: "LGA", value: typeof user.lga === "string" ? user.lga : (user.lga as { name?: string })?.name || "—" },
-            { icon: Building2, label: "Healthcare Centre", value: user.primaryHealthcareCentre || "—" },
-            { icon: Globe, label: "Preferred Language", value: user.preferredLanguage || "—" },
+            { icon: MapPin, label: "State", value: user.lga?.state?.name || "—" },
+            { icon: MapPin, label: "LGA", value: user.lga?.name || "—" },
             { icon: Calendar, label: "Created", value: new Date(user.createdAt).toLocaleDateString() },
             { icon: Shield, label: "Role", value: user.role || "CHEW" },
           ].map((field) => (
