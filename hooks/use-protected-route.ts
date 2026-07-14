@@ -11,7 +11,6 @@ export function useProtectedRoute() {
   useEffect(() => {
     if (!isLoading) {
       if (!isAuthenticated) router.replace("/login");
-      else if (user?.verificationStatus === "PENDING") router.replace("/pending-approval");
       else if (user?.role === "ADMIN") router.replace("/admin");
     }
   }, [isAuthenticated, isLoading, user, router]);

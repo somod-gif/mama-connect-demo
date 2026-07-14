@@ -1,10 +1,13 @@
 "use client";
 
-import { HeartPulse, ChevronDown } from "lucide-react";
+import { HeartPulse, ChevronDown, Smartphone, MessageSquare } from "lucide-react";
 import { FadeInUp, FadeInLeft } from "@/app/components/animations";
 import { Button } from "@/app/components/ui/Button";
 import { WhatsAppButton } from "@/app/components/ui/WhatsAppButton";
-import { WHATSAPP_MESSAGES, getWhatsAppUrl } from "@/lib/constants";
+import { WHATSAPP_NUMBER, WHATSAPP_MESSAGES, getWhatsAppUrl } from "@/lib/constants";
+
+const SMS_NUMBER = WHATSAPP_NUMBER;
+const USSD_CODE = "*347*123#";
 
 export default function MotherHero() {
   const pregnantUrl = getWhatsAppUrl(WHATSAPP_MESSAGES.pregnant);
@@ -59,8 +62,26 @@ export default function MotherHero() {
                   </a>
                 </Button>
               </div>
+
+              <div className="flex flex-wrap items-center gap-3 mt-4">
+                <a
+                  href={`sms:${SMS_NUMBER}`}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl border border-border text-foreground hover:border-primary/30 hover:bg-primary-light/50 transition-all"
+                >
+                  <MessageSquare className="w-4 h-4 text-primary" />
+                  Send SMS
+                </a>
+                <a
+                  href={`tel:${USSD_CODE}`}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl border border-border text-foreground hover:border-primary/30 hover:bg-primary-light/50 transition-all"
+                >
+                  <Smartphone className="w-4 h-4 text-primary" />
+                  Dial {USSD_CODE}
+                </a>
+              </div>
+
               <p className="text-xs text-muted-foreground mt-3">
-                Opens WhatsApp. Free to use. Available in 5 languages.
+                Free to use. Available in 5 languages.
               </p>
             </FadeInUp>
           </div>
@@ -79,7 +100,7 @@ export default function MotherHero() {
 
                 <div className="space-y-4">
                   {[
-                    { step: "1", text: "Send us a message on WhatsApp" },
+                    { step: "1", text: "Send us a message on WhatsApp, SMS, or USSD" },
                     { step: "2", text: "Register in your preferred language" },
                     { step: "3", text: "Receive weekly health check-ins" },
                     { step: "4", text: "Get nutrition and vaccination support" },

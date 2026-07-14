@@ -79,6 +79,12 @@ export function clearTokens(): void {
   accessToken = null;
   refreshTokenValue = null;
   clearRefreshTokenFromStorage();
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.removeItem("mama_access_token");
+      localStorage.removeItem("mama_user");
+    } catch {}
+  }
 }
 
 const api: AxiosInstance = axios.create({

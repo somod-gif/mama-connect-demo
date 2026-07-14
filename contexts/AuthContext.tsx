@@ -162,29 +162,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRefreshToken(response.refreshToken);
         syncAuthToCookie();
 
-        const user = parseUserFromToken();
-        const verificationStatus = (response.user?.verificationStatus as VerificationStatus) || "PENDING";
-        const role = (response.user?.role as UserRole) || "CHEW";
-        if (user) {
-          user.verificationStatus = verificationStatus;
-          user.role = role;
-          setStoredUser(user);
-          setState({ user, isAuthenticated: true, isLoading: false });
-        } else {
-          setState({ user: null, isAuthenticated: false, isLoading: false });
-          toast.error("Authentication failed: invalid token");
-          return;
-        }
+        const profile = await authService.getMe();
+        const lgaObj = profile.lga && typeof profile.lga === "object" ? profile.lga as { id: string; name: string; state: { id: string; name: string } } : null;
+        const user: User = {
+          id: profile.id,
+          name: profile.name,
+          firstName: profile.name?.split(" ")[0] || profile.firstName || "",
+          lastName: profile.name?.split(" ").slice(1).join(" ") || profile.lastName || "",
+          email: profile.email,
+          phone: profile.phone || "",
+          role: profile.role as UserRole,
+          verificationStatus: (profile.verificationStatus || "PENDING") as VerificationStatus,
+          state: lgaObj?.state?.name || (typeof profile.lga === "string" ? profile.lga : undefined),
+          lga: lgaObj?.name || (typeof profile.lga === "string" ? profile.lga : undefined),
+        };
+        setStoredUser(user);
+        setState({ user, isAuthenticated: true, isLoading: false });
 
-        if (role === "ADMIN") {
+        if (user.role === "ADMIN") {
           toast.success("Welcome, Admin");
           router.push("/admin");
-        } else if (verificationStatus === "PENDING") {
-          toast.info("Your account is pending verification");
-          router.push("/pending-approval");
-        } else if (verificationStatus === "REJECTED") {
-          toast.error("Your account has been rejected");
-          router.push("/pending-approval");
         } else {
           toast.success("Welcome back");
           router.push("/dashboard");
@@ -208,6 +205,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRefreshToken(response.refreshToken);
         syncAuthToCookie();
 
+        sessionStorage.setItem("mama_pending_profile", JSON.stringify({
+          stateId: data.stateId,
+          lgaId: data.lgaId,
+          primaryHealthcareCentre: data.primaryHealthcareCentre,
+          preferredLanguage: data.preferredLanguage,
+        }));
+
         const user = parseUserFromToken();
         if (user) {
           user.verificationStatus = "PENDING";
@@ -218,7 +222,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           toast.error("Registration failed: invalid response");
           return;
         }
-        router.push("/pending-approval");
+        router.push("/dashboard");
       } catch (error) {
         setState((prev) => ({ ...prev, isLoading: false }));
         const message = extractErrorMessage(error);

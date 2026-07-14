@@ -1,11 +1,14 @@
 "use client";
 
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Smartphone, MessageSquare } from "lucide-react";
 import { FadeInUp } from "@/app/components/animations";
 import { Container } from "@/app/components/ui/Container";
 import { WhatsAppButton } from "@/app/components/ui/WhatsAppButton";
 import { ChannelBadge } from "@/app/components/ui/ChannelBadge";
-import { CHANNELS, WHATSAPP_MESSAGES, getWhatsAppUrl } from "@/lib/constants";
+import { WHATSAPP_NUMBER, CHANNELS, WHATSAPP_MESSAGES, getWhatsAppUrl } from "@/lib/constants";
+
+const SMS_NUMBER = WHATSAPP_NUMBER;
+const USSD_CODE = "*347*123#";
 
 export default function WhatsAppSection() {
   const url = getWhatsAppUrl(WHATSAPP_MESSAGES.pregnant);
@@ -23,8 +26,8 @@ export default function WhatsAppSection() {
           </h2>
 
           <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto leading-relaxed">
-            Click below to send us a message on WhatsApp. A caring team member
-            will help you register in your preferred language.
+            Register through any channel that works for you. A caring team member
+            will help you in your preferred language.
           </p>
 
           <div className="flex flex-col items-center gap-6">
@@ -33,6 +36,23 @@ export default function WhatsAppSection() {
               size="xl"
               label="Register on WhatsApp"
             />
+
+            <div className="flex flex-wrap justify-center gap-3">
+              <a
+                href={`sms:${SMS_NUMBER}`}
+                className="inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold rounded-xl border border-border text-foreground hover:border-primary/30 hover:bg-primary-light/50 transition-all"
+              >
+                <MessageSquare className="w-4 h-4 text-primary" />
+                Send SMS
+              </a>
+              <a
+                href={`tel:${USSD_CODE}`}
+                className="inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold rounded-xl border border-border text-foreground hover:border-primary/30 hover:bg-primary-light/50 transition-all"
+              >
+                <Smartphone className="w-4 h-4 text-primary" />
+                Dial {USSD_CODE}
+              </a>
+            </div>
 
             <div className="flex flex-wrap justify-center gap-2">
               {CHANNELS.map((channel) => (

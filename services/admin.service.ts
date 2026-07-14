@@ -1,6 +1,28 @@
 import { api } from "./api";
-import type { AdminDashboardData, AdminChewUser, AdminChewDetail, AdminPatient, AdminDocument, VerifyRequest } from "@/types/admin";
+import type {
+  AdminDashboardData,
+  AdminUser,
+  AdminPatient,
+  AdminDocument,
+  VerifyRequest,
+  VerifyPatientRequest,
+  CreatePatientFromUserRequest,
+  UpdateUserRequest,
+  UpdatePatientRequest,
+  VerifyDocumentRequest,
+} from "@/types/admin";
 import type { TokenResponse } from "@/types/auth";
+
+function unwrapArray<T>(response: unknown, key: string): T[] {
+  if (Array.isArray(response)) return response as T[];
+  if (response && typeof response === "object") {
+    const obj = response as Record<string, unknown>;
+    if (Array.isArray(obj[key])) return obj[key] as T[];
+    if (Array.isArray(obj.data)) return obj.data as T[];
+    if (Array.isArray(obj.results)) return obj.results as T[];
+  }
+  return [];
+}
 
 class AdminService {
   async login(data: { email: string; password: string }): Promise<TokenResponse> {
@@ -22,35 +44,56 @@ class AdminService {
     return response.data;
   }
 
-  async getCHEWs(): Promise<AdminChewUser[]> {
-    const response = await api.get<AdminChewUser[]>("/admin/users");
+  async getUsers(params?: { role?: string; status?: string }): Promise<AdminUser[]> {
+    const response = await api.get("/admin/users", { params });
+    return unwrapArray<AdminUser>(response.data, "users");
+  }
+
+  async getUser(id: string): Promise<AdminUser> {
+    const response = await api.get<AdminUser>(`/admin/users/${id}`);
     return response.data;
   }
 
-  async getCHEWDetail(id: string): Promise<AdminChewDetail> {
-    const response = await api.get<AdminChewDetail>(`/admin/users/${id}`);
-    return response.data;
+  async updateUser(id: string, data: UpdateUserRequest): Promise<void> {
+    await api.patch(`/admin/users/${id}`, data);
   }
 
-  async verifyCHEW(id: string, data: VerifyRequest): Promise<void> {
+  async deleteUser(id: string): Promise<void> {
+    await api.delete(`/admin/users/${id}`);
+  }
+
+  async verifyUser(id: string, data: VerifyRequest): Promise<void> {
     await api.post(`/admin/users/${id}/verify`, data);
   }
 
-  async getPatients(): Promise<AdminPatient[]> {
-    const response = await api.get<AdminPatient[]>("/admin/patients");
+  async getPatients(params?: { verificationStatus?: string; lga?: string; assignedCHEW?: string }): Promise<AdminPatient[]> {
+    const response = await api.get("/admin/patients", { params });
+    return unwrapArray<AdminPatient>(response.data, "patients");
+  }
+
+  async getPatient(id: string): Promise<AdminPatient> {
+    const response = await api.get<AdminPatient>(`/admin/patients/${id}`);
     return response.data;
   }
 
-  async verifyPatient(id: string): Promise<void> {
-    await api.post(`/admin/patients/${id}/verify`);
+  async updatePatient(id: string, data: UpdatePatientRequest): Promise<void> {
+    await api.patch(`/admin/patients/${id}`, data);
+  }
+
+  async verifyPatient(id: string, data: VerifyPatientRequest): Promise<void> {
+    await api.post(`/admin/patients/${id}/verify`, data);
+  }
+
+  async createPatientFromUser(id: string, data: CreatePatientFromUserRequest): Promise<void> {
+    await api.post(`/admin/users/${id}/verify-patient`, data);
   }
 
   async getDocuments(): Promise<AdminDocument[]> {
-    const response = await api.get<AdminDocument[]>("/admin/documents");
-    return response.data;
+    const response = await api.get("/admin/documents");
+    return unwrapArray<AdminDocument>(response.data, "documents");
   }
 
-  async verifyDocument(id: string, data: VerifyRequest): Promise<void> {
+  async verifyDocument(id: string, data: VerifyDocumentRequest): Promise<void> {
     await api.post(`/admin/documents/${id}/verify`, data);
   }
 }

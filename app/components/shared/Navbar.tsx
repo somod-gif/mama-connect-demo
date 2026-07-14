@@ -9,10 +9,25 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 
+interface NavItem {
+  label: string;
+  href: string;
+}
+
+const navItems: NavItem[] = [
+  { label: "For Mothers", href: "/mothers" },
+  { label: "For CHEWs", href: "/chew" },
+];
+
+function isActive(pathname: string, href: string): boolean {
+  if (pathname === href) return true;
+  if (href !== "/" && pathname.startsWith(href)) return true;
+  return false;
+}
+
 function isDashboardRoute(pathname: string): boolean {
   return pathname.startsWith("/dashboard") || pathname.startsWith("/admin")
-    || pathname === "/login" || pathname === "/register"
-    || pathname.startsWith("/pending-approval");
+    || pathname === "/login" || pathname === "/register";
 }
 
 export function Navbar() {
@@ -39,24 +54,49 @@ export function Navbar() {
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
+        <div className="flex items-center justify-between h-14 md:h-16">
+          <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
             <div className="relative">
               <Image
                 src="/logo.png"
                 alt="MamaConnect"
-                width={48}
-                height={48}
+                width={40}
+                height={40}
                 priority
                 className="rounded-xl transition-all duration-500 group-hover:scale-105"
               />
             </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-extrabold text-foreground tracking-tight leading-tight">
-                Mama<span className="text-primary">Connect</span>
-              </span>
-            </div>
+            <span className="text-lg md:text-xl font-extrabold text-foreground tracking-tight leading-tight">
+              Mama<span className="text-primary">Connect</span>
+            </span>
           </Link>
+
+          <nav className="hidden lg:flex items-center gap-1">
+            {navItems.map((item) => {
+              const active = isActive(pathname, item.href);
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={cn(
+                    "relative px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200",
+                    active
+                      ? "text-primary bg-primary-light/60"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/60"
+                  )}
+                >
+                  {item.label}
+                  {active && (
+                    <motion.span
+                      layoutId="activeNav"
+                      className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-primary"
+                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
 
           <div className="hidden lg:flex items-center gap-3">
             {isAuthenticated ? (
@@ -112,8 +152,24 @@ export function Navbar() {
               transition={{ duration: 0.25, ease: "easeInOut" }}
               className="lg:hidden border-t border-border bg-white/95 backdrop-blur-xl overflow-hidden shadow-lg"
             >
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-                <div className="space-y-2">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-1">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      "block px-4 py-3 text-sm font-semibold rounded-xl transition-colors",
+                      isActive(pathname, item.href)
+                        ? "text-primary bg-primary-light/50"
+                        : "text-muted-foreground hover:bg-primary-light/30 hover:text-primary"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+
+                <div className="pt-3 space-y-2 border-t border-border mt-3">
                   {isAuthenticated ? (
                     <Link
                       href="/dashboard"

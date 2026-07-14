@@ -7,6 +7,7 @@ import { ArrowLeft, Phone, MapPin, Globe, Calendar, Shield, Activity, AlertTrian
 import { toast } from "sonner";
 import { patientsService } from "@/lib/services/patients.service";
 import { FadeInUp } from "@/app/components/animations";
+import { RequireVerified } from "@/app/components/shared/VerificationGate";
 
 const riskStyles: Record<string, string> = {
   high: "bg-red-50 text-red-700 border-red-200",
@@ -15,6 +16,14 @@ const riskStyles: Record<string, string> = {
 };
 
 export default function MotherProfilePage() {
+  return (
+    <RequireVerified>
+      <MotherProfileContent />
+    </RequireVerified>
+  );
+}
+
+function MotherProfileContent() {
   const params = useParams();
   const id = params.id as string;
 

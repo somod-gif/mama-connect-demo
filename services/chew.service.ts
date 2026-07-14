@@ -2,6 +2,7 @@ import { api } from "./api";
 
 export interface ChewProfile {
   id: string;
+  name?: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -23,12 +24,16 @@ export interface UpdateProfileRequest {
 
 class ChewService {
   async getProfile(): Promise<ChewProfile> {
-    const response = await api.get<ChewProfile>("/users/me");
+    const response = await api.get<ChewProfile>("/auth/me");
     return response.data;
   }
 
   async updateProfile(data: UpdateProfileRequest): Promise<void> {
-    await api.patch("/users/profile", data);
+    await api.patch("/auth/me", data);
+  }
+
+  async changePassword(data: { currentPassword: string; newPassword: string }): Promise<void> {
+    await api.post("/auth/change-password", data);
   }
 
   async getDashboard(): Promise<unknown> {

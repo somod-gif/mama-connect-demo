@@ -11,7 +11,7 @@ const steps = [
     icon: MessageCircle,
     title: "Reach Out",
     description:
-      "Click the WhatsApp button on this page to send us a message. Our team will welcome you and guide you through registration.",
+      "Send us a message via WhatsApp, SMS, or dial our USSD code. Our team will welcome you and guide you through registration.",
     step: "01",
   },
   {

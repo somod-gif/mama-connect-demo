@@ -9,11 +9,35 @@ import {
   Globe,
   Shield,
   LogOut,
+  Eye,
+  EyeOff,
+  Loader2,
+  KeyRound,
 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { chewService } from "@/services/chew.service";
 import { FadeInUp } from "@/app/components/animations";
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Must contain an uppercase letter")
+    .regex(/[a-z]/, "Must contain a lowercase letter")
+    .regex(/[0-9]/, "Must contain a number")
+    .regex(/[^A-Za-z0-9]/, "Must contain a special character"),
+  confirmPassword: z.string(),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
+type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
 
 const sections = [
   { id: "profile", label: "Profile", icon: User },
@@ -151,15 +175,124 @@ export default function SettingsPage() {
 
             {activeSection === "security" && (
               <FadeInUp key="security">
-                <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
-                  <h3 className="text-lg font-bold text-foreground mb-6">Security</h3>
-                  <p className="text-sm text-muted-foreground">Security settings will be available soon.</p>
-                </div>
+                <SecuritySection />
               </FadeInUp>
             )}
           </AnimatePresence>
         </div>
       </div>
+    </div>
+  );
+}
+
+function SecuritySection() {
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const changePasswordMutation = useMutation({
+    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
+      chewService.changePassword(data),
+    onSuccess: () => {
+      toast.success("Password changed successfully");
+      reset();
+    },
+    onError: () => toast.error("Failed to change password. Check your current password."),
+  });
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ChangePasswordForm>({
+    resolver: zodResolver(changePasswordSchema),
+  });
+
+  const inputClass = "w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary transition-all pr-10";
+
+  return (
+    <div className="bg-card border border-border rounded-2xl p-6 md:p-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center">
+          <KeyRound className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <h3 className="text-lg font-bold text-foreground">Change Password</h3>
+          <p className="text-sm text-muted-foreground">Update your account password</p>
+        </div>
+      </div>
+
+      <form
+        onSubmit={handleSubmit((data) =>
+          changePasswordMutation.mutate({
+            currentPassword: data.currentPassword,
+            newPassword: data.newPassword,
+          })
+        )}
+        className="space-y-4 max-w-md"
+      >
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1.5">Current Password</label>
+          <div className="relative">
+            <input
+              type={showCurrent ? "text" : "password"}
+              placeholder="Enter current password"
+              {...register("currentPassword")}
+              className={inputClass}
+            />
+            <button type="button" onClick={() => setShowCurrent(!showCurrent)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+          {errors.currentPassword && <p className="mt-1 text-xs text-red-500">{errors.currentPassword.message}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1.5">New Password</label>
+          <div className="relative">
+            <input
+              type={showNew ? "text" : "password"}
+              placeholder="Enter new password"
+              {...register("newPassword")}
+              className={inputClass}
+            />
+            <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+          {errors.newPassword && <p className="mt-1 text-xs text-red-500">{errors.newPassword.message}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1.5">Confirm New Password</label>
+          <div className="relative">
+            <input
+              type={showConfirm ? "text" : "password"}
+              placeholder="Confirm new password"
+              {...register("confirmPassword")}
+              className={inputClass}
+            />
+            <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+          {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword.message}</p>}
+        </div>
+
+        <button
+          type="submit"
+          disabled={changePasswordMutation.isPending}
+          className="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary-dark disabled:opacity-60 transition-all"
+        >
+          {changePasswordMutation.isPending ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <KeyRound className="w-4 h-4" />
+          )}
+          {changePasswordMutation.isPending ? "Changing..." : "Change Password"}
+        </button>
+      </form>
     </div>
   );
 }
