@@ -65,7 +65,24 @@ export default function SettingsPage() {
     onError: () => toast.error("Failed to update language preference"),
   });
 
-  const display = profile || user;
+  const firstName = profile?.name?.split(" ")[0] || user?.firstName || "";
+  const lastName = profile?.name?.split(" ").slice(1).join(" ") || user?.lastName || "";
+
+  const normalizeLga = (val: unknown): string => {
+    if (typeof val === "string") return val;
+    if (val && typeof val === "object") return (val as { name: string }).name || "—";
+    return "—";
+  };
+
+  const normalizeState = (val: unknown): string => {
+    if (typeof val === "string") return val;
+    if (val && typeof val === "object") {
+      const lga = val as { state?: { name?: string }; name?: string };
+      if (lga.state?.name) return lga.state.name;
+      return lga.name || "—";
+    }
+    return "—";
+  };
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const lang = e.target.value;
@@ -115,11 +132,11 @@ export default function SettingsPage() {
                   <div className="flex items-center gap-4 mb-6">
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
                       <span className="text-lg font-bold text-white">
-                        {display?.firstName?.charAt(0)}{display?.lastName?.charAt(0)}
+                        {firstName?.charAt(0)}{lastName?.charAt(0)}
                       </span>
                     </div>
                     <div>
-                      <p className="text-base font-semibold text-foreground">{display?.firstName} {display?.lastName}</p>
+                      <p className="text-base font-semibold text-foreground">{firstName} {lastName}</p>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-primary-light text-primary-dark">
                         CHEW
                       </span>
@@ -127,11 +144,11 @@ export default function SettingsPage() {
                   </div>
                   <div className="grid sm:grid-cols-2 gap-6">
                     {[
-                      { label: "Email", value: display?.email },
-                      { label: "Phone Number", value: display?.phone || "—" },
-                      { label: "State", value: profile?.state || "—" },
-                      { label: "LGA", value: profile?.lga || "—" },
-                      { label: "Healthcare Centre", value: profile?.primaryHealthcareCentre || "—" },
+                      { label: "Email", value: profile?.email || user?.email },
+                      { label: "Phone Number", value: profile?.phone || user?.phone || "—" },
+                      { label: "State", value: normalizeState(profile?.lga) },
+                      { label: "LGA", value: normalizeLga(profile?.lga) },
+                      { label: "Healthcare Centre", value: profile?.facility || "—" },
                       { label: "Role", value: "Community Health Extension Worker" },
                     ].map((field) => (
                       <div key={field.label}>

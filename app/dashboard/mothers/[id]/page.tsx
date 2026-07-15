@@ -1,19 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, Phone, MapPin, Calendar, Shield, Activity,
   AlertTriangle, Heart, Pill, ClipboardList, Clock,
   ChevronRight, MessageSquare, User, Globe,
   Loader2, Baby, Droplets, Scale, Thermometer,
   Stethoscope, Syringe, FileText, Eye,
-  ChevronDown, ChevronUp, Mail,
+  ChevronDown, ChevronUp, Mail, X, ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { patientsService } from "@/lib/services/patients.service";
+import { referralsService } from "@/lib/services/referrals.service";
 import { FadeInUp } from "@/app/components/animations";
 import { RequireVerified } from "@/app/components/shared/VerificationGate";
 import type { PatientDetail, MedicalAttribute, PatientCheckinsResponse } from "@/types/patient";
@@ -48,7 +49,10 @@ export default function MotherProfilePage() {
 function MotherProfileContent() {
   const params = useParams();
   const id = params.id as string;
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
+  const [showMedicalForm, setShowMedicalForm] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
 
   const { data: patient, isLoading } = useQuery({
     queryKey: ["chew", "patient", id],
@@ -66,6 +70,16 @@ function MotherProfileContent() {
     queryKey: ["chew", "patient", id, "attributes"],
     queryFn: () => patientsService.getPatientAttributes(id),
     enabled: activeTab === "medical" && !!id,
+  });
+
+  const createReferralMutation = useMutation({
+    mutationFn: (data: { reason: string; toFacility: string; notes?: string }) =>
+      referralsService.createReferral({ patientId: id, ...data }),
+    onSuccess: () => {
+      toast.success("Referral created");
+      setShowReferralModal(false);
+    },
+    onError: () => toast.error("Failed to create referral"),
   });
 
   if (isLoading) {
@@ -182,18 +196,85 @@ function MotherProfileContent() {
           </div>
 
           <div className="p-6">
-            {activeTab === "overview" && <OverviewTab patient={patient} pregnancyWeek={pregnancyWeek} />}
+            {activeTab === "overview" && (
+              <OverviewTab
+                patient={patient}
+                pregnancyWeek={pregnancyWeek}
+                onRecordObservation={() => { setActiveTab("medical"); setShowMedicalForm(true); }}
+                onRefer={() => setShowReferralModal(true)}
+              />
+            )}
             {activeTab === "checkins" && <CheckinsTab data={checkins} />}
-            {activeTab === "medical" && <MedicalTab data={attributes} patientId={id} />}
+            {activeTab === "medical" && (
+              <MedicalTab data={attributes} patientId={id} showForm={showMedicalForm} onCloseForm={() => setShowMedicalForm(false)} />
+            )}
             {activeTab === "activity" && <ActivityTab patient={patient} />}
           </div>
         </div>
       </FadeInUp>
+
+      {showReferralModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={() => setShowReferralModal(false)}>
+          <div className="bg-card rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-foreground">New Referral</h3>
+              <button onClick={() => setShowReferralModal(false)} className="p-1 rounded-lg hover:bg-background-soft"><X className="w-5 h-5" /></button>
+            </div>
+            <ReferralForm
+              onSubmit={(data) => createReferralMutation.mutate(data)}
+              isPending={createReferralMutation.isPending}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function OverviewTab({ patient, pregnancyWeek }: { patient: PatientDetail; pregnancyWeek: number | null }) {
+function ReferralForm({ onSubmit, isPending }: { onSubmit: (data: { reason: string; toFacility: string; notes?: string }) => void; isPending: boolean }) {
+  const [reason, setReason] = useState("");
+  const [toFacility, setToFacility] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const handleSubmit = () => {
+    if (!reason || !toFacility) { toast.error("Reason and facility are required"); return; }
+    onSubmit({ reason, toFacility, notes: notes || undefined });
+    setReason("");
+    setToFacility("");
+    setNotes("");
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-foreground mb-1.5">Reason</label>
+        <input type="text" value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. High blood pressure"
+          className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-foreground mb-1.5">Hospital / Facility</label>
+        <input type="text" value={toFacility} onChange={e => setToFacility(e.target.value)} placeholder="e.g. General Hospital"
+          className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-foreground mb-1.5">Notes (optional)</label>
+        <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3}
+          className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none" />
+      </div>
+      <div className="flex gap-3 pt-2">
+        <button onClick={() => { setReason(""); setToFacility(""); setNotes(""); }}
+          className="flex-1 px-4 py-2.5 text-sm font-medium text-muted-foreground bg-background-soft rounded-xl hover:bg-border transition-colors">Cancel</button>
+        <button onClick={handleSubmit} disabled={isPending}
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary-dark disabled:opacity-50 transition-all">
+          {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
+          Create Referral
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function OverviewTab({ patient, pregnancyWeek, onRecordObservation, onRefer }: { patient: PatientDetail; pregnancyWeek: number | null; onRecordObservation: () => void; onRefer: () => void }) {
   const activePregnancy = patient.pregnancies?.find(p => p.isActive);
   const riskFactors = activePregnancy?.riskFactors ? activePregnancy.riskFactors.split(",").map(s => s.trim()).filter(Boolean) : [];
 
@@ -257,23 +338,25 @@ function OverviewTab({ patient, pregnancyWeek }: { patient: PatientDetail; pregn
 
       <div className="flex flex-wrap gap-3">
         <button
-          onClick={() => toast.info("Recording observation...")}
+          onClick={onRecordObservation}
           className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold bg-primary-light text-primary rounded-xl hover:bg-primary-light/80 transition-all"
         >
           <Activity className="w-4 h-4" /> Record Observation
         </button>
         <button
-          onClick={() => toast.info("Creating referral...")}
+          onClick={onRefer}
           className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold bg-amber-50 text-amber-700 rounded-xl hover:bg-amber-100 transition-all"
         >
           <AlertTriangle className="w-4 h-4" /> Refer to Facility
         </button>
-        <button
-          onClick={() => toast.info("Sending message...")}
-          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold bg-background-soft text-foreground rounded-xl hover:bg-border transition-all"
+        <a
+          href={`https://wa.me/${patient.phone?.replace(/\+/g, "")}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold bg-background-soft text-foreground rounded-xl hover:bg-border transition-all"
         >
           <MessageSquare className="w-4 h-4" /> Send Message
-        </button>
+        </a>
       </div>
     </div>
   );
@@ -328,9 +411,14 @@ function CheckinsTab({ data }: { data: PatientCheckinsResponse | undefined }) {
   );
 }
 
-function MedicalTab({ data, patientId }: { data: MedicalAttribute[] | undefined; patientId: string }) {
+function MedicalTab({ data, patientId, showForm: controlledShowForm, onCloseForm }: { data: MedicalAttribute[] | undefined; patientId: string; showForm?: boolean; onCloseForm?: () => void }) {
   const queryClient = useQueryClient();
-  const [showForm, setShowForm] = useState(false);
+  const [internalShowForm, setInternalShowForm] = useState(false);
+  const showForm = controlledShowForm ?? internalShowForm;
+  const setShowForm = (v: boolean) => {
+    setInternalShowForm(v);
+    if (!v) onCloseForm?.();
+  };
   const [attrType, setAttrType] = useState("");
   const [attrValue, setAttrValue] = useState("");
   const [attrUnit, setAttrUnit] = useState("");

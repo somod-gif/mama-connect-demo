@@ -24,28 +24,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 const editSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  name: z.string().min(2, "Full name must be at least 2 characters"),
   phone: z
     .string()
     .min(10, "Please enter a valid Nigerian phone number")
     .regex(/^(\+234|0)[789]\d{9}$/, "Please enter a valid Nigerian phone number"),
-  preferredLanguage: z.string().min(1, "Please select your preferred language"),
 });
 
 type EditFormData = z.infer<typeof editSchema>;
-
-const LANGUAGES = ["English", "Pidgin", "Yoruba", "Hausa", "Igbo"];
 
 function EditProfileModal({
   profile,
   onClose,
 }: {
   profile: {
-    firstName?: string;
-    lastName?: string;
+    name?: string;
     phone?: string;
-    preferredLanguage?: string;
   };
   onClose: () => void;
 }) {
@@ -68,10 +62,8 @@ function EditProfileModal({
   } = useForm<EditFormData>({
     resolver: zodResolver(editSchema),
     defaultValues: {
-      firstName: profile.firstName || "",
-      lastName: profile.lastName || "",
+      name: profile.name || "",
       phone: profile.phone || "",
-      preferredLanguage: profile.preferredLanguage || "English",
     },
   });
 
@@ -86,31 +78,16 @@ function EditProfileModal({
         </div>
 
         <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="space-y-4">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">First Name</label>
-              <input {...register("firstName")} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-              {errors.firstName && <p className="mt-1 text-xs text-red-500">{errors.firstName.message}</p>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Last Name</label>
-              <input {...register("lastName")} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-              {errors.lastName && <p className="mt-1 text-xs text-red-500">{errors.lastName.message}</p>}
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Full Name</label>
+            <input {...register("name")} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+            {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-1.5">Phone</label>
             <input {...register("phone")} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
             {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">Preferred Language</label>
-            <select {...register("preferredLanguage")} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-              {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-            </select>
-            {errors.preferredLanguage && <p className="mt-1 text-xs text-red-500">{errors.preferredLanguage.message}</p>}
           </div>
 
           <button
@@ -144,6 +121,9 @@ export default function ProfilePage() {
     );
   }
 
+  const firstName = profile?.name?.split(" ")[0] || user?.firstName || "";
+  const lastName = profile?.name?.split(" ").slice(1).join(" ") || user?.lastName || "";
+
   const normalizeLga = (val: unknown): string => {
     if (typeof val === "string") return val;
     if (val && typeof val === "object") return (val as { name: string }).name || "—";
@@ -152,15 +132,16 @@ export default function ProfilePage() {
 
   const normalizeState = (val: unknown): string => {
     if (typeof val === "string") return val;
-    if (val && typeof val === "object") return (val as { name: string }).name || "—";
-    if (profile?.lga && typeof profile.lga === "object") return (profile.lga as { state: { name: string } }).state?.name || "—";
+    if (val && typeof val === "object") {
+      const lga = val as { state?: { name?: string }; name?: string };
+      if (lga.state?.name) return lga.state.name;
+      return lga.name || "—";
+    }
     return "—";
   };
 
-  const display = profile || user;
-
   const verificationBadge = () => {
-    const status = display?.verificationStatus || "PENDING";
+    const status = profile?.verificationStatus || user?.verificationStatus || "PENDING";
     if (status === "VERIFIED") return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-50 text-green-700"><CheckCircle className="w-3 h-3" /> Verified</span>;
     if (status === "REJECTED") return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-red-50 text-red-700"><XCircle className="w-3 h-3" /> Rejected</span>;
     return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-amber-50 text-amber-700"><Shield className="w-3 h-3" /> Pending</span>;
@@ -187,14 +168,14 @@ export default function ProfilePage() {
           <div className="flex items-center gap-4 mb-8">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
               <span className="text-xl font-bold text-white">
-                {display?.firstName?.charAt(0)}{display?.lastName?.charAt(0)}
+                {firstName?.charAt(0)}{lastName?.charAt(0)}
               </span>
             </div>
             <div>
               <p className="text-lg font-semibold text-foreground">
-                {display?.firstName} {display?.lastName}
+                {firstName} {lastName}
               </p>
-              <p className="text-sm text-muted-foreground">{display?.email}</p>
+              <p className="text-sm text-muted-foreground">{profile?.email || user?.email}</p>
               <div className="mt-1 flex items-center gap-2">
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-primary-light text-primary-dark">
                   <Shield className="w-3 h-3" /> Community Health Extension Worker
@@ -206,12 +187,12 @@ export default function ProfilePage() {
 
           <div className="grid sm:grid-cols-2 gap-6">
             {[
-              { icon: Mail, label: "Email", value: display?.email },
-              { icon: Phone, label: "Phone", value: display?.phone || "—" },
-              { icon: MapPin, label: "State", value: normalizeState(profile?.state || profile?.lga) },
+              { icon: Mail, label: "Email", value: profile?.email || user?.email || "—" },
+              { icon: Phone, label: "Phone", value: profile?.phone || user?.phone || "—" },
+              { icon: MapPin, label: "State", value: normalizeState(profile?.lga) },
               { icon: MapPin, label: "LGA", value: normalizeLga(profile?.lga) },
-              { icon: Building2, label: "Primary Healthcare Centre", value: profile?.primaryHealthcareCentre || "—" },
-              { icon: Globe, label: "Preferred Language", value: profile?.preferredLanguage || "English" },
+              { icon: Building2, label: "Primary Healthcare Centre", value: profile?.facility || "—" },
+              { icon: Globe, label: "Preferred Language", value: profile?.preferredLanguage || user?.preferredLanguage || "English" },
             ].map((field) => (
               <div key={field.label} className="flex items-start gap-3 p-4 rounded-xl bg-background-soft">
                 <field.icon className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
@@ -228,10 +209,8 @@ export default function ProfilePage() {
       {showEdit && (
         <EditProfileModal
           profile={{
-            firstName: display?.firstName,
-            lastName: display?.lastName,
-            phone: display?.phone,
-            preferredLanguage: profile?.preferredLanguage,
+            name: `${firstName} ${lastName}`.trim(),
+            phone: profile?.phone || user?.phone || "",
           }}
           onClose={() => setShowEdit(false)}
         />

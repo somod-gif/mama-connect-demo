@@ -159,6 +159,7 @@ export default function DashboardHome() {
     queryKey: ["my-documents"],
     queryFn: () => documentService.list(),
     enabled: user?.verificationStatus === "VERIFIED",
+    refetchInterval: 30000,
   });
 
   const { data, isLoading } = useQuery<DashboardData>({

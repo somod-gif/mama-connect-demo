@@ -44,7 +44,6 @@ function parseUserFromToken(): User | null {
       verificationStatus: (payload.verificationStatus || "PENDING") as VerificationStatus,
       state: payload.state,
       lga: payload.lga,
-      primaryHealthcareCentre: payload.primaryHealthcareCentre,
       preferredLanguage: payload.preferredLanguage,
     };
   } catch {
@@ -85,6 +84,7 @@ function userFromProfile(profile: Record<string, unknown>): User {
     verificationStatus: (profile.verificationStatus as VerificationStatus) || "PENDING",
     state: lgaObj?.state?.name || (typeof profile.lga === "string" ? profile.lga : undefined),
     lga: lgaObj?.name || (typeof profile.lga === "string" ? profile.lga : undefined),
+    facility: (profile.facility as string) || undefined,
   };
 }
 

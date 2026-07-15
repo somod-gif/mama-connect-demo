@@ -11,6 +11,7 @@ import {
   Upload,
   CheckCircle2,
   Clock,
+  XCircle,
   ShieldCheck,
   Loader2,
   ArrowRight,
@@ -34,6 +35,7 @@ const typeIcons: Record<DocumentType, typeof FileText> = {
 const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
 
 function DocumentCard({ doc }: { doc: UserDocument }) {
+  const isRejected = !!doc.rejectedAt;
   const isVerified = !!doc.verifiedAt;
 
   return (
@@ -65,7 +67,12 @@ function DocumentCard({ doc }: { doc: UserDocument }) {
       </div>
 
       <div className="flex-shrink-0">
-        {isVerified ? (
+        {isRejected ? (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 border border-red-200">
+            <XCircle className="w-3.5 h-3.5 text-red-500" />
+            <span className="text-[11px] font-semibold text-red-600">Rejected</span>
+          </div>
+        ) : isVerified ? (
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 border border-green-200">
             <ShieldCheck className="w-3.5 h-3.5 text-green-600" />
             <span className="text-[11px] font-semibold text-green-700">Verified</span>
@@ -245,6 +252,7 @@ export default function DocumentsPage() {
   } = useQuery({
     queryKey: ["my-documents"],
     queryFn: () => documentService.list(),
+    refetchInterval: 30000,
   });
 
   const [showNewUpload, setShowNewUpload] = useState(false);
