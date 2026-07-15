@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -28,7 +28,7 @@ const setupSchema = z.object({
 
 type SetupFormData = z.infer<typeof setupSchema>;
 
-export default function SetupPage() {
+function SetupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -250,5 +250,19 @@ export default function SetupPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function SetupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background-soft">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <SetupForm />
+    </Suspense>
   );
 }
