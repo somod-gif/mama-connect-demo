@@ -30,6 +30,7 @@ export interface RecentPatient {
 
 export interface ActivityItem {
   id: string;
+  patientId: string;
   type: "registration" | "checkin" | "referral" | "alert";
   patientName: string;
   description: string;

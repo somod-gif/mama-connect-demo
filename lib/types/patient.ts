@@ -1,1 +1,1 @@
-export type { RiskLevel, PatientStatus, Patient, PatientDetail, PatientCheckIn, CheckInResponse, PatientAlert, MedicalAttribute, RecordAttributeRequest } from "@/types/patient";
+export type { RiskLevel, PatientStatus, Patient, PatientDetail, PatientCheckIn, CheckInResponse, PatientAlert, MedicalAttribute, RecordAttributeRequest, PatientCheckinsResponse } from "@/types/patient";
