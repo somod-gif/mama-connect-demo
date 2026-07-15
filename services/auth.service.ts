@@ -30,8 +30,8 @@ class AuthService {
   }
 
   async getMe(): Promise<User> {
-    const response = await api.get<User>("/auth/me");
-    return response.data;
+    const response = await api.get<{ data: User }>("/auth/me");
+    return response.data.data;
   }
 }
 
