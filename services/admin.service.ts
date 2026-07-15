@@ -2,8 +2,10 @@ import { api } from "./api";
 import type {
   AdminDashboardData,
   AdminUser,
+  AdminUserDetail,
   AdminPatient,
   AdminDocument,
+  PaginatedResponse,
   VerifyRequest,
   VerifyPatientRequest,
   CreatePatientFromUserRequest,
@@ -11,27 +13,25 @@ import type {
   UpdatePatientRequest,
   VerifyDocumentRequest,
 } from "@/types/admin";
-import type { TokenResponse } from "@/types/auth";
+
+interface ListUsersParams { role?: string; status?: string; q?: string; page?: number; limit?: number }
+interface ListPatientsParams { status?: string; lgaId?: string; chewId?: string; q?: string; page?: number; limit?: number }
+interface ListDocumentsParams { type?: string; verified?: string; userId?: string; q?: string; page?: number; limit?: number }
 
 class AdminService {
-  async login(data: { email: string; password: string }): Promise<TokenResponse> {
-    const response = await api.post<TokenResponse>("/auth/login", data);
-    return response.data;
-  }
-
   async getDashboard(): Promise<AdminDashboardData> {
     const response = await api.get("/admin/dashboard");
     return (response.data as { data: AdminDashboardData }).data;
   }
 
-  async getUsers(params?: { role?: string; status?: string }): Promise<AdminUser[]> {
+  async getUsers(params?: ListUsersParams): Promise<PaginatedResponse<AdminUser>> {
     const response = await api.get("/admin/users", { params });
-    return (response.data as { data: AdminUser[] }).data;
+    return response.data as PaginatedResponse<AdminUser>;
   }
 
-  async getUser(id: string): Promise<AdminUser> {
+  async getUser(id: string): Promise<AdminUserDetail> {
     const response = await api.get(`/admin/users/${id}`);
-    return (response.data as { data: AdminUser }).data;
+    return (response.data as { data: AdminUserDetail }).data;
   }
 
   async updateUser(id: string, data: UpdateUserRequest): Promise<void> {
@@ -46,9 +46,9 @@ class AdminService {
     await api.post(`/admin/users/${id}/verify`, data);
   }
 
-  async getPatients(params?: { verificationStatus?: string; lga?: string; assignedCHEW?: string }): Promise<AdminPatient[]> {
+  async getPatients(params?: ListPatientsParams): Promise<PaginatedResponse<AdminPatient>> {
     const response = await api.get("/admin/patients", { params });
-    return (response.data as { data: AdminPatient[] }).data;
+    return response.data as PaginatedResponse<AdminPatient>;
   }
 
   async updatePatient(id: string, data: UpdatePatientRequest): Promise<void> {
@@ -63,13 +63,23 @@ class AdminService {
     await api.post(`/admin/users/${id}/verify-patient`, data);
   }
 
-  async getDocuments(): Promise<AdminDocument[]> {
-    const response = await api.get("/admin/documents");
-    return (response.data as { data: AdminDocument[] }).data;
+  async getDocuments(params?: ListDocumentsParams): Promise<PaginatedResponse<AdminDocument>> {
+    const response = await api.get("/admin/documents", { params });
+    return response.data as PaginatedResponse<AdminDocument>;
   }
 
   async verifyDocument(id: string, data: VerifyDocumentRequest): Promise<void> {
     await api.post(`/admin/documents/${id}/verify`, data);
+  }
+
+  async getStates(): Promise<Array<{ id: string; name: string }>> {
+    const response = await api.get("/geography/states");
+    return response.data as Array<{ id: string; name: string }>;
+  }
+
+  async getLgas(stateId: string): Promise<Array<{ id: string; name: string }>> {
+    const response = await api.get(`/geography/states/${stateId}/lgas`);
+    return response.data as Array<{ id: string; name: string }>;
   }
 }
 

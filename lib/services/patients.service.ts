@@ -27,8 +27,8 @@ class PatientsService {
   }
 
   async getPatientById(id: string): Promise<PatientDetail> {
-    const response = await api.get<PatientDetail>(`/chew/patients/${id}`);
-    return response.data;
+    const response = await api.get(`/chew/patients/${id}`);
+    return (response.data as { data: PatientDetail }).data;
   }
 
   async assignPatient(id: string): Promise<void> {
@@ -44,8 +44,8 @@ class PatientsService {
   }
 
   async getPatientAttributes(id: string): Promise<MedicalAttribute[]> {
-    const response = await api.get<MedicalAttribute[]>(`/chew/patients/${id}/attributes`);
-    return response.data;
+    const response = await api.get(`/chew/patients/${id}/attributes`);
+    return (response.data as { data: MedicalAttribute[] }).data;
   }
 
   async recordAttribute(id: string, data: RecordAttributeRequest): Promise<void> {
@@ -63,8 +63,8 @@ class PatientsService {
   }
 
   async getPatientCheckins(id: string): Promise<PatientCheckinsResponse> {
-    const response = await api.get<PatientCheckinsResponse>(`/chew/patients/${id}/checkins`);
-    return response.data;
+    const response = await api.get(`/chew/patients/${id}/checkins`);
+    return (response.data as { data: PatientCheckinsResponse }).data;
   }
 }
 

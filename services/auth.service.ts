@@ -1,5 +1,5 @@
 import { api } from "./api";
-import type { RegisterRequest, LoginRequest, LoginResponse, TokenResponse, SetPasswordRequest, SetPasswordResponse, User } from "@/types/auth";
+import type { RegisterRequest, LoginRequest, LoginResponse, TokenResponse, SetPasswordRequest, SetPasswordResponse, UpdateProfileRequest, ChangePasswordRequest, User } from "@/types/auth";
 
 class AuthService {
   async register(data: RegisterRequest): Promise<LoginResponse> {
@@ -41,6 +41,15 @@ class AuthService {
   async getMe(): Promise<User> {
     const response = await api.get<{ data: User }>("/auth/me");
     return response.data.data;
+  }
+
+  async updateProfile(data: UpdateProfileRequest): Promise<User> {
+    const response = await api.patch<{ data: User }>("/auth/me", data);
+    return response.data.data;
+  }
+
+  async changePassword(data: ChangePasswordRequest): Promise<void> {
+    await api.post("/auth/change-password", data);
   }
 }
 

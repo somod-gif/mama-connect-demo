@@ -1,31 +1,37 @@
 import { api } from "./api";
 
+export interface LgaRef {
+  id: string;
+  name: string;
+  state: { id: string; name: string };
+}
+
 export interface ChewProfile {
   id: string;
-  name?: string;
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
   phone: string;
-  state?: string;
-  lga?: string;
-  primaryHealthcareCentre?: string;
-  role?: string;
+  role: string;
+  verificationStatus: string;
+  facility?: string;
+  lga?: LgaRef;
   preferredLanguage?: string;
-  verificationStatus?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface UpdateProfileRequest {
-  firstName?: string;
-  lastName?: string;
+  name?: string;
+  email?: string;
   phone?: string;
+  facility?: string;
   preferredLanguage?: string;
 }
 
 class ChewService {
   async getProfile(): Promise<ChewProfile> {
-    const response = await api.get<ChewProfile>("/auth/me");
-    return response.data;
+    const response = await api.get<{ data: ChewProfile }>("/auth/me");
+    return response.data.data;
   }
 
   async updateProfile(data: UpdateProfileRequest): Promise<void> {
