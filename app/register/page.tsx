@@ -31,15 +31,12 @@ const registerSchema = z.object({
   stateId: z.string().min(1, "Please select your state"),
   lgaId: z.string().min(1, "Please select your LGA"),
   primaryHealthcareCentre: z.string().min(2, "Please enter your Primary Healthcare Centre"),
-  preferredLanguage: z.string().min(1, "Please select your preferred language"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
-
-const LANGUAGES = ["English", "Pidgin", "Yoruba", "Hausa", "Igbo"];
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -57,7 +54,7 @@ export default function RegisterPage() {
     defaultValues: {
       firstName: "", lastName: "", email: "", phone: "",
       password: "", confirmPassword: "",
-      stateId: "", lgaId: "", primaryHealthcareCentre: "", preferredLanguage: "",
+      stateId: "", lgaId: "", primaryHealthcareCentre: "",
     },
   });
 
@@ -98,12 +95,14 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
+      const stateName = states.find((s) => s.id === data.stateId)?.name || "";
+      const lgaName = lgas.find((l) => l.id === data.lgaId)?.name || "";
       await registerUser({
         firstName: data.firstName, lastName: data.lastName,
         email: data.email, phone: data.phone, password: data.password,
         stateId: data.stateId, lgaId: data.lgaId,
         primaryHealthcareCentre: data.primaryHealthcareCentre,
-        preferredLanguage: data.preferredLanguage,
+        stateName, lgaName, facility: data.primaryHealthcareCentre,
       });
     } catch { }
   };
@@ -247,14 +246,6 @@ export default function RegisterPage() {
                   <label htmlFor="primaryHealthcareCentre" className="block text-sm font-medium text-foreground mb-1.5">Primary Healthcare Centre</label>
                   <input id="primaryHealthcareCentre" type="text" placeholder="e.g. General Hospital, Gwagwalada" autoComplete="organization" {...register("primaryHealthcareCentre")} disabled={isPending} className={inputClass} />
                   {errors.primaryHealthcareCentre && <p className="mt-1 text-xs text-red-500">{errors.primaryHealthcareCentre.message}</p>}
-                </div>
-                <div>
-                  <label htmlFor="preferredLanguage" className="block text-sm font-medium text-foreground mb-1.5">Preferred Language</label>
-                  <select id="preferredLanguage" {...register("preferredLanguage")} disabled={isPending} className={inputClass}>
-                    <option value="">Select language</option>
-                    {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-                  </select>
-                  {errors.preferredLanguage && <p className="mt-1 text-xs text-red-500">{errors.preferredLanguage.message}</p>}
                 </div>
               </div>
             </div>
