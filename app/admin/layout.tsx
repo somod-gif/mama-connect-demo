@@ -38,6 +38,7 @@ function AdminSidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: (
     return (
       <Link
         href={item.href}
+        onClick={() => setMobileOpen(false)}
         title={collapsed ? item.label : undefined}
         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
           isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-background-soft hover:text-foreground"
@@ -66,7 +67,7 @@ function AdminSidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: (
       <div className={`py-3 border-t border-border space-y-0.5 ${collapsed ? "px-2" : "px-3"}`}>
         {bottomItems.map((item) => <NavLink key={item.href} item={item} collapsed={collapsed} />)}
         <button
-          onClick={() => logout()}
+          onClick={() => { setMobileOpen(false); logout(); }}
           title={collapsed ? "Logout" : undefined}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-all ${collapsed ? "justify-center px-0" : ""}`}
         >

@@ -1,36 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Search, CheckCircle, XCircle, Clock, Edit3 } from "lucide-react";
+import { Loader2, Search, CheckCircle, XCircle, Clock, Edit3, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { adminService } from "@/services/admin.service";
 import { showApiError } from "@/lib/error-handler";
 import type { AdminPatient, AdminUser } from "@/types/admin";
 
-function EditPatientDialog({
-  patient,
-  onClose,
-}: {
-  patient: AdminPatient;
-  onClose: () => void;
-}) {
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => { const t = setTimeout(() => setDebounced(value), delay); return () => clearTimeout(t); }, [value, delay]);
+  return debounced;
+}
+
+function EditPatientDialog({ patient, onClose }: { patient: AdminPatient; onClose: () => void }) {
   const queryClient = useQueryClient();
   const [name, setName] = useState(patient.name || "");
   const [age, setAge] = useState(String(patient.age ?? ""));
-  const [state, setState] = useState(patient.state?.name || "");
-  const [lga, setLga] = useState(patient.lga?.name || "");
+  const [selectedStateId, setSelectedStateId] = useState(patient.stateId || patient.state?.id || "");
+  const [selectedLgaId, setSelectedLgaId] = useState(patient.lgaId || patient.lga?.id || "");
   const [address, setAddress] = useState(patient.address || "");
   const [preferredLanguage, setPreferredLanguage] = useState(patient.preferredLanguage || "");
   const [preferredChannel, setPreferredChannel] = useState(patient.preferredChannel || "");
 
+  const { data: states = [] } = useQuery({
+    queryKey: ["geography", "states"],
+    queryFn: () => adminService.getStates(),
+  });
+
+  const { data: lgas = [] } = useQuery({
+    queryKey: ["geography", "lgas", selectedStateId],
+    queryFn: () => adminService.getLgas(selectedStateId),
+    enabled: !!selectedStateId,
+  });
+
   const updateMutation = useMutation({
-    mutationFn: () =>
-      adminService.updatePatient(patient.id, {
-        name,
-        age: age ? Number(age) : undefined,
-        state, lga, address, preferredLanguage, preferredChannel,
-      }),
+    mutationFn: () => adminService.updatePatient(patient.id, {
+      name: name || undefined,
+      age: age ? Number(age) : undefined,
+      stateId: selectedStateId || undefined,
+      lgaId: selectedLgaId || undefined,
+      address: address || undefined,
+      preferredLanguage: preferredLanguage || undefined,
+      preferredChannel: preferredChannel || undefined,
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "patients"] });
       toast.success("Patient updated");
@@ -57,28 +71,39 @@ function EditPatientDialog({
               <input type="number" value={age} onChange={(e) => setAge(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">State</label>
-              <input value={state} onChange={(e) => setState(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">LGA</label>
-              <input value={lga} onChange={(e) => setLga(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-            </div>
-            <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1">Address</label>
               <input value={address} onChange={(e) => setAddress(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">Preferred Language</label>
-              <input value={preferredLanguage} onChange={(e) => setPreferredLanguage(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+              <label className="block text-xs font-medium text-muted-foreground mb-1">State</label>
+              <select value={selectedStateId} onChange={(e) => { setSelectedStateId(e.target.value); setSelectedLgaId(""); }}
+                className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="">Select State</option>
+                {states.map((s: { id: string; name: string }) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">Preferred Channel</label>
-              <select value={preferredChannel} onChange={(e) => setPreferredChannel(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+              <label className="block text-xs font-medium text-muted-foreground mb-1">LGA</label>
+              <select value={selectedLgaId} onChange={(e) => setSelectedLgaId(e.target.value)}
+                disabled={!selectedStateId}
+                className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50">
+                <option value="">Select LGA</option>
+                {lgas.map((l: { id: string; name: string }) => <option key={l.id} value={l.id}>{l.name}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Preferred Language</label>
+              <input value={preferredLanguage} onChange={(e) => setPreferredLanguage(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Channel</label>
+              <select value={preferredChannel} onChange={(e) => setPreferredChannel(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                 <option value="">Select</option>
                 <option value="WHATSAPP">WhatsApp</option>
                 <option value="SMS">SMS</option>
@@ -86,11 +111,8 @@ function EditPatientDialog({
               </select>
             </div>
           </div>
-          <button
-            onClick={() => updateMutation.mutate()}
-            disabled={updateMutation.isPending}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary-dark disabled:opacity-60 transition-all"
-          >
+          <button onClick={() => updateMutation.mutate()} disabled={updateMutation.isPending}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary-dark disabled:opacity-60">
             {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Edit3 className="w-4 h-4" />}
             Save Changes
           </button>
@@ -100,20 +122,15 @@ function EditPatientDialog({
   );
 }
 
-function VerifyPatientDialog({
-  patient,
-  onClose,
-}: {
-  patient: AdminPatient;
-  onClose: () => void;
-}) {
+function VerifyPatientDialog({ patient, onClose }: { patient: AdminPatient; onClose: () => void }) {
   const queryClient = useQueryClient();
   const [chewId, setChewId] = useState("");
 
-  const { data: chews = [] } = useQuery<AdminUser[]>({
-    queryKey: ["admin", "users", "CHEW", "VERIFIED"],
-    queryFn: () => adminService.getUsers({ role: "CHEW", status: "VERIFIED" }),
+  const { data: chewsRes } = useQuery({
+    queryKey: ["admin", "users", { role: "CHEW", status: "VERIFIED" }],
+    queryFn: () => adminService.getUsers({ role: "CHEW", status: "VERIFIED", limit: 100 }),
   });
+  const chews = chewsRes?.data ?? [];
 
   const verifyMutation = useMutation({
     mutationFn: () => adminService.verifyPatient(patient.id, { chewId }),
@@ -133,30 +150,18 @@ function VerifyPatientDialog({
           <h3 className="text-lg font-bold text-foreground">Verify Patient</h3>
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-background-soft"><XCircle className="w-5 h-5" /></button>
         </div>
-        <p className="text-sm text-muted-foreground mb-4">
-          Assign <strong>{patient.name}</strong> to a CHEW to verify.
-        </p>
+        <p className="text-sm text-muted-foreground mb-4">Assign <strong>{patient.name}</strong> to a CHEW to verify.</p>
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1.5">Assign CHEW</label>
-            <select
-              value={chewId}
-              onChange={(e) => setChewId(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            >
+            <select value={chewId} onChange={(e) => setChewId(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary">
               <option value="">Select CHEW</option>
-              {chews.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} — {c.email}
-                </option>
-              ))}
+              {chews.map((c: AdminUser) => <option key={c.id} value={c.id}>{c.name} — {c.email}</option>)}
             </select>
           </div>
-          <button
-            onClick={() => verifyMutation.mutate()}
-            disabled={verifyMutation.isPending || !chewId}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 disabled:opacity-60 transition-all"
-          >
+          <button onClick={() => verifyMutation.mutate()} disabled={verifyMutation.isPending || !chewId}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 disabled:opacity-60">
             {verifyMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
             Verify & Assign
           </button>
@@ -172,98 +177,38 @@ const statusBadge = (status: string) => {
   return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-amber-50 text-amber-700"><Clock className="w-3 h-3" /> Pending</span>;
 };
 
-function PatientCard({
-  patient,
-  onEdit,
-  onVerify,
-}: {
-  patient: AdminPatient;
-  onEdit: (p: AdminPatient) => void;
-  onVerify: (p: AdminPatient) => void;
-}) {
-  return (
-    <div className="bg-card border border-border rounded-xl p-4 space-y-3">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-semibold text-foreground">{patient.name}</p>
-          <p className="text-[11px] text-muted-foreground">{patient.maternalId || "—"}</p>
-        </div>
-        {statusBadge(patient.verificationStatus)}
-      </div>
-      <div className="text-[11px] text-muted-foreground space-y-0.5">
-        <p>CHEW: {patient.chew?.name || "Unassigned"}</p>
-        <p>{patient.state?.name || "—"} · {patient.lga?.name || "—"}</p>
-      </div>
-      <div className="flex gap-2">
-        <button onClick={() => onEdit(patient)} className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold text-primary bg-primary-light rounded-lg hover:bg-primary/20 transition-all">
-          <Edit3 className="w-3 h-3" /> Edit
-        </button>
-        {patient.verificationStatus !== "VERIFIED" && (
-          <button onClick={() => onVerify(patient)} className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold text-green-700 bg-green-50 rounded-lg hover:bg-green-100 transition-all">
-            <CheckCircle className="w-3 h-3" /> Verify
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function TableSkeleton() {
-  return (
-    <div className="space-y-3">
-      {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="flex items-center gap-4 p-4 animate-pulse">
-          <div className="flex-1 space-y-2">
-            <div className="w-40 h-4 rounded bg-background-soft" />
-            <div className="w-24 h-3 rounded bg-background-soft" />
-          </div>
-          <div className="w-20 h-6 rounded-full bg-background-soft" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function AdminPatientsPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [editPatient, setEditPatient] = useState<AdminPatient | null>(null);
   const [verifyPatient, setVerifyPatient] = useState<AdminPatient | null>(null);
+  const debouncedSearch = useDebounce(search, 300);
 
-  const { data: patients = [], isLoading } = useQuery<AdminPatient[]>({
-    queryKey: ["admin", "patients"],
-    queryFn: () => adminService.getPatients(),
+  const queryKey = ["admin", "patients", { page, q: debouncedSearch }];
+  const { data, isLoading } = useQuery({
+    queryKey,
+    queryFn: () => adminService.getPatients({ q: debouncedSearch || undefined, page, limit: 20 }),
+    placeholderData: (prev) => prev,
   });
 
-  const filtered = patients.filter((p) => {
-    if (!search.trim()) return true;
-    const q = search.toLowerCase();
-    return (
-      (p.name?.toLowerCase() || "").includes(q) ||
-      (p.maternalId || "").toLowerCase().includes(q) ||
-      (p.chew?.name || "").toLowerCase().includes(q)
-    );
-  });
+  const patients = data?.data ?? [];
+  const meta = data?.meta;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">Patient Management</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">{patients.length} patients</p>
+        <p className="text-sm text-muted-foreground mt-0.5">{meta ? `${meta.total} patients` : "Loading..."}</p>
       </div>
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <input
-          type="text"
-          placeholder="Search patients..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-        />
+        <input type="text" placeholder="Search by name, phone, maternal ID, or CHEW..." value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
       </div>
 
-      {/* Desktop table */}
       <div className="hidden sm:block bg-card border border-border rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -279,12 +224,14 @@ export default function AdminPatientsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {isLoading ? (
-                <tr><td colSpan={7}><TableSkeleton /></td></tr>
-              ) : filtered.length === 0 ? (
+              {isLoading && !patients.length ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i}><td colSpan={7} className="px-4 py-3"><div className="h-8 bg-background-soft rounded animate-pulse" /></td></tr>
+                ))
+              ) : patients.length === 0 ? (
                 <tr><td colSpan={7} className="text-center py-12 text-sm text-muted-foreground">No patients found</td></tr>
               ) : (
-                filtered.map((patient) => (
+                patients.map((patient) => (
                   <tr key={patient.id} className="hover:bg-background-soft transition-colors">
                     <td className="px-4 py-3 text-sm font-medium text-foreground">{patient.maternalId || "—"}</td>
                     <td className="px-4 py-3 text-sm text-foreground">{patient.name}</td>
@@ -294,11 +241,13 @@ export default function AdminPatientsPage() {
                     <td className="px-4 py-3 text-sm text-muted-foreground">{patient.lga?.name || "—"}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => setEditPatient(patient)} className="p-2 rounded-lg hover:bg-background-soft text-muted-foreground hover:text-foreground transition-colors" title="Edit">
+                        <button onClick={() => setEditPatient(patient)}
+                          className="p-2 rounded-lg hover:bg-background-soft text-muted-foreground hover:text-foreground" title="Edit">
                           <Edit3 className="w-4 h-4" />
                         </button>
                         {patient.verificationStatus !== "VERIFIED" && (
-                          <button onClick={() => setVerifyPatient(patient)} className="p-2 rounded-lg hover:bg-green-50 text-green-600 transition-colors" title="Verify">
+                          <button onClick={() => setVerifyPatient(patient)}
+                            className="p-2 rounded-lg hover:bg-green-50 text-green-600" title="Verify">
                             <CheckCircle className="w-4 h-4" />
                           </button>
                         )}
@@ -312,40 +261,69 @@ export default function AdminPatientsPage() {
         </div>
       </div>
 
-      {/* Mobile cards */}
       <div className="sm:hidden space-y-3">
         {isLoading ? (
-          [1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-card border border-border rounded-xl p-4 animate-pulse">
-              <div className="space-y-2">
-                <div className="w-32 h-4 rounded bg-background-soft" />
-                <div className="w-24 h-3 rounded bg-background-soft" />
-              </div>
-              <div className="w-full h-9 rounded-lg bg-background-soft mt-3" />
-            </div>
-          ))
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-sm text-muted-foreground">No patients found</p>
-          </div>
+          Array.from({ length: 4 }).map((_, i) => <div key={i} className="bg-card border border-border rounded-xl p-4 animate-pulse"><div className="h-8 bg-background-soft rounded" /></div>)
+        ) : patients.length === 0 ? (
+          <div className="text-center py-12"><p className="text-sm text-muted-foreground">No patients found</p></div>
         ) : (
-          filtered.map((patient) => (
-            <PatientCard
-              key={patient.id}
-              patient={patient}
-              onEdit={setEditPatient}
-              onVerify={setVerifyPatient}
-            />
+          patients.map((patient) => (
+            <div key={patient.id} className="bg-card border border-border rounded-xl p-4 space-y-3">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{patient.name}</p>
+                  <p className="text-[11px] text-muted-foreground">{patient.maternalId || "—"}</p>
+                </div>
+                {statusBadge(patient.verificationStatus)}
+              </div>
+              <div className="text-[11px] text-muted-foreground space-y-0.5">
+                <p>CHEW: {patient.chew?.name || "Unassigned"}</p>
+                <p>{patient.state?.name || "—"} · {patient.lga?.name || "—"}</p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => setEditPatient(patient)}
+                  className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold text-primary bg-primary-light rounded-lg hover:bg-primary/20">
+                  <Edit3 className="w-3 h-3" /> Edit
+                </button>
+                {patient.verificationStatus !== "VERIFIED" && (
+                  <button onClick={() => setVerifyPatient(patient)}
+                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold text-green-700 bg-green-50 rounded-lg hover:bg-green-100">
+                    <CheckCircle className="w-3 h-3" /> Verify
+                  </button>
+                )}
+              </div>
+            </div>
           ))
         )}
       </div>
 
-      {editPatient && (
-        <EditPatientDialog patient={editPatient} onClose={() => setEditPatient(null)} />
+      {meta && meta.totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">Page {meta.page} of {meta.totalPages} ({meta.total} total)</p>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}
+              className="p-2 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed">
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            {Array.from({ length: Math.min(meta.totalPages, 5) }, (_, i) => {
+              const start = Math.max(1, meta.page - 2);
+              const p = start + i;
+              if (p > meta.totalPages) return null;
+              return (
+                <button key={p} onClick={() => setPage(p)}
+                  className={`w-8 h-8 rounded-xl text-xs font-semibold ${p === page ? "bg-primary text-white" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>{p}</button>
+              );
+            })}
+            <button onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))} disabled={page >= meta.totalPages}
+              className="p-2 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed">
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       )}
-      {verifyPatient && (
-        <VerifyPatientDialog patient={verifyPatient} onClose={() => setVerifyPatient(null)} />
-      )}
+
+      {editPatient && <EditPatientDialog patient={editPatient} onClose={() => setEditPatient(null)} />}
+      {verifyPatient && <VerifyPatientDialog patient={verifyPatient} onClose={() => setVerifyPatient(null)} />}
     </div>
   );
 }
