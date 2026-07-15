@@ -384,7 +384,7 @@ export default function DashboardHome() {
                           </p>
                         </div>
                         <Link
-                          href={`/dashboard/mothers/${item.id.replace(/^(ref-|reg-)/, "")}`}
+                          href={`/dashboard/mothers/${item.patientId}`}
                           className="flex-shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors"
                         >
                           <ChevronRight className="w-4 h-4" />

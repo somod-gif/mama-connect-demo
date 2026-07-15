@@ -47,10 +47,11 @@ function ReferralsContent() {
     queryFn: () => referralsService.getReferrals(),
   });
 
-  const { data: patients = [] } = useQuery({
+  const { data: patientsRes } = useQuery({
     queryKey: ["chew", "patients"],
     queryFn: () => patientsService.getPatients(),
   });
+  const patients = patientsRes?.data ?? [];
 
   const createMutation = useMutation({
     mutationFn: (data: CreateReferralRequest) => referralsService.createReferral(data),
@@ -154,7 +155,7 @@ function ReferralsContent() {
                 >
                   <option value="">Select patient</option>
                   {patients.map((p) => (
-                    <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>
+                    <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
                 </select>
               </div>
