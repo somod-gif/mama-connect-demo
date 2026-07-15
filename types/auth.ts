@@ -1,3 +1,13 @@
+export interface SetPasswordRequest {
+  token: string;
+  password: string;
+}
+
+export interface SetPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
 export interface RegisterRequest {
   firstName: string;
   lastName: string;
@@ -7,7 +17,9 @@ export interface RegisterRequest {
   stateId: string;
   lgaId: string;
   primaryHealthcareCentre: string;
-  preferredLanguage: string;
+  stateName?: string;
+  lgaName?: string;
+  facility?: string;
 }
 
 export interface LoginRequest {

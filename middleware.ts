@@ -10,6 +10,7 @@ const publicPaths = [
   "/chew",
   "/login",
   "/register",
+  "/setup",
   "/_next",
   "/favicon.ico",
   "/logo.png",
