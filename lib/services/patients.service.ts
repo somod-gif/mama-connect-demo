@@ -1,14 +1,28 @@
 import { api } from "@/lib/api";
-import type { Patient, PatientDetail, MedicalAttribute, RecordAttributeRequest } from "@/lib/types/patient";
+import type { Patient, PatientDetail, PatientCheckinsResponse, MedicalAttribute, RecordAttributeRequest } from "@/lib/types/patient";
+
+interface PaginatedResponse<T> {
+  data: T[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+}
+
+interface QueryParams {
+  page?: number;
+  limit?: number;
+  q?: string;
+  status?: string;
+  engagement?: string;
+  risk?: string;
+}
 
 class PatientsService {
-  async getPatients(): Promise<Patient[]> {
-    const response = await api.get<Patient[]>("/chew/patients");
+  async getPatients(params?: QueryParams): Promise<PaginatedResponse<Patient>> {
+    const response = await api.get<PaginatedResponse<Patient>>("/chew/patients", { params });
     return response.data;
   }
 
-  async getUnassignedPatients(): Promise<Patient[]> {
-    const response = await api.get<Patient[]>("/chew/patients/unassigned");
+  async getUnassignedPatients(params?: QueryParams): Promise<PaginatedResponse<Patient>> {
+    const response = await api.get<PaginatedResponse<Patient>>("/chew/patients/unassigned", { params });
     return response.data;
   }
 
@@ -45,6 +59,11 @@ class PatientsService {
 
   async getTodaySummary(id: string): Promise<unknown> {
     const response = await api.get(`/chew/patients/${id}/summaries/today`);
+    return response.data;
+  }
+
+  async getPatientCheckins(id: string): Promise<PatientCheckinsResponse> {
+    const response = await api.get<PatientCheckinsResponse>(`/chew/patients/${id}/checkins`);
     return response.data;
   }
 }
