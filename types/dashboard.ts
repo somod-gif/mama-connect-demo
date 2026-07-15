@@ -66,19 +66,21 @@ export interface HighRiskPatient {
 export interface Referral {
   id: string;
   patientId: string;
-  patientName: string;
+  initiatedBy: string;
   reason: string;
-  hospital: string;
-  status: "pending" | "accepted" | "completed" | "cancelled";
-  notes?: string;
+  toFacility: string | null;
+  notes: string | null;
+  status: string;
+  createdByChewId: string | null;
   createdAt: string;
   updatedAt: string;
+  patient: { name: string; phone: string } | null;
 }
 
 export interface CreateReferralRequest {
   patientId: string;
   reason: string;
-  hospital: string;
+  toFacility?: string;
   notes?: string;
 }
 

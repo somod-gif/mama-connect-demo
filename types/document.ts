@@ -5,6 +5,7 @@ export interface UserDocument {
   type: DocumentType;
   url: string;
   verifiedAt: string | null;
+  rejectedAt: string | null;
   createdAt: string;
 }
 
