@@ -9,6 +9,7 @@ function getPageTitle(pathname: string): string {
   if (pathname.startsWith("/dashboard/mothers/")) return "Mother Profile";
   if (pathname === "/dashboard/mothers") return "Assigned Mothers";
   if (pathname === "/dashboard/find-mothers") return "Find Mothers";
+  if (pathname === "/dashboard/documents" || pathname.startsWith("/dashboard/documents/")) return "Documents";
   if (pathname === "/dashboard/referrals") return "Referrals";
   if (pathname === "/dashboard/profile") return "Profile";
   if (pathname === "/dashboard/settings") return "Settings";

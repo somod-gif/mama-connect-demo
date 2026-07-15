@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Users,
   UserPlus,
+  FileText,
   ArrowRightLeft,
   User,
   Settings,
@@ -24,6 +25,7 @@ const fullAccess = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/mothers", label: "Mothers", icon: Users },
   { href: "/dashboard/find-mothers", label: "Find Mothers", icon: UserPlus },
+  { href: "/dashboard/documents", label: "Documents", icon: FileText },
   { href: "/dashboard/referrals", label: "Referrals", icon: ArrowRightLeft },
 ];
 
