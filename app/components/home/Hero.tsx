@@ -52,7 +52,7 @@ export default function HomeHero() {
             <FadeInLeft delay={0.3}>
               <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-xl">
                 Connecting pregnant and postpartum women with Community Health
-                Extension Workers and healthcare facilities for timely,
+                Extension Workers (CHEWs) and healthcare facilities for timely,
                 life-saving care.
               </p>
             </FadeInLeft>
@@ -107,7 +107,7 @@ export default function HomeHero() {
                     { label: "Pregnant & Postpartum Women", color: "from-primary to-primary-dark" },
                     { label: "Community Health Extension Workers", color: "from-secondary to-secondary" },
                     { label: "Primary Healthcare Centres", color: "from-primary/80 to-primary" },
-                    { label: "Clinics & Hospitals", color: "from-primary/60 to-primary/80" },
+                    { label: "Secondary Healthcare Centers", color: "from-primary/60 to-primary/80" },
                   ].map((item, i) => (
                     <motion.div
                       key={item.label}
@@ -162,7 +162,7 @@ export default function HomeHero() {
               />
               <RoleCard
                 icon={Shield}
-                title="I am a Community Health Worker"
+                title="I am a Community Health Extension Worker"
                 description="Manage assigned mothers, receive risk alerts, track referrals, and monitor patient health from one dashboard."
                 href="/chew"
                 accent="purple"
