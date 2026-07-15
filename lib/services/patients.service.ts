@@ -1,20 +1,34 @@
 import { api } from "@/lib/api";
-import type { Patient, PatientDetail, MedicalAttribute, RecordAttributeRequest } from "@/lib/types/patient";
+import type { Patient, PatientDetail, PatientCheckinsResponse, MedicalAttribute, RecordAttributeRequest } from "@/lib/types/patient";
+
+interface PaginatedResponse<T> {
+  data: T[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+}
+
+interface QueryParams {
+  page?: number;
+  limit?: number;
+  q?: string;
+  status?: string;
+  engagement?: string;
+  risk?: string;
+}
 
 class PatientsService {
-  async getPatients(): Promise<Patient[]> {
-    const response = await api.get<Patient[]>("/chew/patients");
+  async getPatients(params?: QueryParams): Promise<PaginatedResponse<Patient>> {
+    const response = await api.get<PaginatedResponse<Patient>>("/chew/patients", { params });
     return response.data;
   }
 
-  async getUnassignedPatients(): Promise<Patient[]> {
-    const response = await api.get<Patient[]>("/chew/patients/unassigned");
+  async getUnassignedPatients(params?: QueryParams): Promise<PaginatedResponse<Patient>> {
+    const response = await api.get<PaginatedResponse<Patient>>("/chew/patients/unassigned", { params });
     return response.data;
   }
 
   async getPatientById(id: string): Promise<PatientDetail> {
-    const response = await api.get<PatientDetail>(`/chew/patients/${id}`);
-    return response.data;
+    const response = await api.get(`/chew/patients/${id}`);
+    return (response.data as { data: PatientDetail }).data;
   }
 
   async assignPatient(id: string): Promise<void> {
@@ -30,8 +44,8 @@ class PatientsService {
   }
 
   async getPatientAttributes(id: string): Promise<MedicalAttribute[]> {
-    const response = await api.get<MedicalAttribute[]>(`/chew/patients/${id}/attributes`);
-    return response.data;
+    const response = await api.get(`/chew/patients/${id}/attributes`);
+    return (response.data as { data: MedicalAttribute[] }).data;
   }
 
   async recordAttribute(id: string, data: RecordAttributeRequest): Promise<void> {
@@ -46,6 +60,11 @@ class PatientsService {
   async getTodaySummary(id: string): Promise<unknown> {
     const response = await api.get(`/chew/patients/${id}/summaries/today`);
     return response.data;
+  }
+
+  async getPatientCheckins(id: string): Promise<PatientCheckinsResponse> {
+    const response = await api.get(`/chew/patients/${id}/checkins`);
+    return (response.data as { data: PatientCheckinsResponse }).data;
   }
 }
 

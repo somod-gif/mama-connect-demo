@@ -1,5 +1,17 @@
 import type { VerificationStatus } from "./auth";
 
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: PaginationMeta;
+}
+
 export interface AdminDashboardData {
   totalUsers: number;
   totalPatients: number;
@@ -33,9 +45,24 @@ export interface AdminUser {
   role: string;
   verificationStatus: VerificationStatus;
   lga: LgaRef | null;
-  lgaId?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AdminUserDetail extends AdminUser {
+  patient?: { id: string; maternalId: string | null; name: string; verificationStatus: string } | null;
+  documents?: AdminDocument[];
+}
+
+export interface AdminPatientPregnancy {
+  isActive: boolean;
+  edd: string | null;
+  lmp: string | null;
+  gravida: number | null;
+  parity: number | null;
+  riskFactors: string | null;
+  careStatus: string | null;
+  engagementStatus: string | null;
 }
 
 export interface AdminPatient {
@@ -58,18 +85,24 @@ export interface AdminPatient {
   chew: { id: string; name: string } | null;
   createdAt: string;
   updatedAt: string;
-  pregnancies: unknown[];
+  pregnancies: AdminPatientPregnancy[];
 }
 
 export interface AdminDocument {
   id: string;
-  userId?: string;
-  chewName: string;
-  documentType: string;
-  uploadDate: string;
+  userId: string;
+  type: string;
+  url: string;
+  publicId: string | null;
+  verifiedAt: string | null;
+  verifiedById: string | null;
+  rejectedAt: string | null;
+  rejectedById: string | null;
+  createdAt: string;
   verificationStatus: VerificationStatus;
-  previewUrl?: string;
-  fileName?: string;
+  user: { id: string; name: string | null; phone: string | null };
+  verifiedBy: { id: string; name: string | null } | null;
+  rejectedBy: { id: string; name: string | null } | null;
 }
 
 export interface VerifyRequest {
@@ -96,8 +129,8 @@ export interface UpdateUserRequest {
 export interface UpdatePatientRequest {
   name?: string;
   age?: number;
-  state?: string;
-  lga?: string;
+  stateId?: string;
+  lgaId?: string;
   address?: string;
   preferredLanguage?: string;
   preferredChannel?: string;

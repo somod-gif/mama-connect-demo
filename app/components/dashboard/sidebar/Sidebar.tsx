@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Users,
   UserPlus,
+  FileText,
   ArrowRightLeft,
   User,
   Settings,
@@ -24,6 +25,7 @@ const fullAccess = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/mothers", label: "Mothers", icon: Users },
   { href: "/dashboard/find-mothers", label: "Find Mothers", icon: UserPlus },
+  { href: "/dashboard/documents", label: "Documents", icon: FileText },
   { href: "/dashboard/referrals", label: "Referrals", icon: ArrowRightLeft },
 ];
 
@@ -60,6 +62,8 @@ export default function Sidebar({
     ? fullAccess.filter((item) => !restrictedItems.includes(item.label))
     : fullAccess;
 
+  const closeMobile = mobileOpen ? onMobileToggle : () => {};
+
   const NavLink = ({
     item,
     collapsed,
@@ -74,6 +78,7 @@ export default function Sidebar({
     return (
       <Link
         href={item.href}
+        onClick={closeMobile}
         title={collapsed ? item.label : undefined}
         className={`flex items-center gap-3 px-3 py-2.5 min-h-[44px] rounded-lg text-sm font-medium transition-all ${
           isActive
@@ -127,7 +132,7 @@ export default function Sidebar({
           <NavLink key={item.href} item={item} collapsed={collapsed} />
         ))}
         <button
-          onClick={() => logout()}
+          onClick={() => { closeMobile(); logout(); }}
           title={collapsed ? "Logout" : undefined}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-all ${
             collapsed ? "justify-center px-0" : ""

@@ -2,6 +2,18 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Users, UserPlus, FileText, Clock, CheckCircle, Shield } from "lucide-react";
+
+function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
 import { adminService } from "@/services/admin.service";
 import type { AdminDashboardData } from "@/types/admin";
 
@@ -87,7 +99,7 @@ export default function AdminDashboard() {
                   <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
                   <div>
                     <p className="text-sm text-foreground">{item.description}</p>
-                    <p className="text-[11px] text-muted-foreground/60 mt-0.5">{item.timestamp}</p>
+                    <p className="text-[11px] text-muted-foreground/60 mt-0.5">{timeAgo(item.timestamp)}</p>
                   </div>
                 </div>
               ))}

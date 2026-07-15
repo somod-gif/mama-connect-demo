@@ -18,10 +18,11 @@ import { toast } from "sonner";
 import type { Referral, CreateReferralRequest } from "@/lib/types/dashboard";
 
 const statusStyles: Record<string, string> = {
-  pending: "bg-amber-50 text-amber-700 border-amber-200",
-  accepted: "bg-blue-50 text-blue-700 border-blue-200",
-  completed: "bg-green-50 text-green-700 border-green-200",
-  cancelled: "bg-gray-50 text-gray-500 border-gray-200",
+  CREATED: "bg-amber-50 text-amber-700 border-amber-200",
+  ACKNOWLEDGED: "bg-blue-50 text-blue-700 border-blue-200",
+  ARRIVED: "bg-purple-50 text-purple-700 border-purple-200",
+  CARE_PROVIDED: "bg-green-50 text-green-700 border-green-200",
+  CLOSED: "bg-gray-50 text-gray-500 border-gray-200",
 };
 
 export default function ReferralsPage() {
@@ -37,7 +38,7 @@ function ReferralsContent() {
   const [form, setForm] = useState<CreateReferralRequest>({
     patientId: "",
     reason: "",
-    hospital: "",
+    toFacility: "",
     notes: "",
   });
   const queryClient = useQueryClient();
@@ -47,10 +48,11 @@ function ReferralsContent() {
     queryFn: () => referralsService.getReferrals(),
   });
 
-  const { data: patients = [] } = useQuery({
+  const { data: patientsRes } = useQuery({
     queryKey: ["chew", "patients"],
     queryFn: () => patientsService.getPatients(),
   });
+  const patients = patientsRes?.data ?? [];
 
   const createMutation = useMutation({
     mutationFn: (data: CreateReferralRequest) => referralsService.createReferral(data),
@@ -58,13 +60,13 @@ function ReferralsContent() {
       queryClient.invalidateQueries({ queryKey: ["chew", "referrals"] });
       toast.success("Referral created");
       setShowCreate(false);
-      setForm({ patientId: "", reason: "", hospital: "", notes: "" });
+      setForm({ patientId: "", reason: "", toFacility: "", notes: "" });
     },
     onError: () => toast.error("Failed to create referral"),
   });
 
   const handleCreate = () => {
-    if (!form.patientId || !form.reason || !form.hospital) {
+    if (!form.patientId || !form.reason || !form.toFacility) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -112,16 +114,16 @@ function ReferralsContent() {
                 className="bg-card border border-border rounded-2xl p-5 hover:shadow-card-hover transition-shadow"
               >
                 <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-foreground">{r.patientName}</h3>
-                  <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-full border ${statusStyles[r.status] || ""}`}>
-                    {r.status}
+                  <h3 className="text-sm font-semibold text-foreground">{r.patient?.name || "—"}</h3>
+                  <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-full border ${statusStyles[r.status] || "bg-gray-50 text-gray-500 border-gray-200"}`}>
+                    {r.status.replace(/_/g, " ")}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground mb-1">
                   <span className="font-medium">Reason:</span> {r.reason}
                 </p>
                 <p className="text-xs text-muted-foreground mb-1">
-                  <span className="font-medium">Hospital:</span> {r.hospital}
+                  <span className="font-medium">Hospital:</span> {r.toFacility || "—"}
                 </p>
                 <p className="text-xs text-muted-foreground">{r.createdAt}</p>
               </motion.div>
@@ -154,7 +156,7 @@ function ReferralsContent() {
                 >
                   <option value="">Select patient</option>
                   {patients.map((p) => (
-                    <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>
+                    <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
                 </select>
               </div>
@@ -174,8 +176,8 @@ function ReferralsContent() {
                 <label className="block text-sm font-medium text-foreground mb-1.5">Hospital / Facility</label>
                 <input
                   type="text"
-                  value={form.hospital}
-                  onChange={(e) => setForm((p) => ({ ...p, hospital: e.target.value }))}
+                  value={form.toFacility || ""}
+                  onChange={(e) => setForm((p) => ({ ...p, toFacility: e.target.value }))}
                   placeholder="e.g. General Hospital"
                   className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 />

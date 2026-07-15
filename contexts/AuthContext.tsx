@@ -44,7 +44,6 @@ function parseUserFromToken(): User | null {
       verificationStatus: (payload.verificationStatus || "PENDING") as VerificationStatus,
       state: payload.state,
       lga: payload.lga,
-      primaryHealthcareCentre: payload.primaryHealthcareCentre,
       preferredLanguage: payload.preferredLanguage,
     };
   } catch {
@@ -68,6 +67,25 @@ function setStoredUser(user: User): void {
 function clearStoredUser(): void {
   if (typeof window === "undefined") return;
   try { localStorage.removeItem("mama_user"); } catch { }
+}
+
+function userFromProfile(profile: Record<string, unknown>): User {
+  const lgaObj = profile.lga && typeof profile.lga === "object"
+    ? profile.lga as { id: string; name: string; state: { id: string; name: string } }
+    : null;
+  return {
+    id: profile.id as string,
+    name: profile.name as string | undefined,
+    firstName: (profile.name as string)?.split(" ")[0] || (profile.firstName as string) || "",
+    lastName: (profile.name as string)?.split(" ").slice(1).join(" ") || (profile.lastName as string) || "",
+    email: profile.email as string,
+    phone: (profile.phone as string) || "",
+    role: (profile.role as UserRole) || "CHEW",
+    verificationStatus: (profile.verificationStatus as VerificationStatus) || "PENDING",
+    state: lgaObj?.state?.name || (typeof profile.lga === "string" ? profile.lga : undefined),
+    lga: lgaObj?.name || (typeof profile.lga === "string" ? profile.lga : undefined),
+    facility: (profile.facility as string) || undefined,
+  };
 }
 
 function extractErrorMessage(error: unknown): string {
@@ -98,45 +116,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const token = getAccessToken();
       if (token) {
-        const user = parseUserFromToken() || getStoredUser();
-        if (user) {
+        try {
+          const profile = await authService.getMe() as unknown as Record<string, unknown>;
+          const user = userFromProfile(profile);
           setStoredUser(user);
           setState({ user, isAuthenticated: true, isLoading: false });
           return;
+        } catch {
+          const user = parseUserFromToken() || getStoredUser();
+          if (user) {
+            setStoredUser(user);
+            setState({ user, isAuthenticated: true, isLoading: false });
+            return;
+          }
         }
-      }
-
-      const storedUser = getStoredUser();
-      if (storedUser) {
-        setState({ user: storedUser, isAuthenticated: true, isLoading: false });
-        const storedRefreshToken = getRefreshToken();
-        if (storedRefreshToken) {
-          try {
-            const response = await authService.refresh(storedRefreshToken);
-            setAccessToken(response.accessToken);
-            setRefreshToken(response.refreshToken);
-            syncAuthToCookie();
-            const freshUser = parseUserFromToken();
-            if (freshUser) {
-              setStoredUser(freshUser);
-              setState({ user: freshUser, isAuthenticated: true, isLoading: false });
-            }
-          } catch { }
-        }
-        return;
       }
 
       const storedRefreshToken = getRefreshToken();
       if (storedRefreshToken) {
-        const response = await authService.refresh(storedRefreshToken);
-        setAccessToken(response.accessToken);
-        setRefreshToken(response.refreshToken);
-        syncAuthToCookie();
-        const user = parseUserFromToken();
-        if (user) {
-          setStoredUser(user);
-          setState({ user, isAuthenticated: true, isLoading: false });
-          return;
+        try {
+          const response = await authService.refresh(storedRefreshToken);
+          setAccessToken(response.accessToken);
+          setRefreshToken(response.refreshToken);
+          syncAuthToCookie();
+
+          try {
+            const profile = await authService.getMe() as unknown as Record<string, unknown>;
+            const user = userFromProfile(profile);
+            setStoredUser(user);
+            setState({ user, isAuthenticated: true, isLoading: false });
+            return;
+          } catch {
+            const user = parseUserFromToken();
+            if (user) {
+              setStoredUser(user);
+              setState({ user, isAuthenticated: true, isLoading: false });
+              return;
+            }
+          }
+        } catch {
+          const storedUser = getStoredUser();
+          if (storedUser) {
+            setState({ user: storedUser, isAuthenticated: true, isLoading: false });
+            return;
+          }
         }
       }
 
@@ -162,20 +185,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRefreshToken(response.refreshToken);
         syncAuthToCookie();
 
-        const profile = await authService.getMe();
-        const lgaObj = profile.lga && typeof profile.lga === "object" ? profile.lga as { id: string; name: string; state: { id: string; name: string } } : null;
-        const user: User = {
-          id: profile.id,
-          name: profile.name,
-          firstName: profile.name?.split(" ")[0] || profile.firstName || "",
-          lastName: profile.name?.split(" ").slice(1).join(" ") || profile.lastName || "",
-          email: profile.email,
-          phone: profile.phone || "",
-          role: profile.role as UserRole,
-          verificationStatus: (profile.verificationStatus || "PENDING") as VerificationStatus,
-          state: lgaObj?.state?.name || (typeof profile.lga === "string" ? profile.lga : undefined),
-          lga: lgaObj?.name || (typeof profile.lga === "string" ? profile.lga : undefined),
-        };
+        const profile = await authService.getMe() as unknown as Record<string, unknown>;
+        const user = userFromProfile(profile);
         setStoredUser(user);
         setState({ user, isAuthenticated: true, isLoading: false });
 
@@ -203,7 +214,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           stateId: data.stateId,
           lgaId: data.lgaId,
           primaryHealthcareCentre: data.primaryHealthcareCentre,
-          preferredLanguage: data.preferredLanguage,
         }));
 
         const user = parseUserFromToken();
@@ -255,10 +265,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAccessToken(response.accessToken);
       setRefreshToken(response.refreshToken);
       syncAuthToCookie();
-      const user = parseUserFromToken();
-      if (user) {
+
+      try {
+        const profile = await authService.getMe() as unknown as Record<string, unknown>;
+        const user = userFromProfile(profile);
         setStoredUser(user);
         setState((prev) => ({ ...prev, user }));
+      } catch {
+        const user = parseUserFromToken();
+        if (user) {
+          setStoredUser(user);
+          setState((prev) => ({ ...prev, user }));
+        }
       }
     } catch {
       clearTokens();
