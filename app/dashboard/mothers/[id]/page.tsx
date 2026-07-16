@@ -10,15 +10,18 @@ import {
   ChevronRight, MessageSquare, User, Globe,
   Loader2, Baby, Droplets, Scale, Thermometer,
   Stethoscope, Syringe, FileText, Eye,
-  ChevronDown, ChevronUp, Mail, X, ExternalLink,
+  ChevronDown, ChevronUp, Mail, X, ExternalLink, CheckCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { patientsService } from "@/lib/services/patients.service";
+import { chewService } from "@/lib/services/chew.service";
 import { referralsService } from "@/lib/services/referrals.service";
 import { FadeInUp } from "@/app/components/animations";
 import { RequireVerified } from "@/app/components/shared/VerificationGate";
+import { ConfirmDialog } from "@/app/components/shared/ConfirmDialog";
 import type { PatientDetail, MedicalAttribute, PatientCheckinsResponse } from "@/types/patient";
 import { computePregnancyWeek } from "@/lib/utils/date";
+import { careStatusToRiskLevel, normalizeRiskFactors } from "@/lib/utils";
 
 const riskStyles: Record<string, string> = {
   HIGH: "bg-red-50 text-red-700 border-red-200",
@@ -51,8 +54,8 @@ function MotherProfileContent() {
   const id = params.id as string;
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
-  const [showMedicalForm, setShowMedicalForm] = useState(false);
   const [showReferralModal, setShowReferralModal] = useState(false);
+  const [showVerify, setShowVerify] = useState(false);
 
   const { data: patient, isLoading } = useQuery({
     queryKey: ["chew", "patient", id],
@@ -70,6 +73,35 @@ function MotherProfileContent() {
     queryKey: ["chew", "patient", id, "attributes"],
     queryFn: () => patientsService.getPatientAttributes(id),
     enabled: activeTab === "medical" && !!id,
+  });
+
+  const alertQueryClient = useQueryClient();
+  const acknowledgeAlertMutation = useMutation({
+    mutationFn: (alertId: string) => chewService.acknowledgeAlert(alertId),
+    onSuccess: () => {
+      alertQueryClient.invalidateQueries({ queryKey: ["chew", "patient", id] });
+      toast.success("Concern acknowledged");
+    },
+    onError: () => toast.error("Failed to acknowledge concern"),
+  });
+  const resolveAlertMutation = useMutation({
+    mutationFn: (alertId: string) => chewService.resolveAlert(alertId),
+    onSuccess: () => {
+      alertQueryClient.invalidateQueries({ queryKey: ["chew", "patient", id] });
+      toast.success("Concern resolved");
+    },
+    onError: () => toast.error("Failed to resolve concern"),
+  });
+
+  const verifyMutation = useMutation({
+    mutationFn: () => patientsService.verifyPatient(id),
+    onSuccess: () => {
+      setShowVerify(false);
+      alertQueryClient.invalidateQueries({ queryKey: ["chew", "patient", id] });
+      alertQueryClient.invalidateQueries({ queryKey: ["chew", "patients"] });
+      toast.success("Mother verified — Maternal ID issued");
+    },
+    onError: () => toast.error("Failed to verify mother"),
   });
 
   const createReferralMutation = useMutation({
@@ -104,7 +136,7 @@ function MotherProfileContent() {
   const activePregnancy = patient.pregnancies?.find(p => p.isActive);
   const pregnancyWeek = activePregnancy?.edd ? computePregnancyWeek(activePregnancy.edd) : null;
   const initials = patient.name.split(" ").map(s => s[0]).join("").toUpperCase().slice(0, 2);
-  const riskText = activePregnancy?.riskFactors?.toLowerCase() || "low";
+  const riskText = careStatusToRiskLevel(activePregnancy?.careStatus);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -144,6 +176,15 @@ function MotherProfileContent() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {patient.verificationStatus === "PENDING" && (
+                <button
+                  onClick={() => setShowVerify(true)}
+                  disabled={verifyMutation.isPending}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 disabled:opacity-50 transition-all"
+                >
+                  <CheckCircle className="w-4 h-4" /> Verify
+                </button>
+              )}
               <a
                 href={`tel:${patient.phone}`}
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-primary bg-primary-light rounded-xl hover:bg-primary-light/80 transition-all"
@@ -156,7 +197,7 @@ function MotherProfileContent() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               { icon: Phone, label: "Phone", value: patient.phone || "—" },
-              { icon: Globe, label: "Language", value: patient.preferredLanguage || patient.user?.phone || "—" },
+              { icon: Globe, label: "Language", value: patient.preferredLanguage || "—" },
               { icon: MapPin, label: "LGA", value: patient.lga?.name || "—" },
               { icon: Shield, label: "Status", value: patient.verificationStatus || "—" },
               { icon: Calendar, label: "Last Activity", value: patient.lastActivityAt ? new Date(patient.lastActivityAt).toLocaleDateString() : "N/A" },
@@ -175,6 +216,72 @@ function MotherProfileContent() {
           </div>
         </div>
       </FadeInUp>
+
+      {patient.openAlerts && patient.openAlerts.length > 0 && (
+        <FadeInUp delay={0.03}>
+          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-rose-600" />
+              <h3 className="text-sm font-bold text-rose-900">
+                Open Concerns ({patient.openAlerts.length})
+              </h3>
+            </div>
+            <div className="space-y-2">
+              {patient.openAlerts.map((alert) => {
+                const sev =
+                  alert.severity === "HIGH"
+                    ? "bg-rose-100 text-rose-700"
+                    : alert.severity === "MEDIUM"
+                      ? "bg-amber-100 text-amber-700"
+                      : "bg-slate-100 text-slate-700";
+                return (
+                  <div
+                    key={alert.id}
+                    className="flex items-start gap-3 p-3 rounded-xl bg-white border border-rose-100"
+                  >
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${sev}`}
+                    >
+                      {alert.severity}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground">
+                        {alert.concern}
+                      </p>
+                      {alert.reason && (
+                        <p className="text-xs text-muted-foreground/80 mt-0.5">
+                          {alert.reason}
+                        </p>
+                      )}
+                      <p className="text-[11px] text-muted-foreground/60 mt-1">
+                        {new Date(alert.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-1 flex-shrink-0">
+                      {alert.status === "NEW" && (
+                        <button
+                          onClick={() => acknowledgeAlertMutation.mutate(alert.id)}
+                          disabled={acknowledgeAlertMutation.isPending}
+                          className="text-[11px] font-semibold px-2 py-1 rounded-lg bg-rose-100 text-rose-700 hover:bg-rose-200 disabled:opacity-50"
+                        >
+                          Ack
+                        </button>
+                      )}
+                      <button
+                        onClick={() => resolveAlertMutation.mutate(alert.id)}
+                        disabled={resolveAlertMutation.isPending}
+                        className="text-[11px] font-semibold px-2 py-1 rounded-lg bg-card border border-border text-muted-foreground hover:bg-background-soft disabled:opacity-50"
+                      >
+                        Resolve
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </FadeInUp>
+      )}
 
       <FadeInUp delay={0.05}>
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
@@ -200,13 +307,13 @@ function MotherProfileContent() {
               <OverviewTab
                 patient={patient}
                 pregnancyWeek={pregnancyWeek}
-                onRecordObservation={() => { setActiveTab("medical"); setShowMedicalForm(true); }}
+                onRecordObservation={() => { setActiveTab("medical"); }}
                 onRefer={() => setShowReferralModal(true)}
               />
             )}
             {activeTab === "checkins" && <CheckinsTab data={checkins} />}
             {activeTab === "medical" && (
-              <MedicalTab data={attributes} patientId={id} showForm={showMedicalForm} onCloseForm={() => setShowMedicalForm(false)} />
+              <MedicalTab data={attributes} patientId={id} />
             )}
             {activeTab === "activity" && <ActivityTab patient={patient} />}
           </div>
@@ -227,6 +334,17 @@ function MotherProfileContent() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={showVerify}
+        title="Verify mother's enrollment?"
+        description="This confirms the enrollment and issues a Maternal ID."
+        confirmLabel="Verify"
+        variant="success"
+        isPending={verifyMutation.isPending}
+        onConfirm={() => verifyMutation.mutate()}
+        onCancel={() => setShowVerify(false)}
+      />
     </div>
   );
 }
@@ -276,7 +394,7 @@ function ReferralForm({ onSubmit, isPending }: { onSubmit: (data: { reason: stri
 
 function OverviewTab({ patient, pregnancyWeek, onRecordObservation, onRefer }: { patient: PatientDetail; pregnancyWeek: number | null; onRecordObservation: () => void; onRefer: () => void }) {
   const activePregnancy = patient.pregnancies?.find(p => p.isActive);
-  const riskFactors = activePregnancy?.riskFactors ? activePregnancy.riskFactors.split(",").map(s => s.trim()).filter(Boolean) : [];
+  const riskFactors = normalizeRiskFactors(activePregnancy?.riskFactors);
 
   return (
     <div className="space-y-6">
@@ -411,14 +529,9 @@ function CheckinsTab({ data }: { data: PatientCheckinsResponse | undefined }) {
   );
 }
 
-function MedicalTab({ data, patientId, showForm: controlledShowForm, onCloseForm }: { data: MedicalAttribute[] | undefined; patientId: string; showForm?: boolean; onCloseForm?: () => void }) {
+function MedicalTab({ data, patientId }: { data: MedicalAttribute[] | undefined; patientId: string }) {
   const queryClient = useQueryClient();
-  const [internalShowForm, setInternalShowForm] = useState(false);
-  const showForm = controlledShowForm ?? internalShowForm;
-  const setShowForm = (v: boolean) => {
-    setInternalShowForm(v);
-    if (!v) onCloseForm?.();
-  };
+  const [showForm, setShowForm] = useState(false);
   const [attrType, setAttrType] = useState("");
   const [attrValue, setAttrValue] = useState("");
   const [attrUnit, setAttrUnit] = useState("");
@@ -431,7 +544,14 @@ function MedicalTab({ data, patientId, showForm: controlledShowForm, onCloseForm
       return;
     }
     try {
-      await patientsService.recordAttribute(patientId, { type: attrType, value: attrValue, unit: attrUnit || undefined });
+      await patientsService.recordAttribute(patientId, {
+        attributes: [
+          {
+            attributeKey: attrType,
+            attributeValue: attrUnit ? `${attrValue} ${attrUnit}` : attrValue,
+          },
+        ],
+      });
       queryClient.invalidateQueries({ queryKey: ["chew", "patient", patientId, "attributes"] });
       toast.success("Attribute recorded");
       setAttrType("");
@@ -475,7 +595,7 @@ function MedicalTab({ data, patientId, showForm: controlledShowForm, onCloseForm
       {records.length > 0 && (
         <div className="space-y-2">
           {records.map((attr, idx) => {
-            const Icon = iconMap[attr.type] || Activity;
+            const Icon = iconMap[attr.attributeKey] || Activity;
             return (
               <div key={attr.id || idx} className="flex items-center justify-between p-3 rounded-xl bg-background-soft text-sm">
                 <div className="flex items-center gap-3 min-w-0">
@@ -483,14 +603,16 @@ function MedicalTab({ data, patientId, showForm: controlledShowForm, onCloseForm
                     <Icon className="w-4 h-4 text-primary" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium capitalize">{attr.type.replace(/_/g, " ").toLowerCase()}</p>
+                    <p className="font-medium capitalize">{attr.attributeKey.replace(/_/g, " ").toLowerCase()}</p>
                     <p className="text-xs text-muted-foreground">
-                      {attr.value}{attr.unit ? ` ${attr.unit}` : ""}
+                      {attr.attributeValue}
                     </p>
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0 ml-3">
-                  <p className="text-xs text-muted-foreground">{new Date(attr.recordedAt).toLocaleDateString()}</p>
+                  {attr.recordedAt && (
+                    <p className="text-xs text-muted-foreground">{new Date(attr.recordedAt).toLocaleDateString()}</p>
+                  )}
                   {attr.recordedBy && <p className="text-[10px] text-muted-foreground/60">{attr.recordedBy}</p>}
                 </div>
               </div>
@@ -567,8 +689,9 @@ function ActivityTab({ patient }: { patient: PatientDetail }) {
     id: string;
     date: string;
     summary: string | null;
-    toolCallsCount: number;
-    flags: string | null;
+    messageCount?: number;
+    hadFlags?: boolean;
+    hadToolCalls?: boolean;
   }> | undefined;
 
   if (!summaries?.length) {
@@ -582,26 +705,24 @@ function ActivityTab({ patient }: { patient: PatientDetail }) {
 
   return (
     <div className="space-y-3">
-      {summaries.map(s => (
+      {summaries.map((s) => (
         <div key={s.id} className="p-4 rounded-xl bg-background-soft space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">{new Date(s.date).toLocaleDateString()}</span>
-            {s.toolCallsCount > 0 && (
-              <span className="text-[10px] px-2 py-0.5 bg-primary-light text-primary rounded-full font-medium">
-                {s.toolCallsCount} tool calls
-              </span>
-            )}
+            <div className="flex items-center gap-1.5">
+              {s.messageCount ? (
+                <span className="text-[10px] px-2 py-0.5 bg-primary-light text-primary rounded-full font-medium">
+                  {s.messageCount} messages
+                </span>
+              ) : null}
+              {s.hadFlags ? (
+                <span className="text-[10px] px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full border border-amber-200 font-medium">
+                  Had concerns
+                </span>
+              ) : null}
+            </div>
           </div>
           {s.summary && <p className="text-sm text-foreground">{s.summary}</p>}
-          {s.flags && (
-            <div className="flex flex-wrap gap-1.5">
-              {s.flags.split(",").map(f => (
-                <span key={f} className="px-2 py-0.5 text-[10px] bg-amber-50 text-amber-700 rounded-full border border-amber-200">
-                  {f.trim()}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
       ))}
     </div>

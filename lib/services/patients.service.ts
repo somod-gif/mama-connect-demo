@@ -13,6 +13,7 @@ interface QueryParams {
   status?: string;
   engagement?: string;
   risk?: string;
+  alerts?: string;
 }
 
 class PatientsService {

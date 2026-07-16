@@ -1,1 +1,1 @@
-export type { DashboardData, ActivityItem, DashboardStats, RecentActivity, HighRiskPatient, Referral, CreateReferralRequest, ReportData, PatientCounts, RecentPatient } from "@/types/dashboard";
+export type { DashboardData, ActivityItem, DashboardStats, RecentActivity, HighRiskPatient, Referral, CreateReferralRequest, ReportData, PatientCounts, RecentPatient, OpenAlert } from "@/types/dashboard";
