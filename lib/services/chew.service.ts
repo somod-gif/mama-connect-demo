@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+import type { OpenAlert } from "@/types/dashboard";
 
 interface ChewProfile {
   id: string;
@@ -37,6 +38,19 @@ class ChewService {
   async getDashboard(): Promise<unknown> {
     const response = await api.get("/chew/dashboard");
     return response.data;
+  }
+
+  async acknowledgeAlert(id: string): Promise<void> {
+    await api.patch(`/chew/alerts/${id}/acknowledge`);
+  }
+
+  async resolveAlert(id: string, note?: string): Promise<void> {
+    await api.patch(`/chew/alerts/${id}/resolve`, note ? { note } : {});
+  }
+
+  async getAlerts(): Promise<OpenAlert[]> {
+    const response = await api.get<{ data: OpenAlert[] }>("/chew/alerts");
+    return response.data.data;
   }
 }
 

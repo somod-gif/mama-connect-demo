@@ -1,0 +1,27 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "features",
+    "fix/admin-polish",
+    "main",
+    "new-features",
+    "origin",
+    "version-two"
+  ],
+  "parent": {
+    "features": "main",
+    "fix/admin-polish": "main",
+    "main": null,
+    "new-features": "main",
+    "origin": "main",
+    "version-two": "main"
+  },
+  "order": [
+    "main",
+    "features",
+    "fix/admin-polish",
+    "new-features",
+    "origin",
+    "version-two"
+  ]
+}

@@ -2,13 +2,15 @@ export type RiskLevel = "low" | "medium" | "high";
 export type PatientStatus = "active" | "postpartum" | "transferred" | "discharged";
 export type VerificationStatus = "PENDING" | "VERIFIED" | "REJECTED";
 
+import type { OpenAlert } from "@/types/dashboard";
+
 export interface PatientPregnancy {
   id: string;
   lmp: string | null;
   edd: string | null;
   gravida: number | null;
   parity: number | null;
-  riskFactors: string | null;
+  riskFactors: string[] | null;
   careStatus: string | null;
   engagementStatus: string | null;
   isActive: boolean;
@@ -37,6 +39,7 @@ export interface Patient {
   chew: { id: string; name: string; phone: string } | null;
   user: { id: string; name: string; phone: string; role: string };
   pregnancies: PatientPregnancy[];
+  openAlerts?: OpenAlert[];
 }
 
 export interface PatientDetail extends Patient {
@@ -72,18 +75,22 @@ export interface PatientAlert {
 
 export interface MedicalAttribute {
   id: string;
-  type: string;
-  value: string;
-  unit: string;
-  recordedAt: string;
-  recordedBy: string;
+  attributeKey: string;
+  attributeValue: string;
+  category?: string | null;
+  notes?: string | null;
+  source?: string;
+  recordedAt?: string;
+  recordedBy?: string | null;
 }
 
 export interface RecordAttributeRequest {
-  type: string;
-  value: string;
-  unit?: string;
-  notes?: string;
+  attributes: Array<{
+    attributeKey: string;
+    attributeValue: string;
+    category?: string;
+    notes?: string;
+  }>;
 }
 
 export interface PatientCheckinsResponse {

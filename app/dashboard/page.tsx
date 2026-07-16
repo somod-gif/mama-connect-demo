@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import {
   Users,
@@ -23,6 +23,7 @@ import {
   HeartPulse,
 } from "lucide-react";
 import { dashboardService } from "@/lib/services/dashboard.service";
+import { chewService } from "@/lib/services/chew.service";
 import { documentService } from "@/services/document.service";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -167,6 +168,16 @@ export default function DashboardHome() {
     queryFn: () => dashboardService.getDashboard(),
   });
 
+  const queryClient = useQueryClient();
+  const acknowledgeAlert = useMutation({
+    mutationFn: (id: string) => chewService.acknowledgeAlert(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["chew", "dashboard"] }),
+  });
+  const resolveAlert = useMutation({
+    mutationFn: (id: string) => chewService.resolveAlert(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["chew", "dashboard"] }),
+  });
+
   const needsAttention = (data?.overdueCheckIns ?? 0) + (data?.unverifiedFlagCount ?? 0);
 
   return (
@@ -301,6 +312,85 @@ export default function DashboardHome() {
                 {data && data.overdueCheckIns > 0 && data.unverifiedFlagCount > 0 && " · "}
                 {data && data.unverifiedFlagCount > 0 && `${data.unverifiedFlagCount} unverified flag${data.unverifiedFlagCount !== 1 ? "s" : ""}`}
               </p>
+            </div>
+          </div>
+        </FadeInUp>
+      )}
+
+      {data?.openAlerts && data.openAlerts.length > 0 && (
+        <FadeInUp>
+          <div className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-600" />
+                Open Concerns ({data.openAlerts.length})
+              </h3>
+              <Link
+                href="/dashboard/mothers"
+                className="text-xs font-semibold text-primary hover:underline"
+              >
+                View all mothers
+              </Link>
+            </div>
+            <div className="space-y-2">
+              {data.openAlerts.map((alert) => {
+                const severityClass =
+                  alert.severity === "HIGH"
+                    ? "bg-rose-100 text-rose-700"
+                    : alert.severity === "MEDIUM"
+                      ? "bg-amber-100 text-amber-700"
+                      : "bg-slate-100 text-slate-700";
+                return (
+                  <div
+                    key={alert.id}
+                    className="flex items-start gap-3 p-3 rounded-xl bg-background-soft"
+                  >
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${severityClass}`}
+                    >
+                      {alert.severity}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground truncate">
+                        {alert.patientName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{alert.concern}</p>
+                      {alert.reason && (
+                        <p className="text-[11px] text-muted-foreground/70 mt-0.5 line-clamp-2">
+                          {alert.reason}
+                        </p>
+                      )}
+                      <p className="text-[11px] text-muted-foreground/60 mt-1">
+                        {getRelativeTime(alert.createdAt)}
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-1 flex-shrink-0">
+                      {alert.status === "NEW" && (
+                        <button
+                          onClick={() => acknowledgeAlert.mutate(alert.id)}
+                          disabled={acknowledgeAlert.isPending}
+                          className="text-[11px] font-semibold px-2 py-1 rounded-lg bg-primary-light text-primary hover:bg-primary-light/80 disabled:opacity-50"
+                        >
+                          Ack
+                        </button>
+                      )}
+                      <button
+                        onClick={() => resolveAlert.mutate(alert.id)}
+                        disabled={resolveAlert.isPending}
+                        className="text-[11px] font-semibold px-2 py-1 rounded-lg bg-card border border-border text-muted-foreground hover:bg-background-soft disabled:opacity-50"
+                      >
+                        Resolve
+                      </button>
+                      <Link
+                        href={`/dashboard/mothers/${alert.patientId}`}
+                        className="text-[11px] font-semibold px-2 py-1 rounded-lg text-primary text-center hover:underline"
+                      >
+                        View
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </FadeInUp>
