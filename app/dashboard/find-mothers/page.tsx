@@ -49,7 +49,7 @@ function FindMothersContent() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["chew", "patients"] });
       queryClient.invalidateQueries({ queryKey: ["chew", "patients", "unassigned"] });
-      toast.success("Mother assigned to you");
+      toast.success("Mother assigned to you. Verify her enrollment to issue a Maternal ID.");
     },
     onError: () => toast.error("Failed to assign mother"),
   });

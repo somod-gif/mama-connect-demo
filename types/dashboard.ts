@@ -7,8 +7,23 @@ export interface DashboardData {
   overdueCheckIns: number;
   engagementIssueCount: number;
   unverifiedFlagCount: number;
+  openAlerts: OpenAlert[];
+  highRiskPatients: HighRiskPatient[];
   recentPatients: RecentPatient[];
   recentActivity: ActivityItem[];
+}
+
+export interface OpenAlert {
+  id: string;
+  patientId: string;
+  patientName: string;
+  maternalId: string | null;
+  phone: string | null;
+  concern: string;
+  reason: string;
+  severity: "LOW" | "MEDIUM" | "HIGH";
+  status: "NEW" | "ACKNOWLEDGED" | "RESOLVED";
+  createdAt: string;
 }
 
 export interface PatientCounts {

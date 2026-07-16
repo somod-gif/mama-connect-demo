@@ -60,7 +60,7 @@ export interface AdminPatientPregnancy {
   lmp: string | null;
   gravida: number | null;
   parity: number | null;
-  riskFactors: string | null;
+  riskFactors: string[] | null;
   careStatus: string | null;
   engagementStatus: string | null;
 }
