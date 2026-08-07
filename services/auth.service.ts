@@ -16,6 +16,16 @@ class AuthService {
     return response.data;
   }
 
+  async registerCustomer(data: {
+    name: string;
+    email?: string;
+    phone: string;
+    password: string;
+  }): Promise<TokenResponse> {
+    const response = await api.post<TokenResponse>("/auth/register-customer", data);
+    return response.data;
+  }
+
   async setPassword(data: SetPasswordRequest): Promise<SetPasswordResponse> {
     const response = await api.post<SetPasswordResponse>("/auth/set-password", data);
     return response.data;

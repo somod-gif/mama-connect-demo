@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   Clock,
   Bell,
+  Package,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { VerificationBadge } from "@/app/components/shared/VerificationGate";
@@ -29,9 +30,10 @@ const fullAccess = [
   { href: "/dashboard/find-mothers", label: "Find Mothers", icon: UserPlus },
   { href: "/dashboard/documents", label: "Documents", icon: FileText },
   { href: "/dashboard/referrals", label: "Referrals", icon: ArrowRightLeft },
+  { href: "/dashboard/deliveries", label: "Deliveries", icon: Package },
 ];
 
-const restrictedItems = ["Mothers", "Find Mothers", "Referrals", "Concerns"];
+const restrictedItems = ["Mothers", "Find Mothers", "Referrals", "Concerns", "Deliveries"];
 
 const bottomItems = [
   { href: "/dashboard/profile", label: "Profile", icon: User },

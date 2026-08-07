@@ -85,6 +85,11 @@ function userFromProfile(profile: Record<string, unknown>): User {
     state: lgaObj?.state?.name || (typeof profile.lga === "string" ? profile.lga : undefined),
     lga: lgaObj?.name || (typeof profile.lga === "string" ? profile.lga : undefined),
     facility: (profile.facility as string) || undefined,
+    organizationId: (profile.organizationId as string) || undefined,
+    organizationName: (profile.organizationName as string) || undefined,
+    patient: profile.patient
+      ? (profile.patient as User["patient"])
+      : undefined,
   };
 }
 
