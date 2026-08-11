@@ -14,6 +14,36 @@ let failedQueue: Array<{
   reject: (error: unknown) => void;
 }> = [];
 
+/**
+ * Endpoints where a 401 is a *request* failure (bad credentials, expired
+ * refresh token), not a sign the access token expired. Retrying them through
+ * the refresh flow masks the real error (e.g. login with a wrong password
+ * would surface "No refresh token available" instead of "Invalid
+ * credentials") and could loop/hard-redirect the user.
+ */
+const AUTH_ENDPOINTS = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/refresh",
+  "/auth/logout",
+  "/auth/set-password",
+  "/auth/register-customer",
+  "/auth/change-password",
+  "/auth/request-otp",
+  "/auth/verify-otp",
+];
+
+function isAuthEndpoint(url?: string): boolean {
+  if (!url) return false;
+  return AUTH_ENDPOINTS.some((endpoint) => url.includes(endpoint));
+}
+
+/** Fired when a refresh attempt fails and the session is genuinely dead. */
+export function dispatchSessionExpired(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent("auth:session-expired"));
+}
+
 function processQueue(error: unknown, token: string | null): void {
   failedQueue.forEach((promise) => {
     if (error) {
@@ -87,6 +117,22 @@ export function clearTokens(): void {
   }
 }
 
+function setCookie(name: string, value: string): void {
+  if (typeof window === "undefined") return;
+  document.cookie = `${name}=${value}; path=/; max-age=86400; SameSite=Lax`;
+}
+
+function removeCookie(name: string): void {
+  if (typeof window === "undefined") return;
+  document.cookie = `${name}=; path=/; max-age=0`;
+}
+
+export function syncAuthToCookie(): void {
+  const token = getAccessToken();
+  if (token) setCookie("mama_auth_token", token);
+  else removeCookie("mama_auth_token");
+}
+
 const api: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 15000,
@@ -111,8 +157,9 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const isAuthFailure = isAuthEndpoint(originalRequest?.url);
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthFailure) {
       if (isRefreshing) {
         return new Promise<string>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -148,9 +195,8 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         clearTokens();
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
-        }
+        syncAuthToCookie();
+        dispatchSessionExpired();
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

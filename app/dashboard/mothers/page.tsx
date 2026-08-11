@@ -226,6 +226,27 @@ function MothersContent() {
                         {pregnancyWeek ? ` · ${pregnancyWeek} weeks` : ""}
                         {patient.preferredLanguage ? ` · ${patient.preferredLanguage}` : ""}
                       </p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5 sm:hidden">
+                        {riskText && (
+                          <span className={`px-2 py-0.5 text-[9px] font-semibold rounded-full border ${riskStyles[riskText] || "bg-gray-50 text-gray-700 border-gray-200"}`}>
+                            {riskText.toUpperCase()}
+                          </span>
+                        )}
+                        <span className={`px-2 py-0.5 text-[9px] font-semibold rounded-full border ${verificationStyles[patient.verificationStatus] || ""}`}>
+                          {patient.verificationStatus}
+                        </span>
+                        {patient.openAlerts && patient.openAlerts.length > 0 && (() => {
+                          const alerts = patient.openAlerts!;
+                          const hasHigh = alerts.some((a) => a.severity === "HIGH");
+                          const sev = hasHigh ? "HIGH" : alerts[0].severity;
+                          return (
+                            <span className={`px-2 py-0.5 text-[9px] font-semibold rounded-full border flex items-center gap-1 ${alertStyles[sev] || alertStyles.LOW}`}>
+                              <AlertTriangle className="w-2.5 h-2.5" />
+                              {alerts.length > 1 ? `${alerts.length} concerns` : "Concern"}
+                            </span>
+                          );
+                        })()}
+                      </div>
                     </div>
 
                     <span className={`px-2.5 py-1 text-[10px] font-semibold rounded-full border hidden sm:inline ${riskStyles[riskText] || "bg-gray-50 text-gray-700 border-gray-200"}`}>
@@ -242,7 +263,7 @@ function MothersContent() {
                       const sev = hasHigh ? "HIGH" : alerts[0].severity;
                       return (
                         <span
-                          className={`px-2.5 py-1 text-[10px] font-semibold rounded-full border hidden sm:inline flex items-center gap-1 ${alertStyles[sev] || alertStyles.LOW}`}
+                          className={`px-2.5 py-1 text-[10px] font-semibold rounded-full border hidden sm:inline-flex items-center gap-1 ${alertStyles[sev] || alertStyles.LOW}`}
                           title="Open concern"
                         >
                           <AlertTriangle className="w-3 h-3" />

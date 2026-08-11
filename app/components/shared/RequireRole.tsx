@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import type { UserRole } from "@/lib/types/auth";
 import Link from "next/link";
@@ -15,18 +15,19 @@ interface RequireRoleProps {
 
 /**
  * Route gate for role-scoped workspaces (org, patient, market).
- * Unauthenticated → /login; wrong role → a directed "this is not your desk"
- * screen instead of a dead-end error.
+ * Unauthenticated → /login (with return redirect); wrong role → a directed
+ * "this is not your desk" screen instead of a dead-end error.
  */
 export function RequireRole({ roles, children }: RequireRoleProps) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace("/login");
+      router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, router, pathname]);
 
   if (isLoading || !isAuthenticated) {
     return (

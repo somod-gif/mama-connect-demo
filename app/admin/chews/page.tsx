@@ -206,6 +206,42 @@ export default function AdminChewsPage() {
         </select>
       </div>
 
+      <div className="sm:hidden space-y-3">
+        {isLoading && !users.length ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="bg-card border border-border rounded-xl p-4">
+              <div className="h-8 w-2/3 bg-background-soft rounded animate-pulse" />
+            </div>
+          ))
+        ) : users.length === 0 ? (
+          <div className="bg-card border border-border rounded-xl p-6 text-center text-sm text-muted-foreground">
+            No users found
+          </div>
+        ) : (
+          users.map((user) => (
+            <button
+              key={user.id}
+              onClick={() => router.push(`/admin/chews/${user.id}`)}
+              className="w-full text-left bg-card border border-border rounded-xl p-4 hover:border-primary/30 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm font-bold text-white">{user.name?.charAt(0) || "U"}</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-foreground truncate">{user.name || "Unnamed user"}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.email || user.phone || "—"}</p>
+                </div>
+                <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                  {statusBadge(user.verificationStatus)}
+                  <span className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground">{user.role}</span>
+                </div>
+              </div>
+            </button>
+          ))
+        )}
+      </div>
+
       <div className="hidden sm:block bg-card border border-border rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

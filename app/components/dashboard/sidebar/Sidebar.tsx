@@ -18,9 +18,9 @@ import {
   Clock,
   Bell,
   Package,
+  MessagesSquare,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { VerificationBadge } from "@/app/components/shared/VerificationGate";
 import Image from "next/image";
 
 const fullAccess = [
@@ -31,9 +31,10 @@ const fullAccess = [
   { href: "/dashboard/documents", label: "Documents", icon: FileText },
   { href: "/dashboard/referrals", label: "Referrals", icon: ArrowRightLeft },
   { href: "/dashboard/deliveries", label: "Deliveries", icon: Package },
+  { href: "/community", label: "Mama Circle", icon: MessagesSquare },
 ];
 
-const restrictedItems = ["Mothers", "Find Mothers", "Referrals", "Concerns", "Deliveries"];
+const restrictedItems = ["Mothers", "Find Mothers", "Referrals", "Concerns", "Deliveries", "Mama Circle"];
 
 const bottomItems = [
   { href: "/dashboard/profile", label: "Profile", icon: User },
@@ -191,7 +192,7 @@ export default function Sidebar({
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed top-0 left-0 z-50 w-72 h-full bg-card border-r border-border lg:hidden"
+            className="fixed top-0 left-0 z-50 w-72 max-w-[85vw] h-full bg-card border-r border-border lg:hidden"
           >
             <button
               onClick={onMobileToggle}

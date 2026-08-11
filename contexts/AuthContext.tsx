@@ -15,6 +15,7 @@ import type {
   AuthState,
   LoginRequest,
   RegisterRequest,
+  TokenResponse,
   User,
   UserRole,
   VerificationStatus,
@@ -28,6 +29,7 @@ import {
   getRefreshToken,
   syncAuthToCookie,
 } from "@/services/api";
+import { extractErrorMessage } from "@/lib/errors";
 
 function parseUserFromToken(): User | null {
   const token = getAccessToken();
@@ -91,20 +93,6 @@ function userFromProfile(profile: Record<string, unknown>): User {
       ? (profile.patient as User["patient"])
       : undefined,
   };
-}
-
-function extractErrorMessage(error: unknown): string {
-  const err = error as Record<string, unknown> | null | undefined;
-  if (err?.response && typeof err.response === "object") {
-    const resp = err.response as Record<string, unknown>;
-    const data = resp.data as Record<string, unknown> | undefined;
-    if (data?.message && typeof data.message === "string") return data.message;
-    if (data?.error && typeof data.error === "string") return data.error;
-    if (typeof resp.status === "number" && resp.status >= 500) return "Server unavailable. Please try again later.";
-  }
-  if (err?.code === "ECONNABORTED") return "Request timed out. Please check your connection.";
-  if (error instanceof Error) return error.message;
-  return "An unexpected error occurred.";
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -181,20 +169,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initializeAuth();
   }, [initializeAuth]);
 
+  // The API client fires this when a refresh attempt fails — the session is
+  // genuinely dead. Route via the Next router instead of a hard reload so
+  // users never see a jarring page refresh.
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      clearTokens();
+      clearStoredUser();
+      setState({ user: null, isAuthenticated: false, isLoading: false });
+      if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+        router.push("/login");
+      }
+    };
+    window.addEventListener("auth:session-expired", handleSessionExpired);
+    return () => window.removeEventListener("auth:session-expired", handleSessionExpired);
+  }, [router]);
+
+  const finalizeSession = useCallback(async (response: TokenResponse) => {
+    setAccessToken(response.accessToken);
+    setRefreshToken(response.refreshToken);
+    syncAuthToCookie();
+
+    let user: User | null = null;
+    try {
+      const profile = (await authService.getMe()) as unknown as Record<string, unknown>;
+      user = userFromProfile(profile);
+      setStoredUser(user);
+    } catch {
+      // Token is valid even if the profile fetch blips — fall back to the
+      // token payload so a valid login never presents as a failure.
+      user = parseUserFromToken();
+      if (user) setStoredUser(user);
+    }
+
+    if (!user) {
+      throw new Error("Could not load your profile. Please try again.");
+    }
+
+    setState({ user, isAuthenticated: true, isLoading: false });
+    return user;
+  }, []);
+
   const login = useCallback(
     async (data: LoginRequest) => {
+      // Drop any stale tokens from a previous session BEFORE attempting the
+      // login — otherwise a lingering refresh token could be picked up by the
+      // 401-refresh interceptor and mask the real error (or fail outright).
+      clearTokens();
+      syncAuthToCookie();
       setState((prev) => ({ ...prev, isLoading: true }));
       try {
         const response = await authService.login(data);
-        setAccessToken(response.accessToken);
-        setRefreshToken(response.refreshToken);
-        syncAuthToCookie();
-
-        const profile = await authService.getMe() as unknown as Record<string, unknown>;
-        const user = userFromProfile(profile);
-        setStoredUser(user);
-        setState({ user, isAuthenticated: true, isLoading: false });
-
+        const user = await finalizeSession(response);
         toast.success(user.role === "ADMIN" ? "Welcome, Admin" : "Welcome back");
       } catch (error) {
         setState((prev) => ({ ...prev, isLoading: false }));
@@ -203,7 +229,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw error;
       }
     },
-    [router]
+    [finalizeSession]
+  );
+
+  const loginWithOtp = useCallback(
+    async (phone: string, code: string) => {
+      clearTokens();
+      syncAuthToCookie();
+      setState((prev) => ({ ...prev, isLoading: true }));
+      try {
+        const response = await authService.verifyOtp(phone, code);
+        await finalizeSession(response);
+        toast.success("Welcome, Mama");
+      } catch (error) {
+        setState((prev) => ({ ...prev, isLoading: false }));
+        const message = extractErrorMessage(error);
+        toast.error(message);
+        throw error;
+      }
+    },
+    [finalizeSession]
   );
 
   const register = useCallback(
@@ -291,7 +336,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ ...state, login, register, logout, refresh, updateUser }}>
+    <AuthContext.Provider value={{ ...state, login, loginWithOtp, register, logout, refresh, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
