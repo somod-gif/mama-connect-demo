@@ -15,6 +15,8 @@ function getPageTitle(pathname: string): string {
   )
     return 'Documents';
   if (pathname === '/dashboard/referrals') return 'Referrals';
+  if (pathname === '/dashboard/concerns') return 'Open Concerns';
+  if (pathname === '/dashboard/deliveries') return 'Deliveries';
   if (pathname === '/dashboard/profile') return 'Profile';
   if (pathname === '/dashboard/settings') return 'Settings';
   return 'Dashboard';

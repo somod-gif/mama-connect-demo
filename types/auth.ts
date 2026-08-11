@@ -103,6 +103,7 @@ export interface ChangePasswordRequest {
 
 export interface AuthContextValue extends AuthState {
   login: (data: LoginRequest) => Promise<void>;
+  loginWithOtp: (phone: string, code: string) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
