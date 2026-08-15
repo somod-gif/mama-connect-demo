@@ -53,8 +53,8 @@ export function CommunityHeader() {
               className={cn(
                 "hidden items-center gap-1.5 rounded-[var(--radius-stamp)] px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors sm:flex",
                 pathname.startsWith("/community/moderation")
-                  ? "bg-amber-50 text-amber-700"
-                  : "text-amber-700 hover:bg-amber-50",
+                  ? "bg-gold-light text-gold-dark"
+                  : "text-gold-dark hover:bg-gold-light",
               )}
             >
               <ShieldCheck className="h-3.5 w-3.5" />
@@ -100,8 +100,8 @@ export function CommunityHeader() {
             className={cn(
               "flex items-center gap-1 rounded-[var(--radius-stamp)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide",
               pathname.startsWith("/community/moderation")
-                ? "bg-amber-50 text-amber-700"
-                : "text-amber-700",
+                ? "bg-gold-light text-gold-dark"
+                : "text-gold-dark",
             )}
           >
             <ShieldCheck className="h-3 w-3" /> Review wall

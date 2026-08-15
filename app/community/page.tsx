@@ -58,7 +58,7 @@ export default function CommunityHomePage() {
       {/* ---------------------------------------------------------- hero */}
       <section className="relative pt-10 pb-8 sm:pt-14 sm:pb-10">
         <div className="absolute right-0 top-6 hidden rotate-2 sm:block" aria-hidden>
-          <Stamp text="Peer support · not medical care" tone="amber" />
+          <Stamp text="Peer support · not medical care" tone="gold" />
         </div>
         <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-stamp">
           Mama Circle · a moderated space
@@ -104,7 +104,7 @@ export default function CommunityHomePage() {
       )}
 
       {isError && (
-        <div className="rounded-[var(--radius-stamp)] border border-rose-200 bg-rose-50 p-6 text-sm text-rose-700">
+        <div className="rounded-[var(--radius-stamp)] border border-danger/20 bg-danger-light p-6 text-sm text-danger">
           The circle is busy — we couldn&apos;t reach the community board. Refresh to try again.
         </div>
       )}
@@ -151,7 +151,7 @@ export default function CommunityHomePage() {
             )}
             <Link
               href="/community/guidelines"
-              className="mt-6 flex items-start gap-2 rounded-[var(--radius-stamp)] border border-amber-200 bg-amber-50 p-3 text-[11px] leading-snug text-amber-800 transition-colors hover:bg-amber-100"
+              className="mt-6 flex items-start gap-2 rounded-[var(--radius-stamp)] border border-gold/30 bg-gold-light p-3 text-[11px] leading-snug text-gold-dark transition-colors hover:bg-gold/10"
             >
               <ShieldAlert className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
               An emergency? Severe bleeding, seizures, blurred vision, reduced baby movement — call your CHEW or the hospital now, not the board.
@@ -218,7 +218,7 @@ export default function CommunityHomePage() {
                     key={e.id}
                     className="rounded-[var(--radius-stamp)] border border-line/70 bg-white p-3.5 shadow-[var(--shadow-paper)]"
                   >
-                    <p className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.14em] text-stamp">
+                    <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-stamp">
                       <CalendarDays className="h-3 w-3" />
                       {formatEventDate(e.startsAt)}
                     </p>
@@ -241,7 +241,7 @@ export default function CommunityHomePage() {
               {Object.entries(data.languages).map(([code, label]) => (
                 <span
                   key={code}
-                  className="rounded-[var(--radius-stamp)] bg-background-soft px-2 py-1 font-mono text-[9px] uppercase tracking-wide text-ink-faint"
+                  className="rounded-[var(--radius-stamp)] bg-background-soft px-2 py-1 font-mono text-[10px] uppercase tracking-wide text-ink-faint"
                 >
                   {label}
                 </span>

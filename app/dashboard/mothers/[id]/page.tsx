@@ -25,14 +25,14 @@ import { computePregnancyWeek } from "@/lib/utils/date";
 import { careStatusToRiskLevel, normalizeRiskFactors } from "@/lib/utils";
 
 const riskStyles: Record<string, string> = {
-  HIGH: "bg-red-50 text-red-700 border-red-200",
-  MEDIUM: "bg-amber-50 text-amber-700 border-amber-200",
-  LOW: "bg-green-50 text-green-700 border-green-200",
+  HIGH: "bg-danger-light text-danger border-danger/20",
+  MEDIUM: "bg-gold-light text-gold-dark border-gold/20",
+  LOW: "bg-leaf-light text-leaf border-leaf/20",
 };
 const verificationStyles: Record<string, string> = {
-  VERIFIED: "bg-green-50 text-green-700 border-green-200",
-  PENDING: "bg-amber-50 text-amber-700 border-amber-200",
-  REJECTED: "bg-red-50 text-red-700 border-red-200",
+  VERIFIED: "bg-leaf-light text-leaf border-leaf/20",
+  PENDING: "bg-gold-light text-gold-dark border-gold/20",
+  REJECTED: "bg-danger-light text-danger border-danger/20",
 };
 
 const tabs = [
@@ -182,7 +182,7 @@ function MotherProfileContent() {
                 <button
                   onClick={() => setShowVerify(true)}
                   disabled={verifyMutation.isPending}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 disabled:opacity-50 transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-leaf rounded-xl hover:bg-leaf-dark disabled:opacity-50 transition-all"
                 >
                   <CheckCircle className="w-4 h-4" /> Verify
                 </button>
@@ -221,10 +221,10 @@ function MotherProfileContent() {
 
       {patient.openAlerts && patient.openAlerts.length > 0 && (
         <FadeInUp delay={0.03}>
-          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 space-y-3">
+          <div className="bg-danger-light border border-danger/20 rounded-2xl p-4 space-y-3">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-rose-600" />
-              <h3 className="text-sm font-bold text-rose-900">
+              <AlertTriangle className="w-4 h-4 text-danger" />
+              <h3 className="text-sm font-bold text-danger">
                 Open Concerns ({patient.openAlerts.length})
               </h3>
             </div>
@@ -232,14 +232,14 @@ function MotherProfileContent() {
               {patient.openAlerts.map((alert) => {
                 const sev =
                   alert.severity === "HIGH"
-                    ? "bg-rose-100 text-rose-700"
+                    ? "bg-danger-light text-danger"
                     : alert.severity === "MEDIUM"
-                      ? "bg-amber-100 text-amber-700"
-                      : "bg-slate-100 text-slate-700";
+                      ? "bg-gold-light text-gold-dark"
+                      : "bg-background-soft text-muted-foreground";
                 return (
                   <div
                     key={alert.id}
-                    className="flex items-start gap-3 p-3 rounded-xl bg-white border border-rose-100"
+                    className="flex items-start gap-3 p-3 rounded-xl bg-card border border-danger/10"
                   >
                     <span
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${sev}`}
@@ -264,7 +264,7 @@ function MotherProfileContent() {
                         <button
                           onClick={() => acknowledgeAlertMutation.mutate(alert.id)}
                           disabled={acknowledgeAlertMutation.isPending}
-                          className="text-[11px] font-semibold px-2 py-1 rounded-lg bg-rose-100 text-rose-700 hover:bg-rose-200 disabled:opacity-50"
+                          className="text-[11px] font-semibold px-2 py-1 rounded-lg bg-danger-light text-danger hover:bg-danger/10 disabled:opacity-50"
                         >
                           Ack
                         </button>
@@ -447,7 +447,7 @@ function OverviewTab({ patient, pregnancyWeek, onRecordObservation, onRefer }: {
               <span className="text-xs text-muted-foreground">Risk Factors: </span>
               <div className="flex flex-wrap gap-1.5 mt-1">
                 {riskFactors.map(rf => (
-                  <span key={rf} className="px-2 py-0.5 text-[10px] font-medium bg-red-50 text-red-700 rounded-full border border-red-200">
+                  <span key={rf} className="px-2 py-0.5 text-[10px] font-medium bg-danger-light text-danger rounded-full border border-danger/20">
                     {rf}
                   </span>
                 ))}
@@ -466,7 +466,7 @@ function OverviewTab({ patient, pregnancyWeek, onRecordObservation, onRefer }: {
         </button>
         <button
           onClick={onRefer}
-          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold bg-amber-50 text-amber-700 rounded-xl hover:bg-amber-100 transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold bg-gold-light text-gold-dark rounded-xl hover:bg-gold/10 transition-all"
         >
           <AlertTriangle className="w-4 h-4" /> Refer to Facility
         </button>
@@ -947,7 +947,7 @@ function ActivityTab({ patient }: { patient: PatientDetail }) {
                 </span>
               ) : null}
               {s.hadFlags ? (
-                <span className="text-[10px] px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full border border-amber-200 font-medium">
+                <span className="text-[10px] px-2 py-0.5 bg-gold-light text-gold-dark rounded-full border border-gold/20 font-medium">
                   Had concerns
                 </span>
               ) : null}

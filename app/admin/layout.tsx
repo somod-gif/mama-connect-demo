@@ -54,15 +54,15 @@ function AdminSidebar({ collapsed, onToggle, mobileOpen, onMobileToggle }: { col
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
-      <div className={`flex items-center gap-3 px-4 h-14 lg:h-16 border-b border-border ${collapsed ? "justify-center px-0" : ""}`}>
-        <Image src="/logo.png" alt="MamaConnect" width={collapsed ? 28 : 32} height={collapsed ? 28 : 32} className="rounded-lg flex-shrink-0" />
-        {!collapsed && (
+      {!collapsed && (
+        <div className="flex items-center gap-3 px-4 h-14 lg:h-16 border-b border-border">
+          <Image src="/logo.png" alt="MamaConnect" width={32} height={32} className="rounded-lg flex-shrink-0" />
           <div>
-            <p className="text-sm font-bold text-foreground leading-tight">Mama<span className="text-primary">Connect</span></p>
+            <p className="text-sm font-bold text-foreground leading-tight whitespace-nowrap">Mama<span className="text-primary">Connect</span></p>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Admin</p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
       <nav className={`flex-1 py-3 space-y-0.5 overflow-y-auto ${collapsed ? "px-2" : "px-3"}`}>
         {navItems.map((item) => <NavLink key={item.href} item={item} collapsed={collapsed} />)}
       </nav>
@@ -71,7 +71,7 @@ function AdminSidebar({ collapsed, onToggle, mobileOpen, onMobileToggle }: { col
         <button
           onClick={() => { onMobileToggle(); logout(); }}
           title={collapsed ? "Logout" : undefined}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-all ${collapsed ? "justify-center px-0" : ""}`}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-danger hover:bg-danger-light transition-all ${collapsed ? "justify-center px-0" : ""}`}
         >
           <LogOut className="w-5 h-5 flex-shrink-0" />
           {!collapsed && <span>Logout</span>}
@@ -87,14 +87,10 @@ function AdminSidebar({ collapsed, onToggle, mobileOpen, onMobileToggle }: { col
       </AnimatePresence>
       <AnimatePresence>
         {mobileOpen && (
-          <motion.aside initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", damping: 30, stiffness: 300 }} className="fixed top-0 left-0 z-50 w-72 max-w-[85vw] h-full bg-card border-r border-border lg:hidden">
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <div className="flex items-center gap-3">
-                <Image src="/logo.png" alt="MamaConnect" width={32} height={32} className="rounded-lg" />
-                <span className="text-sm font-bold text-foreground">Mama<span className="text-primary">Connect</span></span>
-              </div>
-              <button onClick={onMobileToggle} className="p-1 rounded-lg hover:bg-background-soft"><X className="w-5 h-5" /></button>
-            </div>
+          <motion.aside initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", damping: 30, stiffness: 300 }} className="fixed top-0 left-0 z-50 w-64 h-full bg-card border-r border-border lg:hidden">
+            <button onClick={onMobileToggle} className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-background-soft transition-colors" aria-label="Close menu">
+              <X className="w-4 h-4" />
+            </button>
             {sidebarContent}
           </motion.aside>
         )}

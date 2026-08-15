@@ -183,7 +183,7 @@ function NewPostForm() {
           {/* poll */}
           {postType === "POLL" && (
             <div className="mt-5 rounded-[var(--radius-stamp)] border border-gold/30 bg-gold-light/60 p-4">
-              <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-gold-dark">
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold-dark">
                 Poll options ({pollOptions.length}/12)
               </p>
               <div className="mt-2 space-y-1.5">
@@ -197,7 +197,7 @@ function NewPostForm() {
                       type="button"
                       onClick={() => setPollOptions((prev) => prev.filter((_, j) => j !== i))}
                       aria-label={`Remove option ${opt}`}
-                      className="text-ink-faint hover:text-rose-600"
+                      className="text-ink-faint hover:text-danger"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>

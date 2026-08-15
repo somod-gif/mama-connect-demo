@@ -84,7 +84,7 @@ export default function RegisterPage() {
     if (/[A-Z]/.test(password)) s++;
     if (/[0-9]/.test(password)) s++;
     if (/[^A-Za-z0-9]/.test(password)) s++;
-    if (s <= 1) return { score: 20, label: "Weak", color: "bg-red-500" };
+    if (s <= 1) return { score: 20, label: "Weak", color: "bg-danger" };
     if (s <= 2) return { score: 40, label: "Fair", color: "bg-orange-500" };
     if (s <= 3) return { score: 60, label: "Good", color: "bg-yellow-500" };
     if (s <= 4) return { score: 80, label: "Strong", color: "bg-primary" };
@@ -168,12 +168,12 @@ export default function RegisterPage() {
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-foreground mb-1.5">First Name</label>
                 <input id="firstName" placeholder="Your first name" autoComplete="given-name" {...register("firstName")} disabled={isPending} className={inputClass} />
-                {errors.firstName && <p className="mt-1 text-xs text-red-500">{errors.firstName.message}</p>}
+                {errors.firstName && <p className="mt-1 text-xs text-danger">{errors.firstName.message}</p>}
               </div>
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-foreground mb-1.5">Last Name</label>
                 <input id="lastName" placeholder="Your last name" autoComplete="family-name" {...register("lastName")} disabled={isPending} className={inputClass} />
-                {errors.lastName && <p className="mt-1 text-xs text-red-500">{errors.lastName.message}</p>}
+                {errors.lastName && <p className="mt-1 text-xs text-danger">{errors.lastName.message}</p>}
               </div>
             </div>
 
@@ -181,12 +181,12 @@ export default function RegisterPage() {
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">Email Address</label>
                 <input id="email" type="email" placeholder="you@example.com" autoComplete="email" {...register("email")} disabled={isPending} className={inputClass} />
-                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
+                {errors.email && <p className="mt-1 text-xs text-danger">{errors.email.message}</p>}
               </div>
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1.5">Phone Number</label>
                 <input id="phone" type="tel" placeholder="+2348012345678" autoComplete="tel" {...register("phone")} disabled={isPending} className={inputClass} />
-                {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>}
+                {errors.phone && <p className="mt-1 text-xs text-danger">{errors.phone.message}</p>}
               </div>
             </div>
 
@@ -209,7 +209,7 @@ export default function RegisterPage() {
                     </div>
                   </div>
                 )}
-                {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
+                {errors.password && <p className="mt-1 text-xs text-danger">{errors.password.message}</p>}
               </div>
               <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-1.5">Confirm Password</label>
@@ -219,7 +219,7 @@ export default function RegisterPage() {
                     {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
-                {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword.message}</p>}
+                {errors.confirmPassword && <p className="mt-1 text-xs text-danger">{errors.confirmPassword.message}</p>}
               </div>
             </div>
 
@@ -232,7 +232,7 @@ export default function RegisterPage() {
                     <option value="">Select state</option>
                     {states.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
-                  {errors.stateId && <p className="mt-1 text-xs text-red-500">{errors.stateId.message}</p>}
+                  {errors.stateId && <p className="mt-1 text-xs text-danger">{errors.stateId.message}</p>}
                 </div>
                 <div>
                   <label htmlFor="lgaId" className="block text-sm font-medium text-foreground mb-1.5">LGA</label>
@@ -240,12 +240,12 @@ export default function RegisterPage() {
                     <option value="">{lgasLoading ? "Loading..." : "Select LGA"}</option>
                     {lgas.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
                   </select>
-                  {errors.lgaId && <p className="mt-1 text-xs text-red-500">{errors.lgaId.message}</p>}
+                  {errors.lgaId && <p className="mt-1 text-xs text-danger">{errors.lgaId.message}</p>}
                 </div>
                 <div>
                   <label htmlFor="primaryHealthcareCentre" className="block text-sm font-medium text-foreground mb-1.5">Primary Healthcare Centre</label>
                   <input id="primaryHealthcareCentre" type="text" placeholder="e.g. General Hospital, Gwagwalada" autoComplete="organization" {...register("primaryHealthcareCentre")} disabled={isPending} className={inputClass} />
-                  {errors.primaryHealthcareCentre && <p className="mt-1 text-xs text-red-500">{errors.primaryHealthcareCentre.message}</p>}
+                  {errors.primaryHealthcareCentre && <p className="mt-1 text-xs text-danger">{errors.primaryHealthcareCentre.message}</p>}
                 </div>
               </div>
             </div>

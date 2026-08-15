@@ -95,8 +95,8 @@ function ReportPanel({ postId, onClose }: { postId: string; onClose: () => void 
   });
 
   return (
-    <div className="mt-4 rounded-[var(--radius-stamp)] border border-rose-200 bg-rose-50 p-4">
-      <p className="text-xs font-bold uppercase tracking-wide text-rose-700">Report this post</p>
+    <div className="mt-4 rounded-[var(--radius-stamp)] border border-danger/20 bg-danger-light p-4">
+      <p className="text-xs font-bold uppercase tracking-wide text-danger-dark">Report this post</p>
       <label className="mt-3 block text-[11px] font-semibold text-ink-soft" htmlFor="report-reason">
         Why are you reporting it?
       </label>
@@ -124,7 +124,7 @@ function ReportPanel({ postId, onClose }: { postId: string; onClose: () => void 
         <button
           onClick={() => mutation.mutate()}
           disabled={mutation.isPending}
-          className="rounded-[var(--radius-stamp)] bg-rose-600 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white disabled:opacity-50"
+          className="rounded-[var(--radius-stamp)] bg-danger px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white disabled:opacity-50"
         >
           Send report
         </button>
@@ -173,7 +173,7 @@ function TranslateControl({ post }: { post: PostView }) {
   if (view) {
     return (
       <div className="mt-3 rounded-[var(--radius-stamp)] border border-stamp/30 bg-stamp-light/50 p-3">
-        <p className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-stamp-dark">
+        <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-stamp-dark">
           <Languages className="h-3 w-3" />
           Translated to {target.toUpperCase()}
         </p>
@@ -232,10 +232,10 @@ function ThreadSummary({ post }: { post: PostView }) {
 
   return (
     <div className="rounded-[var(--radius-stamp)] border border-stamp/30 bg-stamp-light/50 p-4">
-      <p className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-stamp-dark">
+      <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-stamp-dark">
         <Sparkles className="h-3 w-3" />
         MamaBot thread summary
-        <Stamp text="Not medical advice" tone="amber" />
+        <Stamp text="Not medical advice" tone="gold" />
       </p>
       <p className="mt-2 text-[13px] leading-relaxed text-ink">
         {text ?? "The mamas here shared their experiences — read on for the full thread."}
@@ -290,7 +290,7 @@ function CommentCard({
           <Stamp text="Best answer" tone="gold" />
         </span>
       )}
-      <div className="flex flex-wrap items-center gap-2 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-faint">
+      <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint">
         <span className="text-ink/60">{comment.author.displayName}</span>
         <AuthorBadge badge={comment.author.badge} role={comment.author.role} />
         <span aria-hidden className="text-line">·</span>
@@ -313,11 +313,11 @@ function CommentCard({
           aria-pressed={comment.myReactions.includes("SUPPORTIVE")}
           className={
             comment.myReactions.includes("SUPPORTIVE")
-              ? "flex items-center gap-1 text-[11px] font-bold text-rose-600"
-              : "flex items-center gap-1 text-[11px] font-semibold text-ink-faint hover:text-rose-600"
+              ? "flex items-center gap-1 text-[11px] font-bold text-danger"
+              : "flex items-center gap-1 text-[11px] font-semibold text-ink-faint hover:text-danger"
           }
         >
-          <Heart className={`h-3.5 w-3.5 ${comment.myReactions.includes("SUPPORTIVE") ? "fill-rose-500 text-rose-500" : ""}`} />
+          <Heart className={`h-3.5 w-3.5 ${comment.myReactions.includes("SUPPORTIVE") ? "fill-danger text-danger" : ""}`} />
           Support
         </button>
         {comment.language && comment.language !== "en" && (
@@ -433,7 +433,7 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
           </button>
           <button
             onClick={() => setShowReport((v) => !v)}
-            className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-rose-600 hover:underline"
+            className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-danger hover:underline"
           >
             <Flag className="h-3.5 w-3.5" />
             Report
@@ -445,7 +445,7 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
       <article className="relative mt-4 rounded-[var(--radius-stamp)] border border-line bg-white shadow-[var(--shadow-paper)]">
         <PinDot className="bg-gold" />
         <div className="paper-ruled rounded-[var(--radius-stamp)] p-5 sm:p-7">
-          <div className="flex flex-wrap items-center gap-2 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-faint">
+          <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint">
             <span className="text-ink/60">{post.postType}</span>
             <AuthorBadge badge={post.author.badge} role={post.author.role} />
             <span aria-hidden className="text-line">·</span>
@@ -453,8 +453,8 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
             <span aria-hidden className="text-line">·</span>
             <span>{formatMono(post.createdAt)}</span>
             <span className="ml-auto flex gap-1.5">
-              {post.flagged && <Stamp text="Flagged" tone="rose" />}
-              {post.status === "PENDING" && <Stamp text="Reviewing" tone="amber" />}
+              {post.flagged && <Stamp text="Flagged" tone="danger" />}
+              {post.status === "PENDING" && <Stamp text="Reviewing" tone="gold" />}
             </span>
           </div>
 
@@ -467,7 +467,7 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
 
           {post.poll && (
             <div className="mt-5 rounded-[var(--radius-stamp)] border border-gold/30 bg-gold-light/60 p-4">
-              <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-gold-dark">Poll</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold-dark">Poll</p>
               <div className="mt-2.5 space-y-2">
                 {post.poll.options.map((opt, i) => {
                   const votes = post.poll?.votes[opt] ?? 0;
@@ -555,7 +555,7 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
           }}
           className="relative z-10 mt-10 rounded-[var(--radius-stamp)] border border-line bg-white p-4 shadow-[var(--shadow-paper)]"
         >
-          <label htmlFor="comment-body" className="font-mono text-[9px] uppercase tracking-[0.18em] text-ink-faint">
+            <label htmlFor="comment-body" className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-faint">
             Join the thread
           </label>
           <textarea
@@ -568,7 +568,7 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
             className="mt-2 w-full resize-none rounded-[var(--radius-stamp)] border border-line bg-background-soft px-3 py-2.5 text-[13px] text-ink placeholder:text-ink-faint focus:border-stamp focus:bg-white focus:outline-none"
           />
           <div className="mt-2 flex items-center justify-between">
-            <p className="font-mono text-[9px] uppercase tracking-wide text-ink-faint">
+            <p className="font-mono text-[10px] uppercase tracking-wide text-ink-faint">
               {body.length}/2000
             </p>
             <button

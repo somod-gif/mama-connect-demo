@@ -8,10 +8,10 @@ import { chewService } from "@/lib/services/chew.service";
 import type { DeliveryOrder } from "@/types/dashboard";
 
 const statusClass: Record<string, string> = {
-  PAID: "bg-emerald-100 text-emerald-700",
+  PAID: "bg-leaf-light text-leaf",
   DELIVERED: "bg-primary-light text-primary",
-  CANCELLED: "bg-slate-100 text-slate-600",
-  FAILED: "bg-rose-100 text-rose-700",
+  CANCELLED: "bg-background-soft text-muted-foreground",
+  FAILED: "bg-danger-light text-danger",
 };
 
 function naira(kobo: number): string {

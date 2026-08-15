@@ -227,7 +227,7 @@ function LoginForm() {
                 disabled={isPending}
                 className={inputClass}
               />
-              {errors.identifier && <p className="mt-1 text-xs text-red-500">{errors.identifier.message}</p>}
+              {errors.identifier && <p className="mt-1 text-xs text-danger">{errors.identifier.message}</p>}
             </div>
 
             <div>
@@ -253,7 +253,7 @@ function LoginForm() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
+              {errors.password && <p className="mt-1 text-xs text-danger">{errors.password.message}</p>}
             </div>
 
             <AnimatePresence>
@@ -263,10 +263,10 @@ function LoginForm() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   role="alert"
-                  className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5"
+                  className="flex items-start gap-2 rounded-xl border border-danger/20 bg-danger-light px-3.5 py-2.5"
                 >
-                  <AlertCircle className="h-4 w-4 mt-0.5 text-red-500 flex-shrink-0" />
-                  <p className="text-xs font-medium text-red-700">{authError}</p>
+                  <AlertCircle className="h-4 w-4 mt-0.5 text-danger flex-shrink-0" />
+                  <p className="text-xs font-medium text-danger-dark">{authError}</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -321,10 +321,10 @@ function LoginForm() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
                       role="alert"
-                      className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5"
+                      className="flex items-start gap-2 rounded-xl border border-danger/20 bg-danger-light px-3.5 py-2.5"
                     >
-                      <AlertCircle className="h-4 w-4 mt-0.5 text-red-500 flex-shrink-0" />
-                      <p className="text-xs font-medium text-red-700">{authError}</p>
+                      <AlertCircle className="h-4 w-4 mt-0.5 text-danger flex-shrink-0" />
+                      <p className="text-xs font-medium text-danger-dark">{authError}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -340,9 +340,9 @@ function LoginForm() {
               </form>
             ) : (
               <form onSubmit={verifyOtpSubmit} className="space-y-5">
-                <div className="rounded-xl border border-green-200 bg-green-50 px-3.5 py-2.5 flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-600 flex-shrink-0" />
-                  <p className="text-xs font-medium text-green-700">
+                <div className="rounded-xl border border-leaf/20 bg-leaf-light px-3.5 py-2.5 flex items-start gap-2">
+                  <CheckCircle2 className="h-4 w-4 mt-0.5 text-leaf flex-shrink-0" />
+                  <p className="text-xs font-medium text-leaf-dark">
                     Code sent to {normalizePhoneInput(otpPhone)}. It expires in 10 minutes.
                   </p>
                 </div>
@@ -372,10 +372,10 @@ function LoginForm() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
                       role="alert"
-                      className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5"
+                      className="flex items-start gap-2 rounded-xl border border-danger/20 bg-danger-light px-3.5 py-2.5"
                     >
-                      <AlertCircle className="h-4 w-4 mt-0.5 text-red-500 flex-shrink-0" />
-                      <p className="text-xs font-medium text-red-700">{authError}</p>
+                      <AlertCircle className="h-4 w-4 mt-0.5 text-danger flex-shrink-0" />
+                      <p className="text-xs font-medium text-danger-dark">{authError}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>

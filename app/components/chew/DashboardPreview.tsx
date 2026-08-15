@@ -105,9 +105,9 @@ export default function DashboardPreview() {
                   <span
                     className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                       patient.risk === "High"
-                        ? "bg-red-50 text-red-600"
+                        ? "bg-danger-light text-danger"
                         : patient.risk === "Medium"
-                        ? "bg-amber-50 text-amber-600"
+                        ? "bg-gold-light text-gold"
                         : "bg-primary-light text-primary-dark"
                     }`}
                   >

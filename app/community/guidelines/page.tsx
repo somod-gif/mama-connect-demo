@@ -34,14 +34,14 @@ export default function GuidelinesPage() {
         </p>
       </div>
 
-      <section className="mt-8 rounded-[var(--radius-stamp)] border border-rose-200 bg-rose-50 p-5">
+      <section className="mt-8 rounded-[var(--radius-stamp)] border border-danger/20 bg-danger-light p-5">
         <div className="flex items-start gap-3">
-          <ShieldAlert className="mt-0.5 h-5 w-5 flex-shrink-0 text-rose-600" />
+          <ShieldAlert className="mt-0.5 h-5 w-5 flex-shrink-0 text-danger" />
           <div>
-            <p className="text-[13px] font-bold text-rose-800">
+            <p className="text-[13px] font-bold text-danger-dark">
               Emergency symptoms need professional help now
             </p>
-            <p className="mt-1 text-[12px] leading-relaxed text-rose-700">
+            <p className="mt-1 text-[12px] leading-relaxed text-danger">
               Severe bleeding, seizures, severe headache, blurred vision, reduced baby movement, breathing difficulty — contact your CHEW or go to a hospital immediately. Do not wait for the board.
             </p>
           </div>

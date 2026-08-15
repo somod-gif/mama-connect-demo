@@ -101,9 +101,9 @@ export default function PatientManagementSection() {
                     <div
                       className={`w-3 h-3 rounded-full flex-shrink-0 ${
                         item.type === "alert"
-                          ? "bg-red-500"
+                          ? "bg-danger"
                           : item.type === "referral"
-                          ? "bg-amber-500"
+                          ? "bg-gold"
                           : "bg-primary"
                       }`}
                     />

@@ -23,8 +23,8 @@ function PostReviewCard({ post }: { post: ModPost }) {
   });
 
   return (
-    <article className="rounded-[var(--radius-stamp)] border border-amber-200 bg-white p-4 shadow-[var(--shadow-paper)]">
-      <div className="flex flex-wrap items-center gap-2 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-faint">
+    <article className="rounded-[var(--radius-stamp)] border border-gold-light bg-white p-4 shadow-[var(--shadow-paper)]">
+      <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint">
         {post.circle && (
           <span className="rounded-[var(--radius-stamp)] bg-secondary-light px-1.5 py-0.5 text-secondary">
             {post.circle.icon} {post.circle.name}
@@ -33,12 +33,12 @@ function PostReviewCard({ post }: { post: ModPost }) {
         <span>{post.author?.name ?? "Unknown"}</span>
         <span aria-hidden className="text-line">·</span>
         <span>{formatRelative(post.createdAt)}</span>
-        <Stamp text="Flagged" tone="amber" className="ml-auto" />
+        <Stamp text="Flagged" tone="gold" className="ml-auto" />
       </div>
       <h3 className="mt-2 text-[14px] font-bold leading-snug text-ink">{post.title}</h3>
       <p className="mt-1 line-clamp-3 text-[12px] leading-relaxed text-ink-soft">{post.body}</p>
       {post.moderationCategory === "MISINFORMATION" && (
-        <p className="mt-2 flex items-center gap-1.5 rounded-[var(--radius-stamp)] border border-sky-200 bg-sky-50 px-2.5 py-1.5 text-[11px] font-semibold text-sky-800">
+        <p className="mt-2 flex items-center gap-1.5 rounded-[var(--radius-stamp)] border border-stamp/30 bg-stamp-light/50 px-2.5 py-1.5 text-[11px] font-semibold text-stamp-dark">
           <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
           Under clinical review — possibly misleading health claims.
         </p>
@@ -55,7 +55,7 @@ function PostReviewCard({ post }: { post: ModPost }) {
         <button
           onClick={() => mutation.mutate("hide")}
           disabled={mutation.isPending}
-          className="flex items-center gap-1.5 rounded-[var(--radius-stamp)] bg-rose-600 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wide text-white hover:bg-rose-700 disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-[var(--radius-stamp)] bg-danger px-4 py-1.5 text-[11px] font-bold uppercase tracking-wide text-white hover:bg-danger-dark disabled:opacity-50"
         >
           <EyeOff className="h-3.5 w-3.5" />
           Hide
@@ -83,16 +83,16 @@ function CommentReviewCard({ comment }: { comment: ModComment }) {
   });
 
   return (
-    <article className="rounded-[var(--radius-stamp)] border border-amber-200 bg-white p-4 shadow-[var(--shadow-paper)]">
-      <div className="flex flex-wrap items-center gap-2 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-faint">
+    <article className="rounded-[var(--radius-stamp)] border border-gold-light bg-white p-4 shadow-[var(--shadow-paper)]">
+      <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint">
         <MessageCircle className="h-3 w-3 text-ink-faint" />
         <span>{comment.author?.name ?? "Unknown"}</span>
         <span aria-hidden className="text-line">·</span>
         <span>{formatRelative(comment.createdAt)}</span>
-        <Stamp text="Flagged" tone="amber" className="ml-auto" />
+        <Stamp text="Flagged" tone="gold" className="ml-auto" />
       </div>
       <p className="mt-2 text-[12px] leading-relaxed text-ink">{comment.body}</p>
-      <p className="mt-1 font-mono text-[9px] uppercase tracking-wide text-ink-faint">
+      <p className="mt-1 font-mono text-[10px] uppercase tracking-wide text-ink-faint">
         on: {comment.postTitle ?? "a post"}
       </p>
       <div className="mt-3 flex gap-2 border-t border-line/70 pt-3">
@@ -107,7 +107,7 @@ function CommentReviewCard({ comment }: { comment: ModComment }) {
         <button
           onClick={() => mutation.mutate("hide")}
           disabled={mutation.isPending}
-          className="flex items-center gap-1.5 rounded-[var(--radius-stamp)] bg-rose-600 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wide text-white hover:bg-rose-700 disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-[var(--radius-stamp)] bg-danger px-4 py-1.5 text-[11px] font-bold uppercase tracking-wide text-white hover:bg-danger-dark disabled:opacity-50"
         >
           <EyeOff className="h-3.5 w-3.5" />
           Hide
@@ -130,18 +130,18 @@ function ReportRow({ report }: { report: CommunityReport }) {
 
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-[var(--radius-stamp)] border border-line bg-white p-4 shadow-[var(--shadow-paper)]">
-      <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[var(--radius-stamp)] bg-rose-50">
-        <Flag className="h-4 w-4 text-rose-600" />
+      <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[var(--radius-stamp)] bg-danger-light">
+        <Flag className="h-4 w-4 text-danger" />
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-[13px] font-bold text-ink">
           {REPORT_REASON_LABELS[report.reason]}
-          <span className="ml-2 font-mono text-[9px] uppercase tracking-wide text-ink-faint">
+          <span className="ml-2 font-mono text-[10px] uppercase tracking-wide text-ink-faint">
             {report.targetType === "POST" ? "post" : "comment"}
           </span>
         </p>
         {report.details && <p className="mt-0.5 line-clamp-2 text-[11px] text-ink-soft">{report.details}</p>}
-        <p className="mt-0.5 font-mono text-[9px] uppercase tracking-wide text-ink-faint">
+        <p className="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-ink-faint">
           reported by {report.reporter?.name ?? "a mama"} · {formatRelative(report.createdAt)}
         </p>
       </div>
@@ -199,8 +199,8 @@ export default function ModerationPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
       <div className="flex flex-wrap items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-stamp)] bg-amber-100">
-          <ShieldCheck className="h-5 w-5 text-amber-700" />
+        <span className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-stamp)] bg-gold-light">
+          <ShieldCheck className="h-5 w-5 text-gold-dark" />
         </span>
         <div>
           <h1 className="font-display text-3xl leading-none text-ink">The review wall</h1>
@@ -212,7 +212,7 @@ export default function ModerationPage() {
 
       <section className="mt-8" aria-label="Flagged posts">
         <h2 className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-faint">
-          <Ban className="h-3.5 w-3.5 text-amber-600" />
+          <Ban className="h-3.5 w-3.5 text-gold-dark" />
           Flagged posts
         </h2>
         <div className="mt-3 space-y-3">
@@ -228,7 +228,7 @@ export default function ModerationPage() {
 
       <section className="mt-8" aria-label="Flagged comments">
         <h2 className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-faint">
-          <MessageCircle className="h-3.5 w-3.5 text-amber-600" />
+          <MessageCircle className="h-3.5 w-3.5 text-gold-dark" />
           Flagged comments
         </h2>
         <div className="mt-3 space-y-3">
@@ -242,7 +242,7 @@ export default function ModerationPage() {
 
       <section className="mt-8" aria-label="Reports">
         <h2 className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-faint">
-          <Flag className="h-3.5 w-3.5 text-rose-600" />
+          <Flag className="h-3.5 w-3.5 text-danger" />
           Open reports
         </h2>
         <div className="mt-3 space-y-3">

@@ -18,7 +18,7 @@ export function AuthorBadge({ badge, role }: { badge: string | null; role: strin
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-[var(--radius-stamp)] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide",
+        "inline-flex items-center gap-1 rounded-[var(--radius-stamp)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
         badge ? "bg-stamp-light text-stamp-dark" : "bg-paper-ink text-ink-faint",
       )}
     >
@@ -60,14 +60,14 @@ export function PostCard({ post, saved, highlight, index = 0 }: PostCardProps) {
       <PinDot className={index % 2 === 0 ? "bg-gold" : "bg-stamp"} />
       <div className="paper-ruled rounded-[var(--radius-stamp)] p-4 sm:p-5">
         <Link href={`/community/post/${post.id}`} className="block focus:outline-none">
-          <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-faint">
+          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint">
             <span className="text-ink/60">{POST_TYPE_LABELS[post.postType]}</span>
             <span aria-hidden className="text-line">/</span>
             <span>{post.author.displayName}</span>
             <span aria-hidden className="text-line">·</span>
             <span>{formatRelative(post.createdAt)}</span>
             {post.flagged && (
-              <Stamp text="Flagged" tone="rose" className="ml-auto" />
+              <Stamp text="Flagged" tone="danger" className="ml-auto" />
             )}
           </div>
 
