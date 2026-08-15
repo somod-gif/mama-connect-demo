@@ -35,14 +35,14 @@ export function Footer({ hideLinks = false }: FooterProps) {
                 </span>
               </div>
             </Link>
-            <p className="text-sm text-white/50 leading-relaxed max-w-sm">
+            <p className="text-[15px] text-white/50 leading-relaxed max-w-sm">
               Human-centered maternal health platform connecting mothers to life-saving care through community health workers and technology.
             </p>
           </div>
 
           {!hideLinks && (
             <div>
-              <h3 className="text-[11px] font-semibold text-white/60 uppercase tracking-wider mb-4">Quick Links</h3>
+              <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-4">Quick Links</h3>
               <ul className="space-y-2.5">
                 {[
                   { label: "Home", href: "/" },
@@ -54,7 +54,7 @@ export function Footer({ hideLinks = false }: FooterProps) {
                   { label: "FAQ", href: "/faq" },
                 ].map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-white/50 hover:text-white transition-colors">
+                    <Link href={link.href} className="text-[15px] text-white/50 hover:text-white transition-colors">
                       {link.label}
                     </Link>
                   </li>
@@ -64,12 +64,12 @@ export function Footer({ hideLinks = false }: FooterProps) {
           )}
 
           <div>
-            <h3 className="text-[11px] font-semibold text-white/60 uppercase tracking-wider mb-4">Team MamaConnect</h3>
+            <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-4">Team MamaConnect</h3>
             <ul className="space-y-3">
               {team.map((member) => (
                 <li key={member.name}>
-                  <p className="text-sm font-medium text-white/90">{member.name}</p>
-                  <p className="text-xs text-white/40">{member.role}</p>
+                  <p className="text-[15px] font-medium text-white/90">{member.name}</p>
+                  <p className="text-sm text-white/40">{member.role}</p>
                 </li>
               ))}
             </ul>
@@ -77,11 +77,11 @@ export function Footer({ hideLinks = false }: FooterProps) {
         </div>
 
         <div className="mt-10 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 text-xs text-white/30">
+          <div className="flex items-center gap-1.5 text-[13px] text-white/30">
             <HeartPulse className="w-3.5 h-3.5" />
             <span>MamaConnect — CareCode Hackathon 2026</span>
           </div>
-          <p className="text-xs text-white/30">
+          <p className="text-[13px] text-white/30">
             &copy; {new Date().getFullYear()} MamaConnect. All rights reserved.
           </p>
         </div>
