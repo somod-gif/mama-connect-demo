@@ -105,3 +105,61 @@ export interface ReportData {
   followUpCompletion: { label: string; completed: number; pending: number }[];
   referralSuccess: { label: string; successful: number; failed: number }[];
 }
+
+export interface DeliveryOrderItem {
+  id: string;
+  orderId: string;
+  productId: string;
+  name: string;
+  quantity: number;
+  unitPriceKobo: number;
+}
+
+export interface DeliveryOrder {
+  id: string;
+  orderNumber: string;
+  status: string;
+  totalKobo: number;
+  totalNaira: number;
+  deliveryType: string | null;
+  deliveryAddress: string | null;
+  deliveryPhone: string | null;
+  chewCommissionKobo: number | null;
+  patientId: string | null;
+  patient: {
+    name: string;
+    phone: string;
+    address?: string | null;
+    lga?: string | null;
+  } | null;
+  items: DeliveryOrderItem[];
+  createdAt: string;
+}
+
+export interface BirthPlanChecklistItem {
+  id: string;
+  label: string;
+  done: boolean;
+  category?: string;
+}
+
+export interface BirthPlan {
+  id: string;
+  patientId: string;
+  checklist: BirthPlanChecklistItem[];
+  preferredFacility: string | null;
+  birthCompanion: string | null;
+  transportNotes: string | null;
+  bloodDonor: string | null;
+  completion: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateBirthPlanRequest {
+  preferredFacility?: string | null;
+  birthCompanion?: string | null;
+  transportNotes?: string | null;
+  bloodDonor?: string | null;
+  checklist?: BirthPlanChecklistItem[];
+}

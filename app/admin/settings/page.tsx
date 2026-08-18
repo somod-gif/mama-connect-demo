@@ -107,7 +107,7 @@ export default function AdminSettingsPage() {
 
         <div className="border-t border-border pt-6">
           <button onClick={() => logout()}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-500 bg-red-50 rounded-xl hover:bg-red-100 transition-all">
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-danger bg-danger-light rounded-xl hover:bg-danger/10 transition-all">
             <LogOut className="w-4 h-4" />
             Sign Out
           </button>

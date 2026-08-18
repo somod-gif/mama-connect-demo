@@ -60,49 +60,49 @@ const summaryCards = [
     subKey: "total" as keyof PatientCounts,
     icon: Users,
     label: "Total Mothers",
-    color: "text-teal-600",
-    bg: "bg-teal-50",
-    ring: "ring-teal-500/10",
+    color: "text-stamp",
+    bg: "bg-stamp-light",
+    ring: "ring-stamp/10",
   },
   {
     key: "highRiskCases" as const,
     icon: HeartPulse,
     label: "High Risk",
-    color: "text-rose-600",
-    bg: "bg-rose-50",
-    ring: "ring-rose-500/10",
+    color: "text-danger",
+    bg: "bg-danger-bg",
+    ring: "ring-danger/10",
   },
   {
     key: "todayFollowUps" as const,
     icon: CalendarCheck,
-    label: "Today's Appointments",
-    color: "text-violet-600",
-    bg: "bg-violet-50",
-    ring: "ring-violet-500/10",
+    label: "Today's Follow-ups",
+    color: "text-ink",
+    bg: "bg-secondary-light",
+    ring: "ring-ink/10",
   },
   {
     key: "pendingReferralCount" as const,
     icon: ArrowRightLeft,
     label: "Pending Referrals",
-    color: "text-amber-600",
-    bg: "bg-amber-50",
-    ring: "ring-amber-500/10",
+    color: "text-gold",
+    bg: "bg-gold-light",
+    ring: "ring-gold/10",
   },
   {
     key: "upcomingAppointments" as const,
     icon: Bell,
-    label: "Upcoming (7 days)",
-    color: "text-blue-600",
-    bg: "bg-blue-50",
-    ring: "ring-blue-500/10",
+    label: "Upcoming",
+    color: "text-stamp",
+    bg: "bg-stamp-light",
+    ring: "ring-stamp/10",
   },
   {
     key: "overdueCheckIns" as const,
     icon: Activity,
     label: "Overdue Check-ins",
-    color: "text-orange-600",
-    bg: "bg-orange-50",
-    ring: "ring-orange-500/10",
+    color: "text-danger",
+    bg: "bg-danger-bg",
+    ring: "ring-danger/10",
   },
 ];
 
@@ -143,10 +143,10 @@ const activityIconMap: Record<string, typeof Bell> = {
 };
 
 const activityColorMap: Record<string, string> = {
-  registration: "bg-teal-500",
-  checkin: "bg-blue-500",
-  referral: "bg-amber-500",
-  alert: "bg-rose-500",
+  registration: "bg-stamp",
+  checkin: "bg-ink",
+  referral: "bg-gold",
+  alert: "bg-danger",
 };
 
 export default function DashboardHome() {
@@ -184,16 +184,16 @@ export default function DashboardHome() {
     <div className="space-y-6">
       {user?.verificationStatus === "PENDING" && (
         <FadeInUp>
-          <div className="flex items-start gap-3.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5">
-            <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-              <Clock className="w-4 h-4 text-amber-700" />
+          <div className="flex items-start gap-3.5 bg-gold-light border border-gold/20 rounded-xl px-4 py-3.5">
+            <div className="w-9 h-9 rounded-xl bg-gold/20 flex items-center justify-center flex-shrink-0">
+              <Clock className="w-4 h-4 text-gold-dark" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <p className="text-sm font-bold text-amber-900">Pending Verification</p>
+                <p className="text-sm font-bold text-gold-dark">Pending Verification</p>
                 <VerificationBadge status="PENDING" />
               </div>
-              <p className="text-xs text-amber-800/80 mt-1">
+              <p className="text-xs text-gold-dark/80 mt-1">
                 Your account is under review. Full access will be available once approved by an administrator.
               </p>
             </div>
@@ -203,22 +203,22 @@ export default function DashboardHome() {
 
       {user?.verificationStatus === "REJECTED" && (
         <FadeInUp>
-          <div className="flex items-start gap-3.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3.5">
-            <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
-              <XCircle className="w-4 h-4 text-red-600" />
+          <div className="flex items-start gap-3.5 bg-danger-light border border-danger/20 rounded-xl px-4 py-3.5">
+            <div className="w-9 h-9 rounded-xl bg-danger/20 flex items-center justify-center flex-shrink-0">
+              <XCircle className="w-4 h-4 text-danger" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <p className="text-sm font-bold text-red-900">Verification Required</p>
+                <p className="text-sm font-bold text-danger">Verification Required</p>
                 <VerificationBadge status="REJECTED" />
               </div>
-              <p className="text-xs text-red-800/80 mt-1">
+              <p className="text-xs text-danger/80 mt-1">
                 Your account couldn&apos;t be verified. Please update your information or contact support.
               </p>
               <div className="flex flex-wrap gap-2 mt-2.5">
                 <Link
                   href="/dashboard/profile"
-                  className="inline-flex items-center gap-1 px-3 py-1.5 text-[11px] font-semibold text-red-700 bg-red-100 rounded-lg hover:bg-red-200 transition-colors"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 text-[11px] font-semibold text-danger bg-danger-light rounded-lg hover:bg-danger/10 transition-colors"
                 >
                   <Shield className="w-3 h-3" />
                   Update Profile
@@ -299,15 +299,15 @@ export default function DashboardHome() {
 
       {needsAttention > 0 && (data?.patientCounts?.verified ?? 0) > 0 && (
         <FadeInUp>
-          <div className="flex items-start gap-3.5 bg-rose-50 border border-rose-200 rounded-xl px-4 py-3.5">
-            <div className="w-9 h-9 rounded-xl bg-rose-100 flex items-center justify-center flex-shrink-0">
-              <AlertTriangle className="w-4 h-4 text-rose-600" />
+          <div className="flex items-start gap-3.5 bg-danger-light border border-danger/20 rounded-xl px-4 py-3.5">
+            <div className="w-9 h-9 rounded-xl bg-danger/20 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-4 h-4 text-danger" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-rose-900">
+              <p className="text-sm font-bold text-danger">
                 {needsAttention} item{needsAttention !== 1 ? "s" : ""} need{needsAttention === 1 ? "s" : ""} your attention
               </p>
-              <p className="text-xs text-rose-800/80 mt-1">
+              <p className="text-xs text-danger/80 mt-1">
                 {data && data.overdueCheckIns > 0 && `${data.overdueCheckIns} overdue check-in${data.overdueCheckIns !== 1 ? "s" : ""}`}
                 {data && data.overdueCheckIns > 0 && data.unverifiedFlagCount > 0 && " · "}
                 {data && data.unverifiedFlagCount > 0 && `${data.unverifiedFlagCount} unverified flag${data.unverifiedFlagCount !== 1 ? "s" : ""}`}
@@ -322,7 +322,7 @@ export default function DashboardHome() {
           <div className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-600" />
+                <AlertTriangle className="w-4 h-4 text-danger" />
                 Open Concerns ({data.openAlerts.length})
               </h3>
               <Link
@@ -336,10 +336,10 @@ export default function DashboardHome() {
               {data.openAlerts.map((alert) => {
                 const severityClass =
                   alert.severity === "HIGH"
-                    ? "bg-rose-100 text-rose-700"
+                    ? "bg-danger-light text-danger"
                     : alert.severity === "MEDIUM"
-                      ? "bg-amber-100 text-amber-700"
-                      : "bg-slate-100 text-slate-700";
+                      ? "bg-gold-light text-gold-dark"
+                      : "bg-background-soft text-muted-foreground";
                 return (
                   <div
                     key={alert.id}
@@ -455,14 +455,14 @@ export default function DashboardHome() {
                     <FadeInUp key={item.id} delay={i * 0.02}>
                       <div className="flex items-start gap-3 px-4 py-3 hover:bg-background-soft transition-colors">
                         <div className="flex flex-col items-center">
-                          <div className={`w-2 h-2 rounded-full mt-1.5 ring-2 ring-white ${activityColorMap[item.type] || "bg-gray-400"}`} />
+                          <div className={`w-2 h-2 rounded-full mt-1.5 ring-2 ring-white ${activityColorMap[item.type] || "bg-ink-faint"}`} />
                           {i < Math.min(data.recentActivity.length, 10) - 1 && (
                             <div className="w-px flex-1 bg-border mt-1" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0 pb-1">
                           <div className="flex items-center gap-2">
-                            <AIcon className={`w-3.5 h-3.5 ${item.type === "alert" ? "text-rose-500" : item.type === "referral" ? "text-amber-500" : "text-primary"}`} />
+                            <AIcon className={`w-3.5 h-3.5 ${item.type === "alert" ? "text-danger" : item.type === "referral" ? "text-gold" : "text-primary"}`} />
                             <p className="text-sm font-semibold text-foreground truncate">
                               {item.patientName}
                             </p>
@@ -511,32 +511,32 @@ export default function DashboardHome() {
               <div className="h-px bg-border" />
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Follow-ups Today</span>
-                <span className="text-sm font-bold text-violet-600">{data?.todayFollowUps ?? 0}</span>
+                <span className="text-sm font-bold text-stamp">{data?.todayFollowUps ?? 0}</span>
               </div>
               <div className="h-px bg-border" />
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Verified</span>
-                <span className="text-sm font-bold text-green-600">{data?.patientCounts?.verified ?? 0}</span>
+                <span className="text-sm font-bold text-leaf">{data?.patientCounts?.verified ?? 0}</span>
               </div>
               <div className="h-px bg-border" />
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Pending Verification</span>
-                <span className="text-sm font-bold text-amber-600">{data?.patientCounts?.pending ?? 0}</span>
+                <span className="text-sm font-bold text-gold">{data?.patientCounts?.pending ?? 0}</span>
               </div>
               <div className="h-px bg-border" />
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Unreachable</span>
-                <span className="text-sm font-bold text-rose-600">{data?.patientCounts?.unreachable ?? 0}</span>
+                <span className="text-sm font-bold text-danger">{data?.patientCounts?.unreachable ?? 0}</span>
               </div>
               <div className="h-px bg-border" />
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">High Risk</span>
-                <span className="text-sm font-bold text-rose-600">{data?.highRiskCases ?? 0}</span>
+                <span className="text-sm font-bold text-danger">{data?.highRiskCases ?? 0}</span>
               </div>
               <div className="h-px bg-border" />
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Upcoming Appointments</span>
-                <span className="text-sm font-bold text-blue-600">{data?.upcomingAppointments ?? 0}</span>
+                <span className="text-sm text-muted-foreground">Upcoming</span>
+                <span className="text-sm font-bold text-stamp">{data?.upcomingAppointments ?? 0}</span>
               </div>
             </div>
           </div>
@@ -570,10 +570,10 @@ export default function DashboardHome() {
                     </div>
                     <div className={`px-2 py-0.5 text-[10px] font-semibold rounded-full border ${
                       patient.engagementStatus === "UNREACHABLE"
-                        ? "bg-red-50 text-red-700 border-red-200"
+                        ? "bg-danger-light text-danger border-danger/20"
                         : patient.engagementStatus === "MISSED_CHECK_IN"
-                        ? "bg-amber-50 text-amber-700 border-amber-200"
-                        : "bg-green-50 text-green-700 border-green-200"
+                        ? "bg-gold-light text-gold-dark border-gold/20"
+                        : "bg-leaf-light text-leaf border-leaf/20"
                     }`}>
                       {patient.engagementStatus === "UNREACHABLE"
                         ? "Unreachable"

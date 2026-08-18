@@ -6,6 +6,7 @@ import { Loader2, Search, CheckCircle, XCircle, Clock, Edit3, ChevronLeft, Chevr
 import { toast } from "sonner";
 import { adminService } from "@/services/admin.service";
 import { showApiError } from "@/lib/error-handler";
+import { StatusBadge } from "@/app/components/ui/StatusBadge";
 import type { AdminPatient, AdminUser } from "@/types/admin";
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -161,7 +162,7 @@ function VerifyPatientDialog({ patient, onClose }: { patient: AdminPatient; onCl
             </select>
           </div>
           <button onClick={() => verifyMutation.mutate()} disabled={verifyMutation.isPending || !chewId}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 disabled:opacity-60">
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-leaf rounded-xl hover:bg-leaf-dark disabled:opacity-60">
             {verifyMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
             Verify & Assign
           </button>
@@ -171,11 +172,7 @@ function VerifyPatientDialog({ patient, onClose }: { patient: AdminPatient; onCl
   );
 }
 
-const statusBadge = (status: string) => {
-  if (status === "VERIFIED") return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-50 text-green-700"><CheckCircle className="w-3 h-3" /> Verified</span>;
-  if (status === "REJECTED") return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-red-50 text-red-700"><XCircle className="w-3 h-3" /> Rejected</span>;
-  return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-amber-50 text-amber-700"><Clock className="w-3 h-3" /> Pending</span>;
-};
+const statusBadge = (status: string) => <StatusBadge status={status} />;
 
 export default function AdminPatientsPage() {
   const queryClient = useQueryClient();
@@ -247,7 +244,7 @@ export default function AdminPatientsPage() {
                         </button>
                         {patient.verificationStatus !== "VERIFIED" && (
                           <button onClick={() => setVerifyPatient(patient)}
-                            className="p-2 rounded-lg hover:bg-green-50 text-green-600" title="Verify">
+                            className="p-2 rounded-lg hover:bg-leaf-light text-leaf" title="Verify">
                             <CheckCircle className="w-4 h-4" />
                           </button>
                         )}
@@ -287,7 +284,7 @@ export default function AdminPatientsPage() {
                 </button>
                 {patient.verificationStatus !== "VERIFIED" && (
                   <button onClick={() => setVerifyPatient(patient)}
-                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold text-green-700 bg-green-50 rounded-lg hover:bg-green-100">
+                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold text-leaf bg-leaf-light rounded-lg hover:bg-leaf/10">
                     <CheckCircle className="w-3 h-3" /> Verify
                   </button>
                 )}

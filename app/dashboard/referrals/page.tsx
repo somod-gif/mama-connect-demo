@@ -18,11 +18,11 @@ import { toast } from "sonner";
 import type { Referral, CreateReferralRequest } from "@/lib/types/dashboard";
 
 const statusStyles: Record<string, string> = {
-  CREATED: "bg-amber-50 text-amber-700 border-amber-200",
-  ACKNOWLEDGED: "bg-blue-50 text-blue-700 border-blue-200",
-  ARRIVED: "bg-purple-50 text-purple-700 border-purple-200",
-  CARE_PROVIDED: "bg-green-50 text-green-700 border-green-200",
-  CLOSED: "bg-gray-50 text-gray-500 border-gray-200",
+  CREATED: "bg-gold-light text-gold-dark border-gold/30",
+  ACKNOWLEDGED: "bg-stamp-light text-stamp border-stamp/30",
+  ARRIVED: "bg-ink/10 text-ink border-ink/20",
+  CARE_PROVIDED: "bg-leaf-light text-leaf border-leaf/30",
+  CLOSED: "bg-background-soft text-muted-foreground border-border",
 };
 
 export default function ReferralsPage() {
@@ -115,7 +115,7 @@ function ReferralsContent() {
               >
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="text-sm font-semibold text-foreground">{r.patient?.name || "—"}</h3>
-                  <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-full border ${statusStyles[r.status] || "bg-gray-50 text-gray-500 border-gray-200"}`}>
+                  <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-full border ${statusStyles[r.status] || "bg-muted text-muted-foreground border-muted/50"}`}>
                     {r.status.replace(/_/g, " ")}
                   </span>
                 </div>

@@ -7,9 +7,9 @@ import { chewService } from "@/lib/services/chew.service";
 import type { OpenAlert } from "@/types/dashboard";
 
 const severityClass: Record<string, string> = {
-  HIGH: "bg-rose-100 text-rose-700",
-  MEDIUM: "bg-amber-100 text-amber-700",
-  LOW: "bg-slate-100 text-slate-700",
+  HIGH: "bg-danger-light text-danger",
+  MEDIUM: "bg-gold-light text-gold-dark",
+  LOW: "bg-background-soft text-muted-foreground",
 };
 
 export default function ConcernsPage() {
@@ -40,10 +40,10 @@ export default function ConcernsPage() {
       </Link>
 
       <div className="flex items-center gap-2">
-        <Bell className="w-5 h-5 text-rose-600" />
+        <Bell className="w-5 h-5 text-danger" />
         <h1 className="text-xl font-bold text-foreground">Open Concerns</h1>
         {alerts.length > 0 && (
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-danger-light text-danger">
             {alerts.length}
           </span>
         )}

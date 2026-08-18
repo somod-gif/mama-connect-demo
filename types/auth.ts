@@ -43,9 +43,21 @@ export interface LoginResponse extends TokenResponse {
   };
 }
 
-export type UserRole = "CHEW" | "ADMIN" | "SUPERVISOR";
+export type UserRole =
+  | "CHEW"
+  | "ADMIN"
+  | "SUPERVISOR"
+  | "ORG_ADMIN"
+  | "FACILITY_STAFF"
+  | "PATIENT"
+  | "CUSTOMER";
 
 export type VerificationStatus = "PENDING" | "VERIFIED" | "REJECTED";
+
+export interface OrganizationRef {
+  id: string;
+  name: string;
+}
 
 export interface User {
   id: string;
@@ -60,6 +72,15 @@ export interface User {
   lga?: string | { id: string; name: string; state: { id: string; name: string } };
   facility?: string;
   preferredLanguage?: string;
+  organizationId?: string;
+  organizationName?: string;
+  patient?: {
+    id: string;
+    maternalId?: string | null;
+    age?: number | null;
+    verificationStatus?: string;
+    chew?: { id: string; name: string; phone: string } | null;
+  } | null;
   createdAt?: string;
 }
 
@@ -82,6 +103,7 @@ export interface ChangePasswordRequest {
 
 export interface AuthContextValue extends AuthState {
   login: (data: LoginRequest) => Promise<void>;
+  loginWithOtp: (phone: string, code: string) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;

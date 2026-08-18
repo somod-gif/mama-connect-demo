@@ -36,6 +36,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   }, [isAuthenticated, isLoading, user, documents, pathname, router, docsLoading]);
 
   if (!isAuthenticated || user?.role === "ADMIN") return null;
+
   if (user?.verificationStatus === "PENDING" && docsLoading) {
     return (
       <div className="min-h-screen bg-background-soft flex items-center justify-center">
@@ -46,14 +47,19 @@ export default function DashboardShell({ children }: { children: React.ReactNode
 
   return (
     <div className="min-h-screen bg-background-soft flex">
-      <Suspense fallback={<div className="w-64 h-screen bg-card border-r border-border animate-pulse" />}>
-        <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} mobileOpen={mobileOpen} onMobileToggle={() => setMobileOpen(!mobileOpen)} />
+      <Suspense fallback={<div className="w-60 h-screen bg-card border-r border-border" />}>
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          mobileOpen={mobileOpen}
+          onMobileToggle={() => setMobileOpen(!mobileOpen)}
+        />
       </Suspense>
-      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"}`}>
-        <Suspense fallback={<header className="h-12 lg:h-14 bg-card/80 border-b border-border animate-pulse" />}>
+      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? "lg:ml-16" : "lg:ml-60"}`}>
+        <Suspense fallback={<header className="h-12 lg:h-14 bg-white border-b border-border" />}>
           <Topbar mobileOpen={mobileOpen} onMobileToggle={() => setMobileOpen(!mobileOpen)} />
         </Suspense>
-        <main className="flex-1 p-4 md:p-6 lg:p-8 pt-3 lg:pt-6">{children}</main>
+        <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );

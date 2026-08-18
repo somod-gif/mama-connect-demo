@@ -8,6 +8,7 @@ import { patientsService } from "@/lib/services/patients.service";
 import { FadeInUp } from "@/app/components/animations";
 import { RequireVerified } from "@/app/components/shared/VerificationGate";
 import { ConfirmDialog } from "@/app/components/shared/ConfirmDialog";
+import { StatusBadge } from "@/app/components/ui/StatusBadge";
 import { toast } from "sonner";
 import type { Patient } from "@/lib/types/patient";
 import { computePregnancyWeek } from "@/lib/utils/date";
@@ -20,19 +21,19 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 const riskStyles: Record<string, string> = {
-  HIGH: "bg-red-50 text-red-700 border-red-200",
-  MEDIUM: "bg-amber-50 text-amber-700 border-amber-200",
-  LOW: "bg-green-50 text-green-700 border-green-200",
+  HIGH: "bg-danger-light text-danger border-danger/20",
+  MEDIUM: "bg-gold-light text-gold-dark border-gold/20",
+  LOW: "bg-leaf-light text-leaf border-leaf/20",
 };
 const verificationStyles: Record<string, string> = {
-  VERIFIED: "bg-green-50 text-green-700 border-green-200",
-  PENDING: "bg-amber-50 text-amber-700 border-amber-200",
-  REJECTED: "bg-red-50 text-red-700 border-red-200",
+  VERIFIED: "bg-leaf-light text-leaf border-leaf/20",
+  PENDING: "bg-gold-light text-gold-dark border-gold/20",
+  REJECTED: "bg-danger-light text-danger border-danger/20",
 };
 const alertStyles: Record<string, string> = {
-  HIGH: "bg-rose-100 text-rose-700",
-  MEDIUM: "bg-amber-100 text-amber-700",
-  LOW: "bg-slate-100 text-slate-700",
+  HIGH: "bg-danger-light text-danger",
+  MEDIUM: "bg-gold-light text-gold-dark",
+  LOW: "bg-background-soft text-muted-foreground",
 };
 
 export default function MothersPage() {
@@ -171,7 +172,7 @@ function MothersContent() {
               <label className="block text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Concerns</label>
               <button
                 onClick={() => { setAlertsFilter(alertsFilter ? "" : "open"); setPage(1); }}
-                className={`w-full px-3 py-2 text-sm rounded-xl border transition-colors ${alertsFilter ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-background border-border text-muted-foreground hover:border-primary"}`}
+                className={`w-full px-3 py-2 text-sm rounded-xl border transition-colors ${alertsFilter ? "bg-danger-light text-danger border-danger/20" : "bg-background border-border text-muted-foreground hover:border-primary"}`}
               >
                 {alertsFilter ? "Open concerns ✓" : "Has open concern"}
               </button>
@@ -226,14 +227,31 @@ function MothersContent() {
                         {pregnancyWeek ? ` · ${pregnancyWeek} weeks` : ""}
                         {patient.preferredLanguage ? ` · ${patient.preferredLanguage}` : ""}
                       </p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5 sm:hidden">
+                        {riskText && (
+                          <StatusBadge status={riskText} size="sm" />
+                        )}
+                        <StatusBadge status={patient.verificationStatus} size="sm" />
+                        {patient.openAlerts && patient.openAlerts.length > 0 && (() => {
+                          const alerts = patient.openAlerts!;
+                          const hasHigh = alerts.some((a) => a.severity === "HIGH");
+                          const sev = hasHigh ? "HIGH" : alerts[0].severity;
+                          return (
+                            <span className={`px-2 py-0.5 text-[9px] font-semibold rounded-full border flex items-center gap-1 ${alertStyles[sev] || alertStyles.LOW}`}>
+                              <AlertTriangle className="w-2.5 h-2.5" />
+                              {alerts.length > 1 ? `${alerts.length} concerns` : "Concern"}
+                            </span>
+                          );
+                        })()}
+                      </div>
                     </div>
 
-                    <span className={`px-2.5 py-1 text-[10px] font-semibold rounded-full border hidden sm:inline ${riskStyles[riskText] || "bg-gray-50 text-gray-700 border-gray-200"}`}>
-                      {riskText.toUpperCase()}
+                    <span className="hidden sm:inline-flex">
+                      <StatusBadge status={riskText || "LOW"} />
                     </span>
 
-                    <span className={`px-2.5 py-1 text-[10px] font-semibold rounded-full border hidden sm:inline ${verificationStyles[patient.verificationStatus] || ""}`}>
-                      {patient.verificationStatus}
+                    <span className="hidden sm:inline-flex">
+                      <StatusBadge status={patient.verificationStatus} />
                     </span>
 
                     {patient.openAlerts && patient.openAlerts.length > 0 && (() => {
@@ -242,7 +260,7 @@ function MothersContent() {
                       const sev = hasHigh ? "HIGH" : alerts[0].severity;
                       return (
                         <span
-                          className={`px-2.5 py-1 text-[10px] font-semibold rounded-full border hidden sm:inline flex items-center gap-1 ${alertStyles[sev] || alertStyles.LOW}`}
+                          className={`px-2.5 py-1 text-[10px] font-semibold rounded-full border hidden sm:inline-flex items-center gap-1 ${alertStyles[sev] || alertStyles.LOW}`}
                           title="Open concern"
                         >
                           <AlertTriangle className="w-3 h-3" />
@@ -257,7 +275,7 @@ function MothersContent() {
                           onClick={() => setVerifyId(patient.id)}
                           disabled={verifyMutation.isPending && verifyMutation.variables === patient.id}
                           title="Verify enrollment"
-                          className="p-2 rounded-lg text-green-600 hover:bg-green-50 transition-colors disabled:opacity-50"
+                          className="p-2 rounded-lg text-leaf hover:bg-leaf-light transition-colors disabled:opacity-50"
                         >
                           <CheckCircle className="w-4 h-4" />
                         </button>

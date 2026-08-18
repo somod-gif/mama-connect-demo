@@ -40,23 +40,23 @@ export default function RiskAlertsSection() {
                 key={alert.name}
                 className={`p-5 border-l-4 ${
                   alert.severity === "high"
-                    ? "border-l-red-500"
-                    : "border-l-amber-500"
+                    ? "border-l-danger"
+                    : "border-l-gold"
                 }`}
               >
                 <div className="flex items-start gap-3">
                   <div
                     className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
                       alert.severity === "high"
-                        ? "bg-red-50"
-                        : "bg-amber-50"
+                        ? "bg-danger-light"
+                        : "bg-gold-light"
                     }`}
                   >
                     <AlertTriangle
                       className={`w-5 h-5 ${
                         alert.severity === "high"
-                          ? "text-red-600"
-                          : "text-amber-600"
+                          ? "text-danger"
+                          : "text-gold"
                       }`}
                     />
                   </div>
@@ -68,8 +68,8 @@ export default function RiskAlertsSection() {
                       <span
                         className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0 ${
                           alert.severity === "high"
-                            ? "bg-red-50 text-red-600"
-                            : "bg-amber-50 text-amber-600"
+                            ? "bg-danger-light text-danger"
+                            : "bg-gold-light text-gold"
                         }`}
                       >
                         {alert.severity === "high" ? "High Risk" : "Medium"}

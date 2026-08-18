@@ -116,7 +116,7 @@ export default function SettingsPage() {
           ))}
           <button
             onClick={() => logout()}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-danger hover:bg-danger-light transition-colors"
           >
             <LogOut className="w-4 h-4" />
             Logout
@@ -262,7 +262,7 @@ function SecuritySection() {
               {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
-          {errors.currentPassword && <p className="mt-1 text-xs text-red-500">{errors.currentPassword.message}</p>}
+          {errors.currentPassword && <p className="mt-1 text-xs text-danger">{errors.currentPassword.message}</p>}
         </div>
 
         <div>
@@ -278,7 +278,7 @@ function SecuritySection() {
               {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
-          {errors.newPassword && <p className="mt-1 text-xs text-red-500">{errors.newPassword.message}</p>}
+          {errors.newPassword && <p className="mt-1 text-xs text-danger">{errors.newPassword.message}</p>}
         </div>
 
         <div>
@@ -294,7 +294,7 @@ function SecuritySection() {
               {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
-          {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword.message}</p>}
+          {errors.confirmPassword && <p className="mt-1 text-xs text-danger">{errors.confirmPassword.message}</p>}
         </div>
 
         <button

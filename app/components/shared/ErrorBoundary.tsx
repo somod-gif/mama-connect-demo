@@ -1,6 +1,8 @@
 "use client";
 
 import { Component, type ReactNode, type ErrorInfo } from "react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
+import { Button } from "@/app/components/ui/Button";
 
 interface Props {
   children: ReactNode;
@@ -31,20 +33,18 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback;
       return (
         <div className="min-h-screen flex items-center justify-center bg-background-soft px-4">
-          <div className="text-center max-w-md">
-            <div className="w-16 h-16 rounded-2xl bg-red-100 flex items-center justify-center mx-auto mb-6">
-              <span className="text-2xl">!</span>
+          <div className="text-center max-w-sm">
+            <div className="w-14 h-14 rounded-2xl bg-danger-bg border border-danger/20 flex items-center justify-center mx-auto mb-5">
+              <AlertTriangle className="w-6 h-6 text-danger" />
             </div>
-            <h1 className="text-xl font-bold text-foreground tracking-tight mb-3">Something went wrong</h1>
+            <h1 className="text-lg font-bold text-foreground mb-2">Something went wrong</h1>
             <p className="text-sm text-muted-foreground mb-6">
-              An unexpected error occurred. Please try refreshing the page.
+              We couldn&apos;t load this page. Please try refreshing.
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-5 py-2.5 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary-dark transition-all"
-            >
+            <Button variant="primary" size="md" onClick={() => window.location.reload()}>
+              <RefreshCw className="w-4 h-4" />
               Refresh Page
-            </button>
+            </Button>
           </div>
         </div>
       );

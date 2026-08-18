@@ -8,18 +8,27 @@ const publicPaths = [
   "/partners",
   "/mothers",
   "/chew",
+  "/organizations",
+  "/healthcare",
+  "/learn-more",
   "/login",
   "/register",
   "/setup",
+  "/market/signup",
+  "/orgs/register",
   "/_next",
   "/favicon.ico",
   "/logo.png",
 ];
 
 function isPublicPath(pathname: string): boolean {
-  return publicPaths.some(
-    (path) => pathname === path || pathname.startsWith(path + "/")
-  );
+  if (publicPaths.some((path) => pathname === path || pathname.startsWith(path + "/"))) {
+    return true;
+  }
+  if (pathname === "/market" || /^\/market\/(?!cart|orders|signup)[^/]+$/.test(pathname)) {
+    return true;
+  }
+  return false;
 }
 
 export function middleware(request: NextRequest) {

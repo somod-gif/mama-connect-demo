@@ -10,7 +10,7 @@ import {
   ChevronRight, MessageSquare, User, Globe,
   Loader2, Baby, Droplets, Scale, Thermometer,
   Stethoscope, Syringe, FileText, Eye,
-  ChevronDown, ChevronUp, Mail, X, ExternalLink, CheckCircle,
+  ChevronDown, ChevronUp, Mail, X, ExternalLink, CheckCircle, Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 import { patientsService } from "@/lib/services/patients.service";
@@ -20,22 +20,24 @@ import { FadeInUp } from "@/app/components/animations";
 import { RequireVerified } from "@/app/components/shared/VerificationGate";
 import { ConfirmDialog } from "@/app/components/shared/ConfirmDialog";
 import type { PatientDetail, MedicalAttribute, PatientCheckinsResponse } from "@/types/patient";
+import type { BirthPlan, BirthPlanChecklistItem } from "@/types/dashboard";
 import { computePregnancyWeek } from "@/lib/utils/date";
 import { careStatusToRiskLevel, normalizeRiskFactors } from "@/lib/utils";
 
 const riskStyles: Record<string, string> = {
-  HIGH: "bg-red-50 text-red-700 border-red-200",
-  MEDIUM: "bg-amber-50 text-amber-700 border-amber-200",
-  LOW: "bg-green-50 text-green-700 border-green-200",
+  HIGH: "bg-danger-light text-danger border-danger/20",
+  MEDIUM: "bg-gold-light text-gold-dark border-gold/20",
+  LOW: "bg-leaf-light text-leaf border-leaf/20",
 };
 const verificationStyles: Record<string, string> = {
-  VERIFIED: "bg-green-50 text-green-700 border-green-200",
-  PENDING: "bg-amber-50 text-amber-700 border-amber-200",
-  REJECTED: "bg-red-50 text-red-700 border-red-200",
+  VERIFIED: "bg-leaf-light text-leaf border-leaf/20",
+  PENDING: "bg-gold-light text-gold-dark border-gold/20",
+  REJECTED: "bg-danger-light text-danger border-danger/20",
 };
 
 const tabs = [
   { id: "overview", label: "Overview", icon: User },
+  { id: "birth-plan", label: "Birth Plan", icon: Heart },
   { id: "checkins", label: "Check-ins", icon: Clock },
   { id: "medical", label: "Medical", icon: Activity },
   { id: "activity", label: "Activity", icon: ClipboardList },
@@ -180,7 +182,7 @@ function MotherProfileContent() {
                 <button
                   onClick={() => setShowVerify(true)}
                   disabled={verifyMutation.isPending}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 disabled:opacity-50 transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-leaf rounded-xl hover:bg-leaf-dark disabled:opacity-50 transition-all"
                 >
                   <CheckCircle className="w-4 h-4" /> Verify
                 </button>
@@ -219,10 +221,10 @@ function MotherProfileContent() {
 
       {patient.openAlerts && patient.openAlerts.length > 0 && (
         <FadeInUp delay={0.03}>
-          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 space-y-3">
+          <div className="bg-danger-light border border-danger/20 rounded-2xl p-4 space-y-3">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-rose-600" />
-              <h3 className="text-sm font-bold text-rose-900">
+              <AlertTriangle className="w-4 h-4 text-danger" />
+              <h3 className="text-sm font-bold text-danger">
                 Open Concerns ({patient.openAlerts.length})
               </h3>
             </div>
@@ -230,14 +232,14 @@ function MotherProfileContent() {
               {patient.openAlerts.map((alert) => {
                 const sev =
                   alert.severity === "HIGH"
-                    ? "bg-rose-100 text-rose-700"
+                    ? "bg-danger-light text-danger"
                     : alert.severity === "MEDIUM"
-                      ? "bg-amber-100 text-amber-700"
-                      : "bg-slate-100 text-slate-700";
+                      ? "bg-gold-light text-gold-dark"
+                      : "bg-background-soft text-muted-foreground";
                 return (
                   <div
                     key={alert.id}
-                    className="flex items-start gap-3 p-3 rounded-xl bg-white border border-rose-100"
+                    className="flex items-start gap-3 p-3 rounded-xl bg-card border border-danger/10"
                   >
                     <span
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${sev}`}
@@ -262,7 +264,7 @@ function MotherProfileContent() {
                         <button
                           onClick={() => acknowledgeAlertMutation.mutate(alert.id)}
                           disabled={acknowledgeAlertMutation.isPending}
-                          className="text-[11px] font-semibold px-2 py-1 rounded-lg bg-rose-100 text-rose-700 hover:bg-rose-200 disabled:opacity-50"
+                          className="text-[11px] font-semibold px-2 py-1 rounded-lg bg-danger-light text-danger hover:bg-danger/10 disabled:opacity-50"
                         >
                           Ack
                         </button>
@@ -302,7 +304,7 @@ function MotherProfileContent() {
             ))}
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {activeTab === "overview" && (
               <OverviewTab
                 patient={patient}
@@ -311,6 +313,7 @@ function MotherProfileContent() {
                 onRefer={() => setShowReferralModal(true)}
               />
             )}
+            {activeTab === "birth-plan" && <BirthPlanTab patientId={id} />}
             {activeTab === "checkins" && <CheckinsTab data={checkins} />}
             {activeTab === "medical" && (
               <MedicalTab data={attributes} patientId={id} />
@@ -444,7 +447,7 @@ function OverviewTab({ patient, pregnancyWeek, onRecordObservation, onRefer }: {
               <span className="text-xs text-muted-foreground">Risk Factors: </span>
               <div className="flex flex-wrap gap-1.5 mt-1">
                 {riskFactors.map(rf => (
-                  <span key={rf} className="px-2 py-0.5 text-[10px] font-medium bg-red-50 text-red-700 rounded-full border border-red-200">
+                  <span key={rf} className="px-2 py-0.5 text-[10px] font-medium bg-danger-light text-danger rounded-full border border-danger/20">
                     {rf}
                   </span>
                 ))}
@@ -463,7 +466,7 @@ function OverviewTab({ patient, pregnancyWeek, onRecordObservation, onRefer }: {
         </button>
         <button
           onClick={onRefer}
-          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold bg-amber-50 text-amber-700 rounded-xl hover:bg-amber-100 transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold bg-gold-light text-gold-dark rounded-xl hover:bg-gold/10 transition-all"
         >
           <AlertTriangle className="w-4 h-4" /> Refer to Facility
         </button>
@@ -476,6 +479,234 @@ function OverviewTab({ patient, pregnancyWeek, onRecordObservation, onRefer }: {
           <MessageSquare className="w-4 h-4" /> Send Message
         </a>
       </div>
+    </div>
+  );
+}
+
+function BirthPlanTab({ patientId }: { patientId: string }) {
+  const queryClient = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const [fields, setFields] = useState({
+    preferredFacility: "",
+    birthCompanion: "",
+    transportNotes: "",
+    bloodDonor: "",
+  });
+
+  const { data: plan, isLoading } = useQuery({
+    queryKey: ["chew", "patient", patientId, "birth-plan"],
+    queryFn: () => chewService.getBirthPlan(patientId),
+    enabled: !!patientId,
+  });
+
+  const applyPlan = (p: BirthPlan) => {
+    setFields({
+      preferredFacility: p.preferredFacility ?? "",
+      birthCompanion: p.birthCompanion ?? "",
+      transportNotes: p.transportNotes ?? "",
+      bloodDonor: p.bloodDonor ?? "",
+    });
+  };
+
+  const toggleItem = useMutation({
+    mutationFn: (item: BirthPlanChecklistItem) =>
+      chewService.setBirthPlanItem(patientId, item.id, !item.done),
+    onSuccess: (updated) => {
+      applyPlan(updated);
+      queryClient.setQueryData(
+        ["chew", "patient", patientId, "birth-plan"],
+        updated,
+      );
+    },
+    onError: () => toast.error("Failed to update checklist"),
+  });
+
+  const saveFields = useMutation({
+    mutationFn: () => chewService.updateBirthPlan(patientId, fields),
+    onSuccess: (p) => {
+      applyPlan(p);
+      queryClient.setQueryData(["chew", "patient", patientId, "birth-plan"], p);
+      setEditing(false);
+      toast.success("Birth plan updated");
+    },
+    onError: () => toast.error("Failed to save birth plan"),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-12">
+        <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto" />
+      </div>
+    );
+  }
+
+  if (!plan) {
+    return (
+      <div className="text-center py-12">
+        <Heart className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+        <p className="text-sm text-muted-foreground">
+          No birth plan yet. The AI helper will build one together with the
+          mother between 28 and 36 weeks.
+        </p>
+      </div>
+    );
+  }
+
+  const pct = Math.round(plan.completion * 100);
+  const byCategory = plan.checklist.reduce<Record<string, BirthPlanChecklistItem[]>>(
+    (acc, item) => {
+      const key = item.category ?? "Other";
+      (acc[key] ??= []).push(item);
+      return acc;
+    },
+    {},
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div className="p-4 rounded-xl bg-background-soft space-y-3">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+            <Heart className="w-3.5 h-3.5" /> Preparation Progress
+          </h4>
+          <div className="flex items-center gap-4">
+            <div className="relative w-16 h-16 flex-shrink-0">
+              <svg viewBox="0 0 36 36" className="w-16 h-16 -rotate-90">
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15.9"
+                  fill="none"
+                  strokeWidth="3"
+                  className="stroke-border"
+                />
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15.9"
+                  fill="none"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeDasharray={`${plan.completion * 100} 100`}
+                  className="stroke-primary"
+                />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-foreground">
+                {pct}%
+              </span>
+            </div>
+            <div className="text-sm space-y-1">
+              <p className="text-muted-foreground">
+                {plan.checklist.filter((i) => i.done).length} of{" "}
+                {plan.checklist.length} steps done
+              </p>
+              <p className="text-[11px] text-muted-foreground/70">
+                Guides the mother toward birth preparedness. The AI helper
+                walks her through each step on WhatsApp.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-xl bg-background-soft space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Her Plan
+            </h4>
+            <button
+              onClick={() => (editing ? setEditing(false) : (applyPlan(plan), setEditing(true)))}
+              className="text-[11px] font-semibold text-primary hover:text-primary-dark flex items-center gap-1"
+            >
+              {editing ? (
+                <><X className="w-3 h-3" /> Cancel</>
+              ) : (
+                <><Pencil className="w-3 h-3" /> Edit</>
+              )}
+            </button>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div className="block">
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Preferred facility</span>
+              <input
+                value={editing ? fields.preferredFacility : (plan.preferredFacility ?? "—")}
+                onChange={(e) => setFields({ ...fields, preferredFacility: e.target.value })}
+                disabled={!editing}
+                className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-background disabled:text-muted-foreground/80 disabled:cursor-default"
+              />
+            </div>
+            <div className="block">
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Birth companion</span>
+              <input
+                value={editing ? fields.birthCompanion : (plan.birthCompanion ?? "—")}
+                onChange={(e) => setFields({ ...fields, birthCompanion: e.target.value })}
+                disabled={!editing}
+                className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60 disabled:bg-card disabled:border-transparent"
+              />
+            </div>
+            <div className="sm:col-span-2 block">
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Transport arrangement</span>
+              <input
+                value={editing ? fields.transportNotes : (plan.transportNotes ?? "—")}
+                onChange={(e) => setFields({ ...fields, transportNotes: e.target.value })}
+                disabled={!editing}
+                className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60 disabled:cursor-default"
+              />
+            </div>
+            <div className="block">
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Blood donor</span>
+              <input
+                value={editing ? fields.bloodDonor : (plan.bloodDonor ?? "—")}
+                onChange={(e) => setFields({ ...fields, bloodDonor: e.target.value })}
+                disabled={!editing}
+                className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60 disabled:cursor-default"
+              />
+            </div>
+          </div>
+          {editing && (
+            <button
+              onClick={() => saveFields.mutate()}
+              disabled={saveFields.isPending}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-primary text-white rounded-xl hover:bg-primary-dark disabled:opacity-50"
+            >
+              {saveFields.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+              Save plan
+            </button>
+          )}
+        </div>
+      </div>
+
+      {Object.entries(byCategory).map(([category, items]) => (
+        <div key={category} className="space-y-2">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            {category}
+          </h4>
+          <div className="space-y-2">
+            {items.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => toggleItem.mutate(item)}
+                disabled={toggleItem.isPending}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-colors ${
+                  item.done
+                    ? "bg-primary-light/40 border-primary/30"
+                    : "bg-card border-border hover:bg-background-soft"
+                } disabled:opacity-60`}
+              >
+                <span
+                  className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 transition-colors ${
+                    item.done ? "bg-primary text-white" : "bg-background-soft border border-border"
+                  }`}
+                >
+                  {item.done && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                </span>
+                <span className={`text-sm ${item.done ? "text-foreground/70 line-through" : "text-foreground"}`}>
+                  {item.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -716,7 +947,7 @@ function ActivityTab({ patient }: { patient: PatientDetail }) {
                 </span>
               ) : null}
               {s.hadFlags ? (
-                <span className="text-[10px] px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full border border-amber-200 font-medium">
+                <span className="text-[10px] px-2 py-0.5 bg-gold-light text-gold-dark rounded-full border border-gold/20 font-medium">
                   Had concerns
                 </span>
               ) : null}

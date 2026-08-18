@@ -68,19 +68,19 @@ function DocumentCard({ doc }: { doc: UserDocument }) {
 
       <div className="flex-shrink-0">
         {isRejected ? (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 border border-red-200">
-            <XCircle className="w-3.5 h-3.5 text-red-500" />
-            <span className="text-[11px] font-semibold text-red-600">Rejected</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-danger-light border border-danger/20">
+            <XCircle className="w-3.5 h-3.5 text-danger" />
+            <span className="text-[11px] font-semibold text-danger">Rejected</span>
           </div>
         ) : isVerified ? (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 border border-green-200">
-            <ShieldCheck className="w-3.5 h-3.5 text-green-600" />
-            <span className="text-[11px] font-semibold text-green-700">Verified</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-leaf-light border border-leaf/20">
+            <ShieldCheck className="w-3.5 h-3.5 text-leaf" />
+            <span className="text-[11px] font-semibold text-leaf">Verified</span>
           </div>
         ) : (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200">
-            <Clock className="w-3.5 h-3.5 text-amber-600" />
-            <span className="text-[11px] font-semibold text-amber-700">Pending</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gold-light border border-gold/20">
+            <Clock className="w-3.5 h-3.5 text-gold" />
+            <span className="text-[11px] font-semibold text-gold-dark">Pending</span>
           </div>
         )}
       </div>
@@ -129,8 +129,8 @@ function GuidedView({
         animate={{ opacity: 1, scale: 1 }}
         className="flex flex-col items-center justify-center py-16"
       >
-        <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-6">
-          <CheckCircle2 className="w-10 h-10 text-green-600" />
+        <div className="w-20 h-20 rounded-full bg-leaf-light flex items-center justify-center mb-6">
+          <CheckCircle2 className="w-10 h-10 text-leaf" />
         </div>
         <h2 className="text-2xl font-bold text-foreground mb-2">Document Submitted</h2>
         <p className="text-sm text-muted-foreground text-center max-w-sm mb-8">

@@ -7,79 +7,97 @@ import {
   MessageCircle,
   Smartphone,
   Globe,
+  ArrowDown,
+  UserRound,
   Shield,
+  Building2,
+  Stethoscope,
+  Baby,
+  Calendar,
+  Truck,
+  Heart,
 } from "lucide-react";
 import { FadeInUp, FadeInLeft } from "@/app/components/animations";
-import { RoleCard } from "@/app/components/ui/RoleCard";
 import { Button } from "@/app/components/ui/Button";
 
-const trustIndicators = [
-  { icon: MessageCircle, label: "WhatsApp Accessible" },
-  { icon: Smartphone, label: "USSD & SMS Enabled" },
-  { icon: Globe, label: "5 Nigerian Languages" },
-  { icon: Shield, label: "CHEW Driven" },
+const channels = [
+  { icon: MessageCircle, label: "WhatsApp" },
+  { icon: Smartphone, label: "SMS" },
+  { icon: Globe, label: "USSD" },
+  { icon: Globe, label: "Web" },
+];
+
+const participants = [
+  { icon: UserRound, label: "Mothers", color: "bg-stamp", desc: "Access care & education" },
+  { icon: Shield, label: "CHEWs", color: "bg-ink", desc: "Coordinate & monitor" },
+  { icon: Building2, label: "Facilities", color: "bg-leaf", desc: "Receive & treat" },
+  { icon: Stethoscope, label: "Organizations", color: "bg-gold", desc: "Deploy & track" },
+];
+
+const journeyStages = [
+  { icon: Heart, label: "Pregnancy", color: "bg-stamp" },
+  { icon: Calendar, label: "Antenatal", color: "bg-secondary" },
+  { icon: Baby, label: "Delivery", color: "bg-ink" },
+  { icon: Truck, label: "Postpartum", color: "bg-leaf" },
+  { icon: HeartPulse, label: "Childcare", color: "bg-gold" },
 ];
 
 export default function HomeHero() {
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden pt-24 pb-12 md:pb-20">
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden pt-20 pb-12 md:pb-20">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-primary-light/50 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-secondary-light/30 blur-3xl" />
+        <div className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full bg-stamp-light/40 blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-secondary-light/20 blur-3xl" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center mb-20">
-          <div className="space-y-8">
+      <div className="relative max-w-6xl mx-auto px-5 sm:px-6 lg:px-8 w-full">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div className="space-y-6">
             <FadeInUp delay={0.1}>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light border border-primary/20 rounded-full">
-                <HeartPulse className="w-3.5 h-3.5 text-primary" />
-                <span className="text-xs font-medium text-primary-dark">
-                  Maternal Health Platform
-                </span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-stamp-light border border-stamp/15 rounded-full">
+                <HeartPulse className="w-3.5 h-3.5 text-stamp" />
+                <span className="text-xs font-medium text-stamp-dark">Maternal Health Platform</span>
               </div>
             </FadeInUp>
 
             <FadeInLeft delay={0.2}>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-[1.05] tracking-tight">
-                Human-Centered{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-dark">
-                  Maternal Care
-                </span>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-ink leading-[1.08] tracking-tight">
+                Continuous Maternal Care,{" "}
+                <span className="text-stamp">From Pregnancy to Parenthood</span>
               </h1>
             </FadeInLeft>
 
             <FadeInLeft delay={0.3}>
-              <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-xl">
-                Connecting pregnant and postpartum women with Community Health
-                Extension Workers and healthcare facilities for timely,
-                life-saving care.
+              <p className="text-lg text-ink-soft leading-relaxed max-w-xl">
+                A human-centered, AI-assisted platform connecting mothers, Community
+                Health Workers, healthcare facilities, and organizations across the
+                full maternal journey.
               </p>
             </FadeInLeft>
 
             <FadeInUp delay={0.4}>
               <div className="flex flex-wrap gap-3">
                 <Button size="lg" asChild>
-                  <a href="#role-selection">
+                  <a href="#ecosystem">
                     Get Started
                     <ChevronRight className="w-4 h-4" />
                   </a>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
-                  <a href="#how-it-works">How It Works</a>
+                  <a href="/learn-more">Learn More</a>
                 </Button>
               </div>
             </FadeInUp>
 
             <FadeInUp delay={0.5}>
               <div className="flex flex-wrap gap-2 pt-2">
-                {trustIndicators.map((item) => (
+                {channels.map((ch) => (
                   <div
-                    key={item.label}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-card border border-border rounded-lg text-xs font-medium text-muted-foreground"
+                    key={ch.label}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-line rounded-lg text-xs font-medium text-ink-soft"
                   >
-                    <item.icon className="w-3 h-3 text-primary" />
-                    {item.label}
+                    <ch.icon className="w-3 h-3 text-stamp" />
+                    {ch.label}
                   </div>
                 ))}
               </div>
@@ -89,87 +107,83 @@ export default function HomeHero() {
           <FadeInUp delay={0.3} className="hidden lg:block">
             <div className="relative">
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
-                className="relative bg-card rounded-2xl border border-border/80 p-8 shadow-[var(--shadow-card-hover)]"
+                className="relative bg-white rounded-2xl border border-line p-8 shadow-paper"
               >
+                {/* Header */}
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center mx-auto mb-3 shadow-lg">
-                    <HeartPulse className="w-8 h-8 text-white" />
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-stamp to-stamp-dark flex items-center justify-center mx-auto mb-3">
+                    <HeartPulse className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-lg font-bold text-foreground">MamaConnect</h3>
-                  <p className="text-sm text-muted-foreground">Maternal Care Network</p>
+                  <h3 className="text-lg font-bold text-ink">MamaConnect</h3>
+                  <p className="text-sm text-ink-soft">Connecting Care Across Nigeria</p>
                 </div>
 
-                <div className="space-y-3">
-                  {[
-                    { label: "Pregnant & Postpartum Women", color: "from-primary to-primary-dark" },
-                    { label: "Community Health Extension Workers", color: "from-secondary to-secondary" },
-                    { label: "Primary Healthcare Centres", color: "from-primary/80 to-primary" },
-                    { label: "Clinics & Hospitals", color: "from-primary/60 to-primary/80" },
-                  ].map((item, i) => (
+                {/* Participants — vertical stack */}
+                <div className="space-y-2 mb-6">
+                  {participants.map((p, i) => (
                     <motion.div
-                      key={item.label}
-                      initial={{ opacity: 0, x: 20 }}
+                      key={p.label}
+                      initial={{ opacity: 0, x: 16 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.6 + i * 0.15, duration: 0.4 }}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-background-soft border border-border/50"
+                      transition={{ delay: 0.6 + i * 0.12, duration: 0.4 }}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-background-soft border border-line/50"
                     >
-                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${item.color} flex items-center justify-center flex-shrink-0`}>
-                        <Shield className="w-4 h-4 text-white" />
+                      <div className={`w-9 h-9 rounded-lg ${p.color} flex items-center justify-center flex-shrink-0`}>
+                        <p.icon className="w-4 h-4 text-white" />
                       </div>
-                      <span className="text-sm font-medium text-foreground">{item.label}</span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-ink">{p.label}</p>
+                        <p className="text-xs text-ink-soft">{p.desc}</p>
+                      </div>
                     </motion.div>
                   ))}
                 </div>
 
+                {/* Journey */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 1.2 }}
-                  className="mt-6 p-3 rounded-xl bg-primary-light text-center border border-primary/10"
+                  transition={{ delay: 1.1 }}
+                  className="p-4 rounded-xl bg-stamp-light border border-stamp/10"
                 >
-                  <p className="text-sm font-semibold text-primary-dark">
-                    Coordinating Care Across Communities
+                  <p className="text-[10px] font-semibold text-stamp-dark uppercase tracking-wider text-center mb-3">
+                    Care Journey
                   </p>
+                  <div className="flex items-center justify-between gap-1">
+                    {journeyStages.map((stage, i) => (
+                      <div key={stage.label} className="flex items-center gap-1">
+                        <div className="flex flex-col items-center gap-1">
+                          <div className={`w-8 h-8 rounded-lg ${stage.color} flex items-center justify-center`}>
+                            <stage.icon className="w-3.5 h-3.5 text-white" />
+                          </div>
+                          <span className="text-[10px] font-medium text-ink-soft leading-tight text-center">
+                            {stage.label}
+                          </span>
+                        </div>
+                        {i < journeyStages.length - 1 && (
+                          <div className="w-3 h-px bg-stamp/30 mt-[-12px]" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </motion.div>
               </motion.div>
             </div>
           </FadeInUp>
         </div>
 
-        <FadeInUp delay={0.6}>
-          <div id="role-selection" className="scroll-mt-24">
-            <div className="text-center mb-10">
-              <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                Who are you?
-              </p>
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground mt-2 tracking-tight">
-                Choose your path to maternal care
-              </h2>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-              <RoleCard
-                icon={HeartPulse}
-                title="I am pregnant or a new mother"
-                description="Get weekly health check-ins, nutrition advice, vaccination reminders, and direct support from a Community Health Worker."
-                href="/mothers"
-                accent="cyan"
-                badge="For Mothers"
-                index={0}
-              />
-              <RoleCard
-                icon={Shield}
-                title="I am a Community Health Worker"
-                description="Manage assigned mothers, receive risk alerts, track referrals, and monitor patient health from one dashboard."
-                href="/chew"
-                accent="purple"
-                badge="For CHEWs"
-                index={1}
-              />
-            </div>
+        <FadeInUp delay={0.7}>
+          <div className="flex justify-center mt-16">
+            <a
+              href="#ecosystem"
+              className="flex flex-col items-center gap-2 text-ink-faint hover:text-ink transition-colors"
+            >
+              <span className="text-xs font-medium">Explore the platform</span>
+              <ArrowDown className="w-4 h-4 animate-bounce" />
+            </a>
           </div>
         </FadeInUp>
       </div>

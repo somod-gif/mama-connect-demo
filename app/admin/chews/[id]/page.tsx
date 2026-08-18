@@ -11,13 +11,10 @@ import {
 import { toast } from "sonner";
 import { adminService } from "@/services/admin.service";
 import { showApiError } from "@/lib/error-handler";
+import { StatusBadge } from "@/app/components/ui/StatusBadge";
 import type { AdminUserDetail, AdminPatient, AdminDocument } from "@/types/admin";
 
-const statusBadge = (status: string) => {
-  if (status === "VERIFIED") return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-50 text-green-700"><CheckCircle className="w-3 h-3" /> Verified</span>;
-  if (status === "REJECTED") return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-red-50 text-red-700"><XCircle className="w-3 h-3" /> Rejected</span>;
-  return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-amber-50 text-amber-700"><Clock className="w-3 h-3" /> Pending</span>;
-};
+const statusBadge = (status: string) => <StatusBadge status={status} />;
 
 export default function ChewDetailPage() {
   const params = useParams();
@@ -105,7 +102,7 @@ export default function ChewDetailPage() {
           </div>
           {user.verificationStatus !== "VERIFIED" && (
             <button onClick={() => verifyMutation.mutate("VERIFIED")} disabled={verifyMutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700 disabled:opacity-60">
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-leaf rounded-xl hover:bg-leaf-dark disabled:opacity-60">
               <CheckCircle className="w-4 h-4" /> Approve
             </button>
           )}
@@ -184,11 +181,11 @@ export default function ChewDetailPage() {
                     <>
                       <button onClick={() => verifyDocMutation.mutate({ id: doc.id, action: "approve" })}
                         disabled={verifyDocMutation.isPending}
-                        className="p-1.5 rounded-lg hover:bg-green-50 text-green-600 disabled:opacity-50" title="Approve">
+                        className="p-1.5 rounded-lg hover:bg-leaf-light text-leaf disabled:opacity-50" title="Approve">
                         <CheckCircle className="w-3.5 h-3.5" />
                       </button>
                       <button onClick={() => setRejectDocId(doc.id)}
-                        className="p-1.5 rounded-lg hover:bg-red-50 text-red-500" title="Reject">
+                        className="p-1.5 rounded-lg hover:bg-danger-light text-danger" title="Reject">
                         <XCircle className="w-3.5 h-3.5" />
                       </button>
                     </>
@@ -205,8 +202,8 @@ export default function ChewDetailPage() {
           <div className="fixed inset-0 bg-black/40" onClick={() => setRejectDocId(null)} />
           <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
-                <XCircle className="w-5 h-5 text-red-500" />
+              <div className="w-10 h-10 rounded-xl bg-danger-light flex items-center justify-center">
+                <XCircle className="w-5 h-5 text-danger" />
               </div>
               <div>
                 <p className="text-base font-bold text-foreground">Reject Document</p>
@@ -227,7 +224,7 @@ export default function ChewDetailPage() {
                 verifyDocMutation.mutate({ id: rejectDocId, action: "reject" });
                 setRejectDocId(null);
               }} disabled={verifyDocMutation.isPending}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700 disabled:opacity-60 transition-colors">
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-danger rounded-xl hover:bg-danger-dark disabled:opacity-60 transition-colors">
                 {verifyDocMutation.isPending ? "Rejecting..." : "Reject"}
               </button>
             </div>

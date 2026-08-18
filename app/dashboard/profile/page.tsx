@@ -81,13 +81,13 @@ function EditProfileModal({
           <div>
             <label className="block text-sm font-medium text-foreground mb-1.5">Full Name</label>
             <input {...register("name")} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-            {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
+            {errors.name && <p className="mt-1 text-xs text-danger">{errors.name.message}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-1.5">Phone</label>
             <input {...register("phone")} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
-            {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>}
+            {errors.phone && <p className="mt-1 text-xs text-danger">{errors.phone.message}</p>}
           </div>
 
           <button
@@ -142,9 +142,9 @@ export default function ProfilePage() {
 
   const verificationBadge = () => {
     const status = profile?.verificationStatus || user?.verificationStatus || "PENDING";
-    if (status === "VERIFIED") return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-50 text-green-700"><CheckCircle className="w-3 h-3" /> Verified</span>;
-    if (status === "REJECTED") return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-red-50 text-red-700"><XCircle className="w-3 h-3" /> Rejected</span>;
-    return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-amber-50 text-amber-700"><Shield className="w-3 h-3" /> Pending</span>;
+    if (status === "VERIFIED") return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-leaf-light text-leaf"><CheckCircle className="w-3 h-3" /> Verified</span>;
+    if (status === "REJECTED") return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-danger-light text-danger"><XCircle className="w-3 h-3" /> Rejected</span>;
+    return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-gold-light text-gold-dark"><Shield className="w-3 h-3" /> Pending</span>;
   };
 
   return (
