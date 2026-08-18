@@ -18,14 +18,14 @@ import { adminService } from "@/services/admin.service";
 import type { AdminDashboardData } from "@/types/admin";
 
 const summaryCards = [
-  { key: "totalUsers" as const, icon: Users, label: "Total Users", color: "text-blue-600", bg: "bg-blue-50", ring: "ring-blue-500/10" },
-  { key: "totalPatients" as const, icon: UserPlus, label: "Total Patients", color: "text-teal-600", bg: "bg-teal-50", ring: "ring-teal-500/10" },
-  { key: "totalChews" as const, icon: Shield, label: "Total CHEWs", color: "text-violet-600", bg: "bg-violet-50", ring: "ring-violet-500/10" },
-  { key: "pendingChews" as const, icon: Clock, label: "Pending CHEWs", color: "text-amber-600", bg: "bg-amber-50", ring: "ring-amber-500/10" },
-  { key: "pendingPatients" as const, icon: Clock, label: "Pending Patients", color: "text-amber-600", bg: "bg-amber-50", ring: "ring-amber-500/10" },
-  { key: "verifiedPatients" as const, icon: CheckCircle, label: "Verified Patients", color: "text-green-600", bg: "bg-green-50", ring: "ring-green-500/10" },
-  { key: "totalDocuments" as const, icon: FileText, label: "Documents", color: "text-rose-600", bg: "bg-rose-50", ring: "ring-rose-500/10" },
-  { key: "pendingDocuments" as const, icon: FileText, label: "Pending Documents", color: "text-orange-600", bg: "bg-orange-50", ring: "ring-orange-500/10" },
+  { key: "totalUsers" as const, icon: Users, label: "Total Users", color: "text-stamp", bg: "bg-stamp-light", ring: "ring-stamp/10" },
+  { key: "totalPatients" as const, icon: UserPlus, label: "Total Patients", color: "text-leaf", bg: "bg-leaf-light", ring: "ring-leaf/10" },
+  { key: "totalChews" as const, icon: Shield, label: "Total CHEWs", color: "text-ink", bg: "bg-secondary-light", ring: "ring-ink/10" },
+  { key: "pendingChews" as const, icon: Clock, label: "Pending CHEWs", color: "text-gold", bg: "bg-gold-light", ring: "ring-gold/10" },
+  { key: "pendingPatients" as const, icon: Clock, label: "Pending Patients", color: "text-gold", bg: "bg-gold-light", ring: "ring-gold/10" },
+  { key: "verifiedPatients" as const, icon: CheckCircle, label: "Verified Patients", color: "text-leaf", bg: "bg-leaf-light", ring: "ring-leaf/10" },
+  { key: "totalDocuments" as const, icon: FileText, label: "Documents", color: "text-stamp", bg: "bg-stamp-light", ring: "ring-stamp/10" },
+  { key: "pendingDocuments" as const, icon: FileText, label: "Pending Documents", color: "text-gold", bg: "bg-gold-light", ring: "ring-gold/10" },
 ];
 
 function SkeletonGrid() {

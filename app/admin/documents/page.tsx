@@ -6,6 +6,7 @@ import { CheckCircle, XCircle, Clock, FileText, Calendar, Search, ExternalLink, 
 import { toast } from "sonner";
 import { adminService } from "@/services/admin.service";
 import { showApiError } from "@/lib/error-handler";
+import { StatusBadge } from "@/app/components/ui/StatusBadge";
 import type { AdminDocument } from "@/types/admin";
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -14,11 +15,7 @@ function useDebounce<T>(value: T, delay: number): T {
   return debounced;
 }
 
-const statusBadge = (status: string) => {
-  if (status === "VERIFIED") return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-50 text-green-700"><CheckCircle className="w-3 h-3" /> Verified</span>;
-  if (status === "REJECTED") return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-red-50 text-red-700"><XCircle className="w-3 h-3" /> Rejected</span>;
-  return <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-amber-50 text-amber-700"><Clock className="w-3 h-3" /> Pending</span>;
-};
+const statusBadge = (status: string) => <StatusBadge status={status} />;
 
 export default function AdminDocumentsPage() {
   const queryClient = useQueryClient();
@@ -129,12 +126,12 @@ export default function AdminDocumentsPage() {
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={() => verifyMutation.mutate({ id: doc.id, action: "approve" })}
                             disabled={verifyMutation.isPending}
-                            className="p-2 rounded-lg hover:bg-green-50 text-green-600 disabled:opacity-50" title="Approve">
+                            className="p-2 rounded-lg hover:bg-leaf-light text-leaf disabled:opacity-50" title="Approve">
                             <CheckCircle className="w-4 h-4" />
                           </button>
                           <button onClick={() => { if (confirm("Reject this document?")) verifyMutation.mutate({ id: doc.id, action: "reject" }); }}
                             disabled={verifyMutation.isPending}
-                            className="p-2 rounded-lg hover:bg-red-50 text-red-500 disabled:opacity-50" title="Reject">
+                            className="p-2 rounded-lg hover:bg-danger-light text-danger disabled:opacity-50" title="Reject">
                             <XCircle className="w-4 h-4" />
                           </button>
                         </div>
@@ -177,11 +174,11 @@ export default function AdminDocumentsPage() {
               {doc.verificationStatus === "PENDING" && (
                 <div className="flex gap-2">
                   <button onClick={() => verifyMutation.mutate({ id: doc.id, action: "approve" })}
-                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700">
+                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold text-white bg-leaf rounded-lg hover:bg-leaf-dark">
                     <CheckCircle className="w-3 h-3" /> Approve
                   </button>
                   <button onClick={() => { if (confirm("Reject?")) verifyMutation.mutate({ id: doc.id, action: "reject" }); }}
-                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold text-red-600 bg-red-50 rounded-lg hover:bg-red-100">
+                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold text-danger bg-danger-light rounded-lg hover:bg-danger/10">
                     <XCircle className="w-3 h-3" /> Reject
                   </button>
                 </div>

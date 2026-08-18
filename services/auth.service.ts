@@ -16,6 +16,16 @@ class AuthService {
     return response.data;
   }
 
+  async registerCustomer(data: {
+    name: string;
+    email?: string;
+    phone: string;
+    password: string;
+  }): Promise<TokenResponse> {
+    const response = await api.post<TokenResponse>("/auth/register-customer", data);
+    return response.data;
+  }
+
   async setPassword(data: SetPasswordRequest): Promise<SetPasswordResponse> {
     const response = await api.post<SetPasswordResponse>("/auth/set-password", data);
     return response.data;
@@ -23,8 +33,26 @@ class AuthService {
 
   async login(data: LoginRequest): Promise<LoginResponse> {
     const response = await api.post<LoginResponse>("/auth/login", {
-      email: data.identifier,
+      email: data.identifier.trim(),
       password: data.password,
+    });
+    return response.data;
+  }
+
+  async requestOtp(
+    phone: string,
+  ): Promise<{ message: string; devCode?: string }> {
+    const response = await api.post<{ message: string; devCode?: string }>(
+      "/auth/request-otp",
+      { phone },
+    );
+    return response.data;
+  }
+
+  async verifyOtp(phone: string, code: string): Promise<TokenResponse> {
+    const response = await api.post<TokenResponse>("/auth/verify-otp", {
+      phone,
+      code,
     });
     return response.data;
   }

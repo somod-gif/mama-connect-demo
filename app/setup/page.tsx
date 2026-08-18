@@ -63,7 +63,7 @@ function SetupForm() {
     if (/[A-Z]/.test(password)) s++;
     if (/[0-9]/.test(password)) s++;
     if (/[^A-Za-z0-9]/.test(password)) s++;
-    if (s <= 1) return { score: 20, label: "Weak", color: "bg-red-500" };
+    if (s <= 1) return { score: 20, label: "Weak", color: "bg-danger" };
     if (s <= 2) return { score: 40, label: "Fair", color: "bg-orange-500" };
     if (s <= 3) return { score: 60, label: "Good", color: "bg-yellow-500" };
     if (s <= 4) return { score: 80, label: "Strong", color: "bg-primary" };
@@ -100,8 +100,8 @@ function SetupForm() {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center"
         >
-          <div className="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 className="w-8 h-8 text-green-600" />
+          <div className="w-16 h-16 rounded-2xl bg-leaf-light flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 className="w-8 h-8 text-leaf" />
           </div>
           <h1 className="text-xl font-bold text-foreground">Setup Complete</h1>
           <p className="text-sm text-muted-foreground mt-2">Redirecting to login...</p>
@@ -164,7 +164,7 @@ function SetupForm() {
         >
           {!token ? (
             <div className="text-center py-6">
-              <p className="text-sm text-red-500">Invalid setup link. No token provided.</p>
+              <p className="text-sm text-danger">Invalid setup link. No token provided.</p>
               <Link
                 href="/login"
                 className="mt-4 inline-block text-sm font-medium text-primary hover:text-primary-dark transition-colors"
@@ -205,7 +205,7 @@ function SetupForm() {
                     </div>
                   </div>
                 )}
-                {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
+                {errors.password && <p className="mt-1 text-xs text-danger">{errors.password.message}</p>}
               </div>
 
               <div>
@@ -229,7 +229,7 @@ function SetupForm() {
                     {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
-                {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword.message}</p>}
+                {errors.confirmPassword && <p className="mt-1 text-xs text-danger">{errors.confirmPassword.message}</p>}
               </div>
 
               <button
